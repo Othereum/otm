@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <compare>
 #include <iterator>
-#include <numeric>
 #include <ostream>
 
 namespace ola
