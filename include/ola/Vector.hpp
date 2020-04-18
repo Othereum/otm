@@ -271,8 +271,7 @@ namespace ola
 			T* ptr = nullptr;
 		};
 
-		template <class C>
-		struct iterator : const_iterator<C>
+		struct iterator : const_iterator
 		{
 			using iterator_category = std::contiguous_iterator_tag;
 			using value_type = T;
