@@ -284,6 +284,7 @@ namespace ola
 			constexpr const_iterator& operator>>(value_type& v) noexcept { v = **this; return ++*this; }
 
 		protected:
+			friend Vector;
 			constexpr explicit const_iterator(T* data) noexcept: ptr{data} {}
 			T* ptr = nullptr;
 		};
@@ -353,6 +354,7 @@ namespace ola
 			constexpr iterator& operator>>(value_type& v) noexcept { v = **this; return ++*this; }
 
 		protected:
+			friend Vector;
 			constexpr iterator(pointer data) noexcept: const_iterator{data} {}
 		};
 	};
