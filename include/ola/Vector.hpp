@@ -147,14 +147,18 @@ namespace ola
 		template <class Fn>
 		constexpr Vector& Transform(const Vector& other, Fn&& fn) noexcept(std::is_nothrow_invocable_v<Fn, T, T>)
 		{
-			std::transform(this->data, this->data + L, other.data, this->data, std::forward<Fn>(fn));
+			for (size_t i = 0; i < L; ++i)
+				(*this)[i] = fn((*this)[i], other[i]);
+			
 			return *this;
 		}
 
 		template <class Fn>
 		constexpr Vector& Transform(Fn&& fn) noexcept(std::is_nothrow_invocable_v<Fn, T>)
 		{
-			std::transform(this->data, this->data + L, this->data, std::forward<Fn>(fn));
+			for (size_t i = 0; i < L; ++i)
+				(*this)[i] = fn((*this)[i]);
+
 			return *this;
 		}
 
