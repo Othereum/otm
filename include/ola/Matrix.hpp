@@ -32,6 +32,14 @@ namespace ola
 			return zero;
 		}
 
+		static constexpr Matrix SimpleViewProj(const Vec2& scr) noexcept
+		{
+			auto proj = Mat4::Identity();
+			proj[0][0] = 2 / scr.x;
+			proj[1][1] = 2 / scr.y;
+			return proj;
+		}
+
 		template <class... Args>
 		constexpr Matrix(Args... args) noexcept
 			: arr{static_cast<T>(args)...}
