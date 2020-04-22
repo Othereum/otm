@@ -60,6 +60,11 @@ namespace ola
 			return v;
 		}
 
+		[[nodiscard]] constexpr auto& AsVectors() noexcept { return m; }
+		[[nodiscard]] constexpr auto& AsVectors() const noexcept { return m; }
+		[[nodiscard]] constexpr auto& AsFloats() noexcept { return flat; }
+		[[nodiscard]] constexpr auto& AsFloats() const noexcept { return flat; }
+
 		constexpr Matrix operator+(const Matrix& b) const noexcept
 		{
 			auto c = *this;
@@ -134,6 +139,7 @@ namespace ola
 		{
 			Vector<T, C> m[R];
 			T arr[R][C];
+			T flat[R*C];
 		};
 	};
 
