@@ -198,8 +198,21 @@ namespace ola
 			return r;
 		}
 
-		constexpr Vector operator*(T f) const noexcept { return Vector{*this} *= f; }
-		constexpr Vector operator/(T f) const noexcept { return Vector{*this} /= f; }
+		template <class U>
+		constexpr auto operator*(U f) const noexcept
+		{
+			Vector<std::common_type_t<T, U>, L> v = *this;
+			v *= f;
+			return v;
+		}
+
+		template <class U>
+		constexpr auto operator/(U f) const noexcept
+		{
+			Vector<std::common_type_t<T, U>, L> v = *this;
+			v /= f;
+			return v;
+		}
 
 		constexpr T operator|(const Vector& v) const noexcept
 		{
@@ -364,7 +377,7 @@ namespace ola
 	};
 
 	template <class F, class T, size_t L>
-	constexpr Vector<T, L> operator*(F f, const Vector<T, L>& v) noexcept
+	constexpr auto operator*(F f, const Vector<T, L>& v) noexcept
 	{
 		return v * f;
 	}
