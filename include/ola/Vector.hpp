@@ -133,9 +133,6 @@ namespace ola
 		void Normalize() noexcept { *this /= Len(); }
 		[[nodiscard]] Vector Normal() const noexcept { return *this / Len(); }
 
-		[[nodiscard]] constexpr auto& Data() noexcept { return this->data; }
-		[[nodiscard]] constexpr auto& Data() const noexcept { return this->data; }
-
 		constexpr T& operator[](size_t i) noexcept { return this->data[i]; }
 		constexpr T operator[](size_t i) const noexcept { return this->data[i]; }
 
