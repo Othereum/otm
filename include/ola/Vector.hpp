@@ -198,16 +198,18 @@ namespace ola
 		template <class U>
 		constexpr auto operator*(U f) const noexcept
 		{
-			Vector<std::common_type_t<T, U>, L> v = *this;
-			v *= f;
+			using V = std::common_type_t<T, U>;
+			Vector<V, L> v = *this;
+			v *= static_cast<V>(f);
 			return v;
 		}
 
 		template <class U>
 		constexpr auto operator/(U f) const noexcept
 		{
-			Vector<std::common_type_t<T, U>, L> v = *this;
-			v /= f;
+			using V = std::common_type_t<T, U>;
+			Vector<V, L> v = *this;
+			v /= static_cast<V>(f);
 			return v;
 		}
 
