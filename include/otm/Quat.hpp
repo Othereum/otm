@@ -1,13 +1,12 @@
 #pragma once
+#include "Vector.hpp"
 
 namespace otm
 {
 	// TODO: IMPLEMENT
 	struct Quat
 	{
-		static constexpr const Quat& Identity() noexcept
-		{
-			
-		}
+		Vec3 v;
+		float s = 1;
 	};
 }

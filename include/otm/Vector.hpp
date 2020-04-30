@@ -97,22 +97,11 @@ namespace otm
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-		static constexpr const Vector& Zero() noexcept
+		static constexpr Vector One() noexcept
 		{
-			static constexpr Vector v;
-			return v;
-		}
-		
-		static constexpr const Vector& One() noexcept
-		{
-			static constexpr auto v = []
-			{
-				Vector t;
-				t.Transform([](auto&&...) { return static_cast<T>(1); });
-				return t;
-			}();
-			
-			return v;
+			Vector t;
+			t.Transform([](auto&&...) { return static_cast<T>(1); });
+			return t;
 		}
 
 		constexpr Vector() noexcept = default;

@@ -13,23 +13,12 @@ namespace otm
 	template <class T, size_t R, size_t C>
 	struct Matrix
 	{
-		static constexpr const Matrix& Identity() noexcept
+		static constexpr Matrix Identity() noexcept
 		{
-			static constexpr auto identity = []()
-			{
-				Matrix matrix;
-				for (size_t i = 0; i < std::min(R, C); ++i)
-					matrix[i][i] = 1;
-				return matrix;
-			}();
-
-			return identity;
-		}
-
-		static constexpr const Matrix& Zero() noexcept
-		{
-			static constexpr Matrix zero;
-			return zero;
+			Matrix matrix;
+			for (size_t i = 0; i < std::min(R, C); ++i)
+				matrix[i][i] = 1;
+			return matrix;
 		}
 
 		static constexpr Matrix SimpleViewProj(const Vec2& scr) noexcept
