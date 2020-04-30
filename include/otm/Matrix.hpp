@@ -1,7 +1,7 @@
 #pragma once
 #include "Vector.hpp"
 
-namespace ola
+namespace otm
 {
 	template <class T, size_t R, size_t C = R>
 	struct Matrix;

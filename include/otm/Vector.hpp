@@ -4,7 +4,7 @@
 #include <iterator>
 #include <ostream>
 
-namespace ola
+namespace otm
 {
 	template <class T, size_t L>
 	struct Vector;
@@ -81,6 +81,10 @@ namespace ola
 	template <class T, size_t L>
 	struct Vector : detail::VecBase<T, L>
 	{
+	private:
+		using Base = detail::VecBase<T, L>;
+
+	public:
 		using value_type = T;
 		using size_type = size_t;
 		using difference_type = ptrdiff_t;
@@ -110,18 +114,28 @@ namespace ola
 			
 			return v;
 		}
+
+		constexpr Vector() noexcept = default;
+		explicit constexpr Vector(T x) noexcept: Base{x} {}
 		
-		template <class... Args>
-		constexpr Vector(Args... args) noexcept:
-			detail::VecBase<T, L>{static_cast<T>(args)...}
+		template <class... Args, std::enable_if_t<L >= 2 && sizeof...(Args) <= L - 2, int> = 0>
+		constexpr Vector(T x, T y, Args... args) noexcept:
+			Base{x, y, static_cast<T>(args)...}
 		{
 		}
 
 		template <class U, size_t M>
-		constexpr Vector(const Vector<U, M>& v) noexcept
+		explicit constexpr Vector(const Vector<U, M>& v) noexcept
 		{
-			for (size_t i = 0; i < L; ++i)
+			for (size_t i = 0; i < std::min(L, M); ++i)
 				(*this)[i] = static_cast<T>(v[i]);
+		}
+
+		template <class U, size_t M, class... Args, std::enable_if_t<M < L && sizeof...(Args) < L - M, int> = 0>
+		constexpr Vector(const Vector<U, M>& v, T arg, Args... args) noexcept
+			:Vector{v}
+		{
+			(((begin() + M) << arg) << ... << args);
 		}
 
 		[[nodiscard]] constexpr T LenSqr() const noexcept { return *this | *this; }
@@ -374,6 +388,9 @@ namespace ola
 			constexpr iterator(pointer data) noexcept: const_iterator{data} {}
 		};
 	};
+
+	template <class... Args>
+	Vector(Args...) -> Vector<std::common_type_t<Args...>, sizeof...(Args)>;
 
 	template <class F, class T, size_t L>
 	constexpr auto operator*(F f, const Vector<T, L>& v) noexcept
