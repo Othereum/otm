@@ -9,8 +9,14 @@ namespace otm
 	constexpr auto kSmallNumber = 1e-8f;
 	constexpr auto kKindaSmallNumber = 1e-4f;
 
+	template <class T, class U>
+	constexpr auto Min(T a, U b) noexcept { return a < b ? a : b; }
+
+	template <class T, class U>
+	constexpr auto Max(T a, U b) noexcept { return a > b ? a : b; }
+
 	template <class T, class U, class V>
-	constexpr auto Clamp(T v, U min, V max) noexcept { return std::max(std::min(v, max), min); }
+	constexpr auto Clamp(T v, U min, V max) noexcept { return Max(Min(v, max), min); }
 
 	template <class T, class U, class V = float>
 	bool IsNearlyEqual(T a, U b, V tolerance = kSmallNumber) noexcept { return std::abs(a-b) < tolerance; }
