@@ -1,5 +1,5 @@
 #pragma once
-#include "MathUtil.hpp"
+#include "Matrix.hpp"
 #include "Quat.hpp"
 
 namespace otm
@@ -21,26 +21,28 @@ namespace otm
 
 		[[nodiscard]] constexpr Mat4 ToMatrix() const noexcept
 		{
-			return Scale() * Rotation() * Translation();
+			return ScaleMatrix(scale) * RotationMatrix(rot) * TranslationMatrix(pos);
 		}
 
-		[[nodiscard]] constexpr Mat4 Translation() const noexcept
+		[[nodiscard]] static constexpr Mat4 TranslationMatrix(const Vec3& pos) noexcept
 		{
 			auto t = Mat4::Identity();
-			t[3] << pos.x << pos.y;
+			t[3] << pos.x << pos.y << pos.z;
 			return t;
 		}
 
-		// TODO: Implement
-		[[nodiscard]] Mat4 Rotation() const noexcept
+		[[nodiscard]] static constexpr Mat4 RotationMatrix(const Quat& rot) noexcept
 		{
+			// TODO: Implement
+			return Mat4::Identity();
 		}
 
-		[[nodiscard]] constexpr Mat4 Scale() const noexcept
+		[[nodiscard]] static constexpr Mat4 ScaleMatrix(const Vec3& scale) noexcept
 		{
 			auto s = Mat4::Identity();
 			s[0][0] = scale.x;
 			s[1][1] = scale.y;
+			s[2][2] = scale.z;
 			return s;
 		}
 	};
