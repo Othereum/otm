@@ -1,3 +1,3 @@
-# OLA
+# otm
 
-## Othereum's Linear Algebra library
+## Othereum's Math Library
