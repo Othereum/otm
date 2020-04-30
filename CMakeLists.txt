@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(ola)
+project(otm)
 
-add_library(ola INTERFACE)
-target_include_directories(ola INTERFACE include)
+add_library(otm INTERFACE)
+target_include_directories(otm INTERFACE include)
