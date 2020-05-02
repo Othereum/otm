@@ -57,8 +57,7 @@ namespace otm
 			}
 
 			// Cross product
-			template <class U>
-			constexpr VecBase<T, 3>& operator^=(const Vector<U, 3>& v) noexcept
+			constexpr VecBase<T, 3>& operator^=(const Vector<T, 3>& v) noexcept
 			{
 				return *this = *this ^ v;
 			}
