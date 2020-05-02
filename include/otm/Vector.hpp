@@ -167,6 +167,14 @@ namespace otm
 			return *this;
 		}
 
+		constexpr void Negate() noexcept { Transform(std::negate<>{}); }
+		constexpr Vector operator-() const noexcept
+		{
+			auto v = *this;
+			v.Negate();
+			return v;
+		}
+
 		constexpr Vector& operator+=(const Vector& v) noexcept
 		{
 			return Transform(v, std::plus<>{});
