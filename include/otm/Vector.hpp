@@ -13,6 +13,13 @@ namespace otm
 	using Vec3 = Vector<float, 3>;
 	using Vec4 = Vector<float, 4>;
 
+	template <class T, size_t L>
+	struct UnitVec;
+
+	using UVec2 = UnitVec<float, 2>;
+	using UVec3 = UnitVec<float, 3>;
+	using UVec4 = UnitVec<float, 4>;
+
 	namespace detail
 	{
 		template <class T, size_t L>
@@ -127,13 +134,12 @@ namespace otm
 		}
 
 		[[nodiscard]] constexpr T LenSqr() const noexcept { return *this | *this; }
-		[[nodiscard]] float Len() const noexcept { return sqrtf(static_cast<float>(LenSqr())); }
+		[[nodiscard]] auto Len() const noexcept { return std::sqrt(static_cast<std::common_type_t<float, T>>(LenSqr())); }
 
 		[[nodiscard]] constexpr T DistSqr(const Vector& v) const noexcept { return (*this - v).LenSqr(); }
-		[[nodiscard]] float Dist(const Vector& v) const noexcept { return (*this - v).Len(); }
+		[[nodiscard]] auto Dist(const Vector& v) const noexcept { return (*this - v).Len(); }
 
-		void Normalize() noexcept { *this /= Len(); }
-		[[nodiscard]] Vector Normal() const noexcept { return *this / Len(); }
+		[[nodiscard]] auto Unit() const noexcept;
 
 		constexpr T& operator[](size_t i) noexcept { return this->data[i]; }
 		constexpr T operator[](size_t i) const noexcept { return this->data[i]; }
@@ -393,5 +399,27 @@ namespace otm
 		for (size_t i = 1; i < L; ++i)
 			os << ' ' << v[i];
 		return os;
+	}
+
+	template <class T, size_t L>
+	struct UnitVec
+	{
+		[[nodiscard]] constexpr const Vector<T, L>& Get() const noexcept { return v; }
+		
+	private:
+		friend Vector<T, L>;
+		
+		explicit UnitVec(const Vector<T, L>& v) noexcept
+			:v{v}
+		{
+		}
+		
+		const Vector<T, L> v;
+	};
+
+	template <class T, size_t L>
+	auto Vector<T, L>::Unit() const noexcept
+	{
+		return UnitVec{*this / Len()};
 	}
 }
