@@ -98,20 +98,25 @@ namespace otm
 			return t;
 		}
 
-		template <class... Args>
-		explicit constexpr Vector(Args... args) noexcept:
-			Base{static_cast<T>(args)...}
-		{
-		}
+		constexpr Vector() noexcept = default;
+		explicit constexpr Vector(T x) noexcept: Base{x} {}
 
-		template <class U, size_t M, class... Args>
-		explicit constexpr Vector(const Vector<U, M>& v, Args... args) noexcept
+		template <class... Args>
+		constexpr Vector(T x, T y, Args... args) noexcept :Base{x, y, static_cast<T>(args)...} {}
+
+		template <class U, size_t M>
+		explicit constexpr Vector(const Vector<U, M>& v) noexcept
 		{
 			for (size_t i = 0; i < std::min(L, M); ++i)
 				(*this)[i] = static_cast<T>(v[i]);
+		}
 
-			static_assert(sizeof...(Args) <= std::max<ptrdiff_t>(L - M, 0), "Too many arguments");
-			((begin() + M) << ... << static_cast<T>(args));
+		template <class U, size_t M, class... Args>
+		constexpr Vector(const Vector<U, M>& v, T arg, Args... args) noexcept
+			:Vector{v}
+		{
+			static_assert(sizeof...(Args) < std::max<ptrdiff_t>(L - M, 0), "Too many arguments");
+			(((begin() + M) << arg) << ... << static_cast<T>(args));
 		}
 
 		[[nodiscard]] constexpr T LenSqr() const noexcept { return *this | *this; }
