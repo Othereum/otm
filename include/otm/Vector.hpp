@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <compare>
+#include <functional>
 #include <iterator>
 #include <ostream>
 
@@ -110,27 +111,20 @@ namespace otm
 			return t;
 		}
 
-		constexpr Vector() noexcept = default;
-		explicit constexpr Vector(T x) noexcept: Base{x} {}
-		
-		template <class... Args, std::enable_if_t<L >= 2 && sizeof...(Args) <= L - 2, int> = 0>
-		constexpr Vector(T x, T y, Args... args) noexcept:
-			Base{x, y, static_cast<T>(args)...}
+		template <class... Args>
+		explicit constexpr Vector(Args... args) noexcept:
+			Base{static_cast<T>(args)...}
 		{
 		}
 
-		template <class U, size_t M>
-		explicit constexpr Vector(const Vector<U, M>& v) noexcept
+		template <class U, size_t M, class... Args>
+		explicit constexpr Vector(const Vector<U, M>& v, Args... args) noexcept
 		{
 			for (size_t i = 0; i < std::min(L, M); ++i)
 				(*this)[i] = static_cast<T>(v[i]);
-		}
 
-		template <class U, size_t M, class... Args, std::enable_if_t<M < L && sizeof...(Args) < L - M, int> = 0>
-		constexpr Vector(const Vector<U, M>& v, T arg, Args... args) noexcept
-			:Vector{v}
-		{
-			(((begin() + M) << arg) << ... << args);
+			static_assert(sizeof...(Args) <= std::max<ptrdiff_t>(L - M, 0), "Too many arguments");
+			((begin() + M) << ... << static_cast<T>(args));
 		}
 
 		[[nodiscard]] constexpr T LenSqr() const noexcept { return *this | *this; }
@@ -139,6 +133,7 @@ namespace otm
 		[[nodiscard]] constexpr T DistSqr(const Vector& v) const noexcept { return (*this - v).LenSqr(); }
 		[[nodiscard]] auto Dist(const Vector& v) const noexcept { return (*this - v).Len(); }
 
+		void Normalize() noexcept { *this /= Len(); }
 		[[nodiscard]] auto Unit() const noexcept;
 
 		constexpr T& operator[](size_t i) noexcept { return this->data[i]; }
@@ -394,6 +389,9 @@ namespace otm
 	template <class... Args>
 	Vector(Args...) -> Vector<std::common_type_t<Args...>, sizeof...(Args)>;
 
+	template <class T, size_t L, class... Args>
+	Vector(Vector<T, L>, Args...) -> Vector<std::common_type_t<T, Args...>, L + sizeof...(Args)>;
+	
 	template <class F, class T, size_t L>
 	constexpr auto operator*(F f, const Vector<T, L>& v) noexcept
 	{
