@@ -56,19 +56,6 @@ namespace otm
 				T data[3];
 				struct { T x, y, z; };
 			};
-
-			// Cross product
-			template <class U>
-			constexpr Vector<std::common_type_t<T, U>, 3> operator^(const Vector<U, 3>& v) const noexcept
-			{
-				return {y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x};
-			}
-
-			// Cross product
-			constexpr VecBase<T, 3>& operator^=(const Vector<T, 3>& v) noexcept
-			{
-				return *this = *this ^ v;
-			}
 		};
 
 		template <class T>
@@ -427,5 +414,17 @@ namespace otm
 	auto Vector<T, L>::Unit() const noexcept
 	{
 		return UnitVec{*this / Len()};
+	}
+
+	template <class T, class U>
+	constexpr auto operator^(const Vector<T, 3>& a, const Vector<U, 3>& b) noexcept
+	{
+		return Vector{a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x};
+	}
+
+	template <class T>
+	constexpr Vector<T, 3>& operator^=(Vector<T, 3>& a, const Vector<T, 3>& b) noexcept
+	{
+		return a = a ^ b;
 	}
 }
