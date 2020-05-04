@@ -1,5 +1,6 @@
 #pragma once
 #include "Vector.hpp"
+#include "Quat.hpp"
 
 namespace otm
 {
@@ -10,8 +11,22 @@ namespace otm
 	using Mat3 = Matrix<float, 3>;
 	using Mat4 = Matrix<float, 4>;
 
+	namespace detail
+	{
+		template <class T, size_t R, size_t C>
+		struct MatrixBase {};
+
+		template <>
+		struct MatrixBase<float, 4, 4>
+		{
+			static constexpr Mat4 Translation(const Vec3& pos) noexcept;
+			static constexpr Mat4 Rotation(const Quat& rot) noexcept;
+			static constexpr Mat4 Scale(const Vec3& scale) noexcept;
+		};
+	}
+
 	template <class T, size_t R, size_t C>
-	struct Matrix
+	struct Matrix : detail::MatrixBase<T, R, C>
 	{
 		static constexpr Matrix Identity() noexcept
 		{
@@ -142,5 +157,29 @@ namespace otm
 		for (size_t i = 1; i < R; ++i)
 			os << '\n' << m[i];
 		return os;
+	}
+
+	namespace detail
+	{
+		constexpr Mat4 MatrixBase<float, 4, 4>::Translation(const Vec3& pos) noexcept
+		{
+			auto t = Mat4::Identity();
+			t[3] << pos.x << pos.y << pos.z;
+			return t;
+		}
+
+		constexpr Mat4 MatrixBase<float, 4, 4>::Rotation(const Quat& rot) noexcept
+		{
+			
+		}
+
+		constexpr Mat4 MatrixBase<float, 4, 4>::Scale(const Vec3& scale) noexcept
+		{
+			auto s = Mat4::Identity();
+			s[0][0] = scale.x;
+			s[1][1] = scale.y;
+			s[2][2] = scale.z;
+			return s;
+		}
 	}
 }

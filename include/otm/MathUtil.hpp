@@ -1,6 +1,5 @@
 #pragma once
 #include "Angle.hpp"
-#include "Matrix.hpp"
 
 namespace otm
 {
