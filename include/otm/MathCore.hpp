@@ -18,14 +18,17 @@ namespace otm
 	template <class T, class U, class V>
 	constexpr auto Clamp(T v, U min, V max) noexcept { return Max(Min(v, max), min); }
 
+	template <class T>
+	constexpr T Abs(T x) noexcept { return x >= 0 ? x : -x; }
+
 	template <class T, class U, class V = float>
-	bool IsNearlyEqual(T a, U b, V tolerance = kSmallNumber) noexcept { return std::abs(a-b) < tolerance; }
+	constexpr bool IsNearlyEqual(T a, U b, V tolerance = kSmallNumber) noexcept { return Abs(a-b) < tolerance; }
 
 	template <class T, class U = float>
-	bool IsNearlyZero(T a, U tolerance = kSmallNumber) noexcept { return IsNearlyEqual(a, 0, tolerance); }
+	constexpr bool IsNearlyZero(T a, U tolerance = kSmallNumber) noexcept { return IsNearlyEqual(a, 0, tolerance); }
 
 	template <class T, class U, class V>
-	float GetRangePct(T min, U max, V val) noexcept
+	constexpr float GetRangePct(T min, U max, V val) noexcept
 	{
 		const auto divisor = static_cast<float>(max - min);
 		if (IsNearlyZero(divisor))
@@ -37,7 +40,7 @@ namespace otm
 	}
 	
 	template <class T, class U, class V> 
-	auto Lerp(T a, U b, V alpha) noexcept
+	constexpr auto Lerp(T a, U b, V alpha) noexcept
 	{
 		return a + alpha * (b - a);
 	}
@@ -47,7 +50,7 @@ namespace otm
 	// [min, max] for int
 	// [min, max) for float
 	template <class T = float>
-	[[nodiscard]] auto Rand(T min = 0, T max = std::is_integral_v<T> ? std::numeric_limits<T>::max() : 1) noexcept
+	[[nodiscard]] T Rand(T min = 0, T max = std::is_integral_v<T> ? std::numeric_limits<T>::max() : 1) noexcept
 	{
 		if constexpr (std::is_integral_v<T>)
 		{
