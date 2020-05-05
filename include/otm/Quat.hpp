@@ -10,6 +10,7 @@ namespace otm
 			struct { Vec3 v; float s; };
 			struct { float x, y, z, w; };
 			Vec4 v4;
+			float data[4];
 		};
 
 		constexpr Quat() noexcept: v{}, s{1} {}
