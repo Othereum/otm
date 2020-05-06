@@ -1,5 +1,6 @@
 #pragma once
 #include "Angle.hpp"
+#include "Vector.hpp"
 
 namespace otm
 {

@@ -7,6 +7,8 @@
 
 namespace otm
 {
+	struct Quat;
+	
 	template <class T, size_t L>
 	struct Vector;
 
@@ -56,6 +58,8 @@ namespace otm
 				T data[3];
 				struct { T x, y, z; };
 			};
+
+			[[nodiscard]] Vec3 Rotate(const Quat& q) const noexcept;
 		};
 
 		template <class T>
