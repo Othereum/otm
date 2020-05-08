@@ -25,8 +25,8 @@ namespace otm
 		constexpr Angle operator+(const Angle<S>& r) const noexcept { return *this + Angle{r}; }
 		constexpr Angle operator+(const Angle& r) const noexcept { return Angle{val + r.Get()}; }
 
-		constexpr Angle operator*(const float f) const noexcept { return Angle{val * f}; }
-		constexpr Angle operator/(const float f) const noexcept { return Angle{val / f}; }
+		constexpr Angle operator*(float f) const noexcept { return Angle{val * f}; }
+		constexpr Angle operator/(float f) const noexcept { return Angle{val / f}; }
 
 		constexpr Angle operator-() const noexcept { return Angle{-val}; }
 
