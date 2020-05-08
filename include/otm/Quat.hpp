@@ -36,6 +36,6 @@ namespace otm
 	template <class T>
 	Vec3 detail::VecBase<T, 3>::Rotate(const Quat& q) const noexcept
 	{
-		return (q * Quat{*this, 0} * ~q).v;
+		return (q * Quat{static_cast<const Vec3&>(*this), 0} * ~q).v;
 	}
 }
