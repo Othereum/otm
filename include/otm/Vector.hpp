@@ -15,6 +15,8 @@ namespace otm
 	using Vec2 = Vector<float, 2>;
 	using Vec3 = Vector<float, 3>;
 	using Vec4 = Vector<float, 4>;
+	using Vec2u16 = Vector<uint16_t, 2>;
+	using Vec3u16 = Vector<uint16_t, 3>;
 
 	template <class T, size_t L>
 	struct UnitVec;
