@@ -22,6 +22,7 @@ namespace otm
 			static constexpr Mat4 Translation(const Vec3& pos) noexcept;
 			static constexpr Mat4 Rotation(const Quat& rot) noexcept;
 			static constexpr Mat4 Scale(const Vec3& scale) noexcept;
+			static Mat4 LookAt(const Vec3& eye, const Vec3& target, const Vec3& up);
 		};
 	}
 
@@ -196,6 +197,21 @@ namespace otm
 			s[1][1] = scale.y;
 			s[2][2] = scale.z;
 			return s;
+		}
+
+		inline Mat4 MatrixBase<float, 4, 4>::LookAt(const Vec3& eye, const Vec3& target, const Vec3& up)
+		{
+			auto k = target - eye; k.Normalize();
+			auto i = up ^ k; i.Normalize();
+			auto j = k ^ i; j.Normalize();
+			Vec3 t{eye|i, eye|j, eye|k}; t.Negate();
+
+			return {
+				i.x, j.x, k.x, 0,
+				i.y, j.y, k.y, 0,
+				i.z, j.z, k.z, 0,
+				t.x, t.y, t.z, 1
+			};
 		}
 	}
 }
