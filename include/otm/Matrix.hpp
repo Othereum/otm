@@ -60,8 +60,17 @@ namespace otm
 		[[nodiscard]] constexpr auto Col(size_t c) const noexcept
 		{
 			Vector<T, R> v;
-			for (size_t r = 0; r < R; ++r) v[r] = m[r][c];
+			
+			for (size_t r = 0; r < R; ++r)
+				v[r] = m[r][c];
+			
 			return v;
+		}
+
+		constexpr void ColAssign(size_t c, const Vector<T, R>& v) noexcept
+		{
+			for (size_t r = 0; r < R; ++r)
+				m[r][c] = v[r];
 		}
 
 		[[nodiscard]] constexpr auto& AsVectors() noexcept { return m; }
