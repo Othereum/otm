@@ -104,25 +104,24 @@ namespace otm
 			return t;
 		}
 
-		constexpr Vector() noexcept :Base{} {}
-		explicit constexpr Vector(T x) noexcept: Base{x} {}
+		constexpr Vector() noexcept = default;
 
 		template <class... Args>
-		constexpr Vector(T x, T y, Args... args) noexcept :Base{x, y, static_cast<T>(args)...} {}
-
-		template <class U, size_t M>
-		explicit constexpr Vector(const Vector<U, M>& v) noexcept
+		explicit(sizeof...(Args) == 0)
+		constexpr Vector(T x, Args... args) noexcept
+			:Base{x, static_cast<T>(args)...}
 		{
-			for (size_t i = 0; i < std::min(L, M); ++i)
-				(*this)[i] = static_cast<T>(v[i]);
 		}
 
 		template <class U, size_t M, class... Args>
-		constexpr Vector(const Vector<U, M>& v, T arg, Args... args) noexcept
-			:Vector{v}
+		explicit(sizeof...(Args) == 0 && !std::is_same_v<T, std::common_type_t<T, U>>)
+		constexpr Vector(const Vector<U, M>& v, Args... args) noexcept
 		{
-			static_assert(sizeof...(Args) < std::max<ptrdiff_t>(L - M, 0), "Too many arguments");
-			(((begin() + M) << arg) << ... << static_cast<T>(args));
+			for (size_t i = 0; i < std::min(L, M); ++i)
+				(*this)[i] = static_cast<T>(v[i]);
+
+			static_assert(sizeof...(Args) <= std::max<ptrdiff_t>(L - M, 0), "Too many arguments");
+			((begin() + M) << ... << static_cast<T>(args));
 		}
 
 		[[nodiscard]] constexpr T LenSqr() const noexcept { return *this | *this; }
