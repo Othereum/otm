@@ -422,9 +422,17 @@ namespace otm
 	std::ostream& operator<<(std::ostream& os, const Vector<T, L>& v)
 	{
 		os << v[0];
-		for (size_t i = 1; i < L; ++i)
+		for (size_t i=1; i<L; ++i)
 			os << ' ' << v[i];
 		return os;
+	}
+
+	template <class T, size_t L>
+	std::istream& operator>>(std::istream& is, Vector<T, L>& v)
+	{
+		for (size_t i=0; i<L; ++i)
+			is >> v[i];
+		return is;
 	}
 
 	template <class T, size_t L>
