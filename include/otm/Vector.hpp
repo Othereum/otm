@@ -104,7 +104,7 @@ namespace otm
 			return t;
 		}
 
-		constexpr Vector() noexcept = default;
+		constexpr Vector() noexcept :Base{} {}
 		explicit constexpr Vector(T x) noexcept: Base{x} {}
 
 		template <class... Args>
