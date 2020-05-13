@@ -153,7 +153,12 @@ namespace otm
 		[[nodiscard]] constexpr T DistSqr(const Vector& v) const noexcept { return (*this - v).LenSqr(); }
 		[[nodiscard]] auto Dist(const Vector& v) const noexcept { return (*this - v).Len(); }
 
-		void Normalize() noexcept { *this /= Len(); }
+		void Normalize() noexcept
+		{
+			static_assert(std::is_same_v<T, decltype(Len())>, "Can't use Normalize() for this type. Use Unit() instead.");
+			*this /= Len();
+		}
+		
 		[[nodiscard]] auto Unit() const noexcept;
 
 		constexpr T& operator[](size_t i) noexcept { return this->data[i]; }
