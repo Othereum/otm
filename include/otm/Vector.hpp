@@ -137,7 +137,7 @@ namespace otm
 		}
 
 		template <class U, size_t M, class... Args>
-		explicit(sizeof...(Args) == 0 && !std::is_same_v<T, std::common_type_t<T, U>>)
+		explicit(sizeof...(Args) == 0 && (L != M || !std::is_same_v<T, std::common_type_t<T, U>>))
 		constexpr Vector(const Vector<U, M>& v, Args... args) noexcept
 		{
 			for (size_t i = 0; i < std::min(L, M); ++i)
