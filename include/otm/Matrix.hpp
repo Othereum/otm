@@ -46,8 +46,9 @@ namespace otm
 		}
 
 		template <class... Args>
+		explicit(sizeof...(Args) == 1)
 		constexpr Matrix(Args... args) noexcept
-			: arr{static_cast<T>(args)...}
+			:arr{static_cast<T>(args)...}
 		{
 		}
 
