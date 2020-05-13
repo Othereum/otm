@@ -32,10 +32,14 @@ namespace otm
 		constexpr void Invert() noexcept { v.Negate(); }
 		constexpr Quat operator~() const noexcept { return {-v, s}; }
 	};
-	
-	template <class T>
-	Vec3 detail::VecBase<T, 3>::Rotate(const Quat& q) const noexcept
+
+	inline Vec3 detail::VecBase2<float, 3>::Rotated(const Quat& q) const noexcept
 	{
 		return (q * Quat{static_cast<const Vec3&>(*this), 0} * ~q).v;
+	}
+
+	inline void detail::VecBase2<float, 3>::Rotate(const Quat& q) noexcept
+	{
+		*this = Rotated(q);
 	}
 }

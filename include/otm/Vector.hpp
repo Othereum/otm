@@ -61,7 +61,17 @@ namespace otm
 				struct { T x, y, z; };
 			};
 
-			[[nodiscard]] Vec3 Rotate(const Quat& q) const noexcept;
+			template <class U>
+			constexpr auto operator^(const Vector<U, 3>& b) const noexcept
+			{
+				return Vector{y*b.z - z*b.y, z*b.x - x*b.z, x*b.y - y*b.x};
+			}
+			
+			constexpr Vector<T, 3>& operator^=(const Vector<T, 3>& b) noexcept
+			{
+				*this = *this ^ b;
+				return static_cast<Vector<T, 3>&>(*this);
+			}
 		};
 
 		template <class T>
@@ -76,15 +86,28 @@ namespace otm
 				struct { T x, y, z, w; };
 			};
 		};
+
+		template <class T, size_t L>
+		struct VecBase2 : VecBase<T, L>
+		{
+			template <class... Args>
+			constexpr VecBase2(Args... args) noexcept: VecBase{args...} {}
+		};
+
+		template <>
+		struct VecBase2<float, 3> : VecBase<float, 3>
+		{
+			template <class... Args>
+			constexpr VecBase2(Args... args) noexcept: VecBase{args...} {}
+
+			[[nodiscard]] Vec3 Rotated(const Quat& q) const noexcept;
+			void Rotate(const Quat& q) noexcept;
+		};
 	}
 
 	template <class T, size_t L>
-	struct Vector : detail::VecBase<T, L>
+	struct Vector : detail::VecBase2<T, L>
 	{
-	private:
-		using Base = detail::VecBase<T, L>;
-
-	public:
 		using value_type = T;
 		using size_type = size_t;
 		using difference_type = ptrdiff_t;
@@ -109,7 +132,7 @@ namespace otm
 		template <class... Args>
 		explicit(sizeof...(Args) == 0)
 		constexpr Vector(T x, Args... args) noexcept
-			:Base{x, static_cast<T>(args)...}
+			:detail::VecBase2<T, L>{x, static_cast<T>(args)...}
 		{
 		}
 
@@ -420,17 +443,5 @@ namespace otm
 	auto Vector<T, L>::Unit() const noexcept
 	{
 		return UnitVec{*this / Len()};
-	}
-
-	template <class T, class U>
-	constexpr auto operator^(const Vector<T, 3>& a, const Vector<U, 3>& b) noexcept
-	{
-		return Vector{a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x};
-	}
-
-	template <class T>
-	constexpr Vector<T, 3>& operator^=(Vector<T, 3>& a, const Vector<T, 3>& b) noexcept
-	{
-		return a = a ^ b;
 	}
 }
