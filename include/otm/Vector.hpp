@@ -215,14 +215,27 @@ namespace otm
 			return Transform([f](T v) { return v / f; });
 		}
 
-		constexpr Vector operator+(const Vector& v) const noexcept { return Vector{*this} += v; }
-		constexpr Vector operator-(const Vector& v) const noexcept { return Vector{*this} -= v; }
+		template <class U>
+		constexpr auto operator+(const Vector<U, L>& v) const noexcept
+		{
+			Vector<std::common_type_t<T, U>, L> r;
+			for (size_t i=0; i<L; ++i) r[i] = (*this)[i] + v[i];
+			return r;
+		}
+		
+		template <class U>
+		constexpr auto operator-(const Vector<U, L>& v) const noexcept
+		{
+			Vector<std::common_type_t<T, U>, L> r;
+			for (size_t i=0; i<L; ++i) r[i] = (*this)[i] - v[i];
+			return r;
+		}
 
 		template <class U>
 		constexpr auto operator*(const Vector<U, L>& v) const noexcept
 		{
 			Vector<std::common_type_t<T, U>, L> r;
-			for (size_t i = 0; i < L; ++i) r[i] = (*this)[i] * v[i];
+			for (size_t i=0; i<L; ++i) r[i] = (*this)[i] * v[i];
 			return r;
 		}
 
@@ -252,6 +265,8 @@ namespace otm
 		}
 
 		constexpr iterator operator<<(T v) noexcept { return begin() << v; }
+		constexpr iterator operator>>(T& v) noexcept { return begin() >> v; }
+		constexpr const_iterator operator>>(T& v) const noexcept { return begin() >> v; }
 
 		[[nodiscard]] constexpr iterator begin() noexcept { return this->data; }
 		[[nodiscard]] constexpr const_iterator begin() const noexcept { return this->data; }
@@ -275,15 +290,15 @@ namespace otm
 			using value_type = T;
 			using difference_type = ptrdiff_t;
 			using pointer = const T*;
-			using reference = T;
+			using reference = const T&;
 
 			constexpr const_iterator() noexcept = default;
 
-			constexpr explicit operator pointer() const noexcept { return ptr; }
+			constexpr explicit operator const T*() const noexcept { return ptr; }
 
-			constexpr reference operator*() const noexcept { return *ptr; }
-			constexpr reference operator[](difference_type n) const noexcept { return ptr[n]; }
-			constexpr pointer operator->() const noexcept { return ptr; }
+			constexpr T operator*() const noexcept { return *ptr; }
+			constexpr T operator[](difference_type n) const noexcept { return ptr[n]; }
+			constexpr const T* operator->() const noexcept { return ptr; }
 
 			constexpr const_iterator& operator++() noexcept
 			{
@@ -311,28 +326,28 @@ namespace otm
 				return it;
 			}
 
-			constexpr const_iterator& operator+=(difference_type n) noexcept
+			constexpr const_iterator& operator+=(ptrdiff_t n) noexcept
 			{
 				ptr += n;
 				return *this;
 			}
 
-			constexpr const_iterator operator+(difference_type n) const noexcept { return const_iterator{ptr + n}; }
+			constexpr const_iterator operator+(ptrdiff_t n) const noexcept { return const_iterator{ptr + n}; }
 
-			constexpr const_iterator& operator-=(difference_type n) noexcept
+			constexpr const_iterator& operator-=(ptrdiff_t n) noexcept
 			{
 				ptr -= n;
 				return *this;
 			}
 
-			constexpr const_iterator operator-(difference_type n) const noexcept { return const_iterator{ptr - n}; }
-			constexpr difference_type operator-(const const_iterator& rhs) const noexcept { return ptr - rhs.ptr; }
+			constexpr const_iterator operator-(ptrdiff_t n) const noexcept { return const_iterator{ptr - n}; }
+			constexpr ptrdiff_t operator-(const const_iterator& rhs) const noexcept { return ptr - rhs.ptr; }
 			constexpr auto operator<=>(const const_iterator& it) const noexcept = default;
-			constexpr const_iterator& operator>>(value_type& v) noexcept { v = **this; return ++*this; }
+			constexpr const_iterator& operator>>(T& v) noexcept { v = **this; return ++*this; }
 
 		protected:
 			friend Vector;
-			constexpr explicit const_iterator(T* data) noexcept: ptr{data} {}
+			constexpr const_iterator(T* data) noexcept: ptr{data} {}
 			T* ptr = nullptr;
 		};
 
@@ -346,11 +361,11 @@ namespace otm
 
 			constexpr iterator() noexcept = default;
 
-			constexpr explicit operator pointer() const noexcept { return this->ptr; }
+			constexpr explicit operator T*() const noexcept { return this->ptr; }
 
-			constexpr reference operator*() const noexcept { return *this->ptr; }
-			constexpr reference operator[](difference_type n) const noexcept { return this->ptr[n]; }
-			constexpr pointer operator->() const noexcept { return this->ptr; }
+			constexpr T& operator*() const noexcept { return *this->ptr; }
+			constexpr T& operator[](ptrdiff_t n) const noexcept { return this->ptr[n]; }
+			constexpr T* operator->() const noexcept { return this->ptr; }
 
 			constexpr iterator& operator++() noexcept
 			{
@@ -378,27 +393,26 @@ namespace otm
 				return it;
 			}
 
-			constexpr iterator& operator+=(difference_type n) noexcept
+			constexpr iterator& operator+=(ptrdiff_t n) noexcept
 			{
 				this->ptr += n;
 				return *this;
 			}
 
-			constexpr iterator operator+(difference_type n) const noexcept { return iterator{this->ptr + n}; }
+			constexpr iterator operator+(ptrdiff_t n) const noexcept { return iterator{this->ptr + n}; }
 
-			constexpr iterator& operator-=(difference_type n) noexcept
+			constexpr iterator& operator-=(ptrdiff_t n) noexcept
 			{
 				this->ptr -= n;
 				return *this;
 			}
 
-			constexpr iterator operator-(difference_type n) const noexcept { return iterator{this->ptr - n}; }
-			constexpr difference_type operator-(const iterator& rhs) const noexcept { return this->ptr - rhs.ptr; }
+			constexpr iterator operator-(ptrdiff_t n) const noexcept { return iterator{this->ptr - n}; }
+			constexpr ptrdiff_t operator-(const iterator& rhs) const noexcept { return this->ptr - rhs.ptr; }
 			constexpr auto operator<=>(const iterator& it) const noexcept = default;
 
-			constexpr iterator& operator<<(const value_type& v) noexcept { **this = v; return ++*this; }
-			constexpr iterator& operator<<(value_type&& v) noexcept { **this = std::move(v); return ++*this; }
-			constexpr iterator& operator>>(value_type& v) noexcept { v = **this; return ++*this; }
+			constexpr iterator& operator<<(T v) noexcept { **this = v; return ++*this; }
+			constexpr iterator& operator>>(T& v) noexcept { v = **this; return ++*this; }
 
 		protected:
 			friend Vector;
