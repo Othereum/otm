@@ -409,15 +409,11 @@ namespace otm
 	struct UnitVec
 	{
 		[[nodiscard]] constexpr const Vector<T, L>& Get() const noexcept { return v; }
-		
+		constexpr operator const Vector<T, L>&() const noexcept { return v; }
+
 	private:
 		friend Vector<T, L>;
-		
-		explicit UnitVec(const Vector<T, L>& v) noexcept
-			:v{v}
-		{
-		}
-		
+		explicit constexpr UnitVec(const Vector<T, L>& v) noexcept: v{v} {}
 		const Vector<T, L> v;
 	};
 
