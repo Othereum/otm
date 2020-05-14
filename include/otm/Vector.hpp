@@ -33,6 +33,8 @@ namespace otm
 			template <class... Args>
 			constexpr VecBase(Args... args) noexcept: data{args...} {}
 
+			constexpr bool operator==(const VecBase&) const noexcept = default;
+
 			T data[L];
 		};
 
@@ -41,6 +43,8 @@ namespace otm
 		{
 			template <class... Args>
 			constexpr VecBase(Args... args) noexcept: data{args...} {}
+
+			constexpr bool operator==(const VecBase&) const noexcept = default;
 
 			union
 			{
@@ -54,6 +58,8 @@ namespace otm
 		{
 			template <class... Args>
 			constexpr VecBase(Args... args) noexcept: data{args...} {}
+
+			constexpr bool operator==(const VecBase&) const noexcept = default;
 
 			union
 			{
@@ -79,6 +85,8 @@ namespace otm
 		{
 			template <class... Args>
 			constexpr VecBase(Args... args) noexcept: data{args...} {}
+
+			constexpr bool operator==(const VecBase&) const noexcept = default;
 
 			union
 			{
@@ -163,11 +171,6 @@ namespace otm
 
 		constexpr T& operator[](size_t i) noexcept { return this->data[i]; }
 		constexpr T operator[](size_t i) const noexcept { return this->data[i]; }
-
-		constexpr bool operator==(const Vector& other) const noexcept
-		{
-			return std::equal(this->data, this->data + L, other.data);
-		}
 
 		template <class Fn>
 		constexpr Vector& Transform(const Vector& other, Fn&& fn) noexcept(std::is_nothrow_invocable_v<Fn, T, T>)
