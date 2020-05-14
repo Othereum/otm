@@ -48,10 +48,17 @@ namespace otm
 			return proj;
 		}
 
+		constexpr Matrix() noexcept :arr{} {}
+
+		constexpr Matrix(All, T x) noexcept
+		{
+			std::fill(flat, flat + R*C, x);
+		}
+
 		template <class... Args>
-		explicit(sizeof...(Args) == 1)
-		constexpr Matrix(Args... args) noexcept
-			:arr{static_cast<T>(args)...}
+		explicit(sizeof...(Args) == 0)
+		constexpr Matrix(T x, Args... args) noexcept
+			:arr{x, static_cast<T>(args)...}
 		{
 		}
 
