@@ -41,6 +41,9 @@ v8 << 1 << 2 << 3 << 4;
 
 float x, y, z, w;
 v8 >> x >> y >> z >> w;
+
+std::cin >> v8;
+std::cout << v8 << std::endl; 
 ```
 
 #### Operations
@@ -111,6 +114,9 @@ m3[3] << 2 << 3 << 4;
 0, 0, 1, 0,
 2, 3, 4, 1
 */
+
+m3[2][3] = 14;
+std::cout << m3 << std::endl;
 
 Matrix<float, 2, 4> a;
 Matrix<double, 4, 2> b;
