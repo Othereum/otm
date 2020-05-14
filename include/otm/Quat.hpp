@@ -1,45 +1,48 @@
 #pragma once
-#include "MathUtil.hpp"
+#include "Vector.hpp"
 
 namespace otm
 {
-	struct Quat
+	template <std::floating_point T>
+	struct Quaternion
 	{
 		union
 		{
-			struct { Vec3 v; float s; };
-			struct { float x, y, z, w; };
-			Vec4 v4;
-			float data[4];
+			struct { Vector<T, 3> v; T s; };
+			struct { T x, y, z, w; };
+			Vector<T, 4> v4;
+			T data[4];
 		};
 
-		constexpr Quat() noexcept: v{}, s{1} {}
-		constexpr Quat(const Vec3& v, float s) noexcept: v{v}, s{s} {}
-		constexpr Quat(float x, float y, float z, float w) noexcept: x{x}, y{y}, z{z}, w{w} {}
-		explicit constexpr Quat(const Vec4& v4) noexcept: v4{v4} {}
+		constexpr Quaternion() noexcept: v{}, s{1} {}
+		constexpr Quaternion(const Vector<T, 3>& v, T s) noexcept: v{v}, s{s} {}
+		constexpr Quaternion(T x, T y, T z, T w) noexcept: x{x}, y{y}, z{z}, w{w} {}
+		explicit constexpr Quaternion(const Vector<T, 4>& v4) noexcept: v4{v4} {}
 		
-		Quat(const UVec3& axis, Radians angle) noexcept
-			:Quat{axis.Get() * Sin(angle / 2), Cos(angle / 2)}
+		Quaternion(const UnitVec<T, 3>& axis, Angle<RadR, T> angle) noexcept
+			:Quaternion{axis.Get() * Sin(angle / 2), Cos(angle / 2)}
 		{
 		}
 
-		constexpr Quat& operator*=(const Quat& q) noexcept { return *this = *this * q; }
-		constexpr Quat operator*(const Quat& q) const noexcept
+		constexpr Quaternion& operator*=(const Quaternion& q) noexcept { return *this = *this * q; }
+		constexpr Quaternion operator*(const Quaternion& q) const noexcept
 		{
 			return {s*q.v + q.s*v + (v^q.v), s*q.s - (v|q.v)};
 		}
 
 		constexpr void Invert() noexcept { v.Negate(); }
-		constexpr Quat operator~() const noexcept { return {-v, s}; }
+		constexpr Quaternion operator~() const noexcept { return {-v, s}; }
 	};
 
-	inline Vec3 detail::VecBase2<float, 3>::Rotated(const Quat& q) const noexcept
+	template <std::floating_point T>
+	Vector<T, 3> detail::VecBase2<T, 3>::Rotated(const Quaternion<T>& q) const noexcept
 	{
-		return (q * Quat{static_cast<const Vec3&>(*this), 0} * ~q).v;
+		return (q * Quaternion<T>{static_cast<const Vector<T, 3>&>(*this), 0} * ~q).v;
 	}
 
-	inline void detail::VecBase2<float, 3>::Rotate(const Quat& q) noexcept
+	template <std::floating_point T>
+	void detail::VecBase2<T, 3>::Rotate(const Quaternion<T>& q) noexcept
 	{
-		*this = Rotated(q);
+		return *this = Rotated(q);
 	}
 }
