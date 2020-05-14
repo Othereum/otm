@@ -122,11 +122,30 @@ namespace otm
 			return {All{}, 1};
 		}
 
+		static Vector Rand(const Vector& min, const Vector& max) noexcept
+		{
+			Vector v;
+			for (size_t i=0; i<L; ++i)
+				v[i] = otm::Rand(min[i], max[i]);
+			return v;
+		}
+
+		static Vector Rand(T min, T max) noexcept
+		{
+			return Vector{[min, max]{ return otm::Rand(min, max); }};
+		}
+
 		constexpr Vector() noexcept = default;
 		
 		constexpr Vector(All, T x) noexcept
+			:Vector{[x] { return x; }}
 		{
-			Transform([x](auto&&...) { return x; });
+		}
+
+		template <std::invocable Fn>
+		explicit constexpr Vector(Fn&& fn) noexcept
+		{
+			Transform([&fn](auto&&...) { return fn(); });
 		}
 
 		template <class... Args>

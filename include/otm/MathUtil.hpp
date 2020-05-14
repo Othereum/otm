@@ -41,16 +41,6 @@ namespace otm
 		};
 	}
 
-	inline Vec2 RandUnitVec() noexcept
-	{
-		return R2V(RandAng());
-	}
-
-	inline Vec2 RandVec(const Vec2& min, const Vec2& max) noexcept
-	{
-		return {Rand(min.x, max.x), Rand(min.y, max.y)};
-	}
-
 	inline float GetRangePct(const Vec2& range, float val) noexcept
 	{
 		return GetRangePct(range.x, range.y, val);
