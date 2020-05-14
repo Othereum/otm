@@ -41,27 +41,27 @@ namespace otm
 		};
 	}
 
-	template <class T, class U>
-	CommonFloat<T, U> GetRangePct(const Vector<T, 2>& range, U val) noexcept
+	template <class T, class U = float>
+	CommonFloat<T, U> GetRangePct(const Vector<U, 2>& range, T val) noexcept
 	{
 		return GetRangePct(range.x, range.y, val);
 	}
 
-	template <class T, class U>
-	std::common_type_t<T, U> GetRangeValue(const Vector<T, 2>& range, U pct) noexcept
+	template <class T, class U = float>
+	std::common_type_t<T, U> GetRangeValue(const Vector<U, 2>& range, T pct) noexcept
 	{
 		return Lerp(range.x, range.y, pct);
 	}
 
-	template <class T, class U, class V>
-	std::common_type_t<T, U, V> MapRngClamp(const Vector<T, 2>& in_rng, const Vector<U, 2>& out_rng, V val) noexcept
+	template <class T, class U = float, class V = float>
+	std::common_type_t<T, U, V> MapRngClamp(const Vector<U, 2>& in_rng, const Vector<V, 2>& out_rng, T val) noexcept
 	{
 		const auto pct = Clamp(GetRangePct(in_rng, val), 0, 1);
 		return GetRangeValue(out_rng, pct);
 	}
 
-	template <class T, class U, class V>
-	std::common_type_t<T, U, V> MapRng(const Vector<T, 2>& in_rng, const Vector<U, 2>& out_rng, V val) noexcept
+	template <class T, class U = float, class V = float>
+	std::common_type_t<T, U, V> MapRng(const Vector<U, 2>& in_rng, const Vector<V, 2>& out_rng, T val) noexcept
 	{
 		return GetRangeValue(out_rng, GetRangePct(in_rng, val));
 	}
