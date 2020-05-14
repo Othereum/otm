@@ -25,16 +25,27 @@ namespace otm
 		constexpr Angle operator+(const Angle<S>& r) const noexcept { return *this + Angle{r}; }
 		constexpr Angle operator+(const Angle& r) const noexcept { return Angle{val + r.Get()}; }
 
+		template <class S>
+		constexpr Angle& operator-=(const Angle<S>& r) noexcept { return *this = *this - r; }
+
+		template <class S>
+		constexpr Angle operator-(const Angle<S>& r) const noexcept { return *this - Angle{r}; }
+		constexpr Angle operator-(const Angle& r) const noexcept { return Angle{val - r.Get()}; }
+
+		constexpr Angle& operator*=(float f) noexcept { return *this = *this * f; }
 		constexpr Angle operator*(float f) const noexcept { return Angle{val * f}; }
+		
+		constexpr Angle& operator/=(float f) noexcept { return *this = *this / f; }
 		constexpr Angle operator/(float f) const noexcept { return Angle{val / f}; }
 
 		constexpr Angle operator-() const noexcept { return Angle{-val}; }
 
 		template <class S>
 		constexpr auto operator<=>(const Angle<S>& r) const noexcept { return *this <=> Angle{r}; }
-		constexpr auto operator<=>(const Angle& r) const noexcept = default;
+		constexpr auto operator<=>(const Angle&) const noexcept = default;
 
 		[[nodiscard]] constexpr float Get() const noexcept { return val; }
+		explicit constexpr operator float() const noexcept { return val; }
 
 	private:
 		float val = 0.f;
