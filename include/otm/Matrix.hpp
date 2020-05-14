@@ -9,18 +9,28 @@ namespace otm
 		template <class T, size_t R, size_t C>
 		struct MatrixBase {};
 
-		template <>
-		struct MatrixBase<float, 4, 4>
+		template <class T, size_t L>
+		struct MatrixBase<T, L, L>
 		{
-			static constexpr Mat4 Translation(const Vec3& pos) noexcept;
-			static constexpr Mat4 Rotation(const Quat& rot) noexcept;
-			static constexpr Mat4 Scale(const Vec3& scale) noexcept;
-			static Mat4 LookAt(const Vec3& eye, const Vec3& target, const Vec3& up);
+			constexpr void Transpose() noexcept;
 		};
+
+		template <class T, size_t R, size_t C>
+		struct MatrixGeometry : MatrixBase<T, R, C> {};
+
+		template <std::floating_point T>
+		struct MatrixGeometry<T, 4, 4> : MatrixBase<T, 4, 4>
+		{
+			static constexpr Matrix<T, 4, 4> Translation(const Vector<T, 3>& pos) noexcept;
+			static constexpr Matrix<T, 4, 4> Rotation(const Quaternion<T>& rot) noexcept;
+			static constexpr Matrix<T, 4, 4> Scale(const Vector<T, 3>& scale) noexcept;
+			static Matrix<T, 4, 4> LookAt(const Vector<T, 3>& eye, const Vector<T, 3>& target, const Vector<T, 3>& up);
+		};
+		
 	}
 
 	template <class T, size_t R, size_t C>
-	struct Matrix : detail::MatrixBase<T, R, C>
+	struct Matrix : detail::MatrixGeometry<T, R, C>
 	{
 		static constexpr Matrix Identity() noexcept
 		{
@@ -133,7 +143,7 @@ namespace otm
 
 		constexpr Matrix& operator*=(const Matrix& b) noexcept { return *this = *this * b; }
 
-		[[nodiscard]] constexpr Matrix<T, C, R> Transpose() const noexcept
+		[[nodiscard]] constexpr Matrix<T, C, R> Transposed() const noexcept
 		{
 			Matrix<T, C, R> t;
 			for (auto i = 0; i < R; ++i)
@@ -165,14 +175,27 @@ namespace otm
 
 	namespace detail
 	{
-		constexpr Mat4 MatrixBase<float, 4, 4>::Translation(const Vec3& pos) noexcept
+		template <class T, size_t L>
+		constexpr void MatrixBase<T, L, L>::Transpose() noexcept
+		{
+			auto& self = static_cast<Matrix<T, L, L>&>(*this);
+			for (size_t i=0; i<L; ++i) for (size_t j=0; j<L; ++j)
+			{
+				using std::swap;
+				swap(self[j][i], self[i][j]);
+			}
+		}
+
+		template <std::floating_point T>
+		constexpr Matrix<T, 4, 4> MatrixGeometry<T, 4, 4>::Translation(const Vector<T, 3>& pos) noexcept
 		{
 			auto t = Mat4::Identity();
 			t[3] << pos.x << pos.y << pos.z;
 			return t;
 		}
 
-		constexpr Mat4 MatrixBase<float, 4, 4>::Rotation(const Quat& rot) noexcept
+		template <std::floating_point T>
+		constexpr Matrix<T, 4, 4> MatrixGeometry<T, 4, 4>::Rotation(const Quaternion<T>& rot) noexcept
 		{
 			const auto& [x, y, z, w] = rot.data;
 			
@@ -184,7 +207,8 @@ namespace otm
 			};
 		}
 
-		constexpr Mat4 MatrixBase<float, 4, 4>::Scale(const Vec3& scale) noexcept
+		template <std::floating_point T>
+		constexpr Matrix<T, 4, 4> MatrixGeometry<T, 4, 4>::Scale(const Vector<T, 3>& scale) noexcept
 		{
 			auto s = Mat4::Identity();
 			s[0][0] = scale.x;
@@ -193,7 +217,8 @@ namespace otm
 			return s;
 		}
 
-		inline Mat4 MatrixBase<float, 4, 4>::LookAt(const Vec3& eye, const Vec3& target, const Vec3& up)
+		template <std::floating_point T>
+		Matrix<T, 4, 4> MatrixGeometry<T, 4, 4>::LookAt(const Vector<T, 3>& eye, const Vector<T, 3>& target, const Vector<T, 3>& up)
 		{
 			auto k = target - eye; k.Normalize();
 			auto i = up ^ k; i.Normalize();
