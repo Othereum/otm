@@ -67,4 +67,12 @@ namespace otm
 			return std::uniform_real_distribution<T>{min, max}(random_engine);
 		}
 	}
+
+	template <class T, class U>
+	[[nodiscard]] CommonFloat<T, U> Gauss(T mean = 0, U stddev = 1) noexcept
+	{
+		return std::normal_distribution<CommonFloat<T, U>>{
+			ToFloat<U>(mean), ToFloat<T>(stddev)
+		}(random_engine);
+	}
 }
