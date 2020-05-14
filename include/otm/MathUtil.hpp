@@ -1,29 +1,47 @@
 #pragma once
 #include "Angle.hpp"
-#include "Vector.hpp"
 
 namespace otm
 {
-	inline float Cos(Radians t) noexcept { return cosf(t.Get()); }
-	inline float Sin(Radians t) noexcept { return sinf(t.Get()); }
-	inline float Tan(Radians t) noexcept { return tanf(t.Get()); }
-	inline Radians Acos(float x) noexcept { return Radians{acosf(x)}; }
-	inline Radians Asin(float y) noexcept { return Radians{asinf(y)}; }
-	inline Radians Atan2(float y, float x) noexcept { return Radians{atan2f(y, x)}; }
-
-	inline Radians V2R(const Vec2& v) noexcept
+	template <class T>
+	CommonFloat<T> Cos(Angle<RadR, T> t) noexcept
 	{
-		return Atan2(v.y, v.x);
+		return std::cos(ToFloat(t));
 	}
-
-	inline Vec2 R2V(Radians r) noexcept
+	
+	template <class T>
+	CommonFloat<T> Sin(Angle<RadR, T> t) noexcept
 	{
-		return {Cos(r), Sin(r)};
+		return std::sin(ToFloat(t));
 	}
-
-	inline Radians RandAng() noexcept
+	
+	template <class T>
+	CommonFloat<T> Tan(Angle<RadR, T> t) noexcept
 	{
-		return Radians{Rand(-kPi, kPi)};
+		return std::tan(ToFloat(t));
+	}
+	
+	template <class T>
+	Angle<RadR, CommonFloat<T>> Acos(T x) noexcept
+	{
+		return Angle<RadR, CommonFloat<T>>{std::acos(x)};
+	}
+	
+	template <class T>
+	Angle<RadR, CommonFloat<T>> Asin(T y) noexcept
+	{
+		return Angle<RadR, CommonFloat<T>>{std::asin(y)};
+	}
+	
+	template <class T, class U>
+	Angle<RadR, CommonFloat<T, U>> Atan2(T y, U x) noexcept
+	{
+		return Angle<RadR, CommonFloat<T, U>>{
+			std::atan2(
+				static_cast<CommonFloat<T, U>>(y),
+				static_cast<CommonFloat<T, U>>(x)
+			)
+		};
 	}
 
 	inline Vec2 RandUnitVec() noexcept
