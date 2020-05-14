@@ -7,6 +7,8 @@ namespace otm
 	template <std::floating_point T>
 	struct Quaternion;
 
+	using Quat = Quaternion<float>;
+
 	
 	template <class T, size_t L>
 	struct Vector;
