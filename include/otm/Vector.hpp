@@ -1,30 +1,14 @@
 #pragma once
 #include <algorithm>
 #include <compare>
+#include <concepts>
 #include <functional>
 #include <iterator>
 #include <ostream>
+#include "MathUtil.hpp"
 
 namespace otm
 {
-	struct Quat;
-	
-	template <class T, size_t L>
-	struct Vector;
-
-	using Vec2 = Vector<float, 2>;
-	using Vec3 = Vector<float, 3>;
-	using Vec4 = Vector<float, 4>;
-	using Vec2u16 = Vector<uint16_t, 2>;
-	using Vec3u16 = Vector<uint16_t, 3>;
-
-	template <class T, size_t L>
-	struct UnitVec;
-
-	using UVec2 = UnitVec<float, 2>;
-	using UVec3 = UnitVec<float, 3>;
-	using UVec4 = UnitVec<float, 4>;
-
 	namespace detail
 	{
 		template <class T, size_t L>
