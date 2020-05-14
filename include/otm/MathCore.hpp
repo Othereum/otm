@@ -1,14 +1,17 @@
 #pragma once
 #include <ratio>
 #include <random>
+#include "otmfwd.hpp"
 
 namespace otm
 {
-	using PiRatio = std::ratio<5419351, 1725033>;
 	constexpr auto kPi = static_cast<float>(PiRatio::num) / PiRatio::den;
 	constexpr auto kSmallNumber = 1e-8f;
 	constexpr auto kKindaSmallNumber = 1e-4f;
 
+	template <class T>
+	CommonFloat<T> ToFloat(T x) { return static_cast<CommonFloat<T>>(x); }
+	
 	template <class T, class U>
 	constexpr auto Min(T a, U b) noexcept { return a < b ? a : b; }
 
