@@ -113,6 +113,8 @@ namespace otm
 		};
 	}
 
+	struct All {};
+
 	template <class T, size_t L>
 	struct Vector : detail::VecBase2<T, L>
 	{
@@ -130,12 +132,15 @@ namespace otm
 
 		static constexpr Vector One() noexcept
 		{
-			Vector t;
-			t.Transform([](auto&&...) { return static_cast<T>(1); });
-			return t;
+			return {All{}, 1};
 		}
 
 		constexpr Vector() noexcept = default;
+		
+		constexpr Vector(All, T x) noexcept
+		{
+			Transform([x](auto&&...) { return x; });
+		}
 
 		template <class... Args>
 		explicit(sizeof...(Args) == 0)
