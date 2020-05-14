@@ -1,9 +1,6 @@
 #pragma once
 #include <algorithm>
 #include <compare>
-#include <concepts>
-#include <functional>
-#include <iterator>
 #include <ostream>
 #include "MathUtil.hpp"
 
@@ -458,7 +455,7 @@ namespace otm
 		[[nodiscard]] static UnitVec Rand() noexcept
 		{
 			Vector<T, L> v;
-			v.Transform([](auto&&...) { return Gauss(0, 1); });
+			v.Transform([](auto&&...) { return Gauss<T, T>(0, 1); });
 			return v.Unit();
 		}
 		
