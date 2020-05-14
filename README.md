@@ -1,8 +1,9 @@
 # otm : Othereum's Math Library
 
+Math library for 3D programming.
+
 ## Key features
 
-* Math library for 3D programming.
 * Lightweight, Header-only
 * Modern (**C++20**)
 * Generic
