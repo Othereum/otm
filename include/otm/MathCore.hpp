@@ -9,8 +9,11 @@ namespace otm
 	constexpr auto kSmallNumber = 1e-8f;
 	constexpr auto kKindaSmallNumber = 1e-4f;
 
-	template <class T>
-	CommonFloat<T> ToFloat(T x) { return static_cast<CommonFloat<T>>(x); }
+	template <class T, class... U>
+	CommonFloat<T, U...> ToFloat(T x)
+	{
+		return static_cast<CommonFloat<T, U...>>(x);
+	}
 	
 	template <class T, class U>
 	constexpr auto Min(T a, U b) noexcept { return a < b ? a : b; }

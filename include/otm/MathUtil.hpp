@@ -37,10 +37,7 @@ namespace otm
 	Angle<RadR, CommonFloat<T, U>> Atan2(T y, U x) noexcept
 	{
 		return Angle<RadR, CommonFloat<T, U>>{
-			std::atan2(
-				static_cast<CommonFloat<T, U>>(y),
-				static_cast<CommonFloat<T, U>>(x)
-			)
+			std::atan2(ToFloat<U>(y), ToFloat<T>(x))
 		};
 	}
 
