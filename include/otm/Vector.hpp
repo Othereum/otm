@@ -30,6 +30,11 @@ namespace otm
 
 			constexpr bool operator==(const VecBase&) const noexcept = default;
 
+			[[nodiscard]] Angle<RadR, CommonFloat<T>> ToAngle() const noexcept
+			{
+				return Atan2(y, x);
+			}
+			
 			union
 			{
 				T data[2];
@@ -79,6 +84,7 @@ namespace otm
 			};
 		};
 
+		
 		template <class T, size_t L>
 		struct VecBase2 : VecBase<T, L>
 		{
@@ -86,14 +92,14 @@ namespace otm
 			constexpr VecBase2(Args... args) noexcept: VecBase{args...} {}
 		};
 
-		template <>
-		struct VecBase2<float, 3> : VecBase<float, 3>
+		template <std::floating_point T>
+		struct VecBase2<T, 3> : VecBase<T, 3>
 		{
 			template <class... Args>
 			constexpr VecBase2(Args... args) noexcept: VecBase{args...} {}
 
-			[[nodiscard]] Vec3 Rotated(const Quat& q) const noexcept;
-			void Rotate(const Quat& q) noexcept;
+			[[nodiscard]] Vector<T, 3> Rotated(const Quaternion<T>& q) const noexcept;
+			void Rotate(const Quaternion<T>& q) noexcept;
 		};
 	}
 
@@ -446,15 +452,20 @@ namespace otm
 		return is;
 	}
 
-	template <class T, size_t L>
+	template <std::floating_point T, size_t L>
 	struct UnitVec
 	{
 		[[nodiscard]] constexpr const Vector<T, L>& Get() const noexcept { return v; }
 		constexpr operator const Vector<T, L>&() const noexcept { return v; }
 
 	private:
+		template <class, class>
+		friend struct Angle;
+		
 		friend Vector<T, L>;
-		explicit constexpr UnitVec(const Vector<T, L>& v) noexcept: v{v} {}
+		
+		constexpr UnitVec(const Vector<T, L>& v) noexcept: v{v} {}
+		
 		const Vector<T, L> v;
 	};
 
@@ -462,5 +473,11 @@ namespace otm
 	auto Vector<T, L>::Unit() const noexcept
 	{
 		return UnitVec{*this / Len()};
+	}
+	
+	template <class Ratio, class T>
+	UnitVec<CommonFloat<T>, 2> Angle<Ratio, T>::ToVector() const noexcept
+	{
+		return {{Cos(*this), Sin(*this)}};
 	}
 }
