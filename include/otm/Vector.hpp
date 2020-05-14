@@ -455,6 +455,13 @@ namespace otm
 	template <std::floating_point T, size_t L>
 	struct UnitVec
 	{
+		[[nodiscard]] static UnitVec Rand() noexcept
+		{
+			Vector<T, L> v;
+			v.Transform([](auto&&...) { return Gauss(0, 1); });
+			return v.Unit();
+		}
+		
 		[[nodiscard]] constexpr const Vector<T, L>& Get() const noexcept { return v; }
 		constexpr operator const Vector<T, L>&() const noexcept { return v; }
 

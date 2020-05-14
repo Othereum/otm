@@ -69,7 +69,7 @@ namespace otm
 	}
 
 	template <class T, class U>
-	[[nodiscard]] CommonFloat<T, U> Gauss(T mean = 0, U stddev = 1) noexcept
+	[[nodiscard]] CommonFloat<T, U> Gauss(T mean, U stddev) noexcept
 	{
 		return std::normal_distribution<CommonFloat<T, U>>{
 			ToFloat<U>(mean), ToFloat<T>(stddev)
