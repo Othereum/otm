@@ -41,23 +41,27 @@ namespace otm
 		};
 	}
 
-	inline float GetRangePct(const Vec2& range, float val) noexcept
+	template <class T, class U>
+	CommonFloat<T, U> GetRangePct(const Vector<T, 2>& range, U val) noexcept
 	{
 		return GetRangePct(range.x, range.y, val);
 	}
 
-	inline float GetRangeValue(const Vec2& range, float pct) noexcept
+	template <class T, class U>
+	std::common_type_t<T, U> GetRangeValue(const Vector<T, 2>& range, U pct) noexcept
 	{
 		return Lerp(range.x, range.y, pct);
 	}
 
-	inline float MapRngClamp(const Vec2& in_rng, const Vec2& out_rng, float val) noexcept
+	template <class T, class U, class V>
+	std::common_type_t<T, U, V> MapRngClamp(const Vector<T, 2>& in_rng, const Vector<U, 2>& out_rng, V val) noexcept
 	{
 		const auto pct = Clamp(GetRangePct(in_rng, val), 0, 1);
 		return GetRangeValue(out_rng, pct);
 	}
 
-	inline float MapRng(const Vec2& in_rng, const Vec2& out_rng, float val) noexcept
+	template <class T, class U, class V>
+	std::common_type_t<T, U, V> MapRng(const Vector<T, 2>& in_rng, const Vector<U, 2>& out_rng, V val) noexcept
 	{
 		return GetRangeValue(out_rng, GetRangePct(in_rng, val));
 	}
