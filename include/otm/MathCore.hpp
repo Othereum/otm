@@ -5,48 +5,68 @@
 
 namespace otm
 {
-	constexpr auto kPi = static_cast<float>(PiRatio::num) / PiRatio::den;
-	constexpr auto kSmallNumber = 1e-8f;
-	constexpr auto kKindaSmallNumber = 1e-4f;
+	template <std::floating_point T>
+	constexpr auto kPiV = static_cast<T>(PiRatio::num) / PiRatio::den;
+	constexpr auto kPi = kPiV<float>;
+	
+	template <std::floating_point T>
+	constexpr auto kSmallNumberV = static_cast<T>(1e-8);
+	constexpr auto kSmallNumber = kSmallNumberV<float>;
+	
+	template <std::floating_point T>
+	constexpr auto kKindaSmallNumberV = static_cast<T>(1e-4);
+	constexpr auto kKindaSmallNumber = kKindaSmallNumberV<float>;
 
 	template <class T, class... U>
-	CommonFloat<T, U...> ToFloat(T x)
+	[[nodiscard]] constexpr CommonFloat<T, U...> ToFloat(T x) noexcept
 	{
 		return static_cast<CommonFloat<T, U...>>(x);
 	}
 	
 	template <class T, class U>
-	constexpr auto Min(T a, U b) noexcept { return a < b ? a : b; }
+	[[nodiscard]] constexpr std::common_type_t<T, U> Min(T a, U b) noexcept
+	{
+		return a < b ? a : b;
+	}
 
 	template <class T, class U>
-	constexpr auto Max(T a, U b) noexcept { return a > b ? a : b; }
+	[[nodiscard]] constexpr std::common_type_t<T, U> Max(T a, U b) noexcept
+	{
+		return a > b ? a : b;
+	}
 
 	template <class T, class U, class V>
-	constexpr auto Clamp(T v, U min, V max) noexcept { return Max(Min(v, max), min); }
+	[[nodiscard]] constexpr std::common_type_t<T, U, V> Clamp(T v, U min, V max) noexcept
+	{
+		return Max(Min(v, max), min);
+	}
 
 	template <class T>
-	constexpr T Abs(T x) noexcept { return x >= 0 ? x : -x; }
+	[[nodiscard]] constexpr T Abs(T x) noexcept
+	{
+		return x >= 0 ? x : -x;
+	}
 
-	template <class T, class U, class V = float>
-	constexpr bool IsNearlyEqual(T a, U b, V tolerance = kSmallNumber) noexcept { return Abs(a-b) < tolerance; }
+	template <class T, class U, class V = CommonFloat<T>>
+	[[nodiscard]] constexpr bool IsNearlyEqual(T a, U b, V tolerance = kSmallNumberV<V>) noexcept
+	{
+		return Abs(a - b) < tolerance;
+	}
 
-	template <class T, class U = float>
-	constexpr bool IsNearlyZero(T a, U tolerance = kSmallNumber) noexcept { return IsNearlyEqual(a, 0, tolerance); }
+	template <class T, class U = CommonFloat<T>>
+	[[nodiscard]] constexpr bool IsNearlyZero(T a, U tolerance = kSmallNumberV<U>) noexcept
+	{
+		return Abs(a) < tolerance;
+	}
 
 	template <class T, class U, class V>
-	constexpr float GetRangePct(T min, U max, V val) noexcept
+	[[nodiscard]] constexpr CommonFloat<T, U, V> GetRangePct(T min, U max, V val) noexcept
 	{
-		const auto divisor = static_cast<float>(max - min);
-		if (IsNearlyZero(divisor))
-		{
-			return (val >= max) ? 1.f : 0.f;
-		}
-
-		return static_cast<float>(val - min) / divisor;
+		return ToFloat<U>(val - min) / (max - min);
 	}
 	
 	template <class T, class U, class V> 
-	constexpr auto Lerp(T a, U b, V alpha) noexcept
+	[[nodiscard]] constexpr std::common_type_t<T, U, V> Lerp(T a, U b, V alpha) noexcept
 	{
 		return a + alpha * (b - a);
 	}
@@ -58,14 +78,9 @@ namespace otm
 	template <class T = float>
 	[[nodiscard]] T Rand(T min = 0, T max = std::is_integral_v<T> ? std::numeric_limits<T>::max() : 1) noexcept
 	{
-		if constexpr (std::is_integral_v<T>)
-		{
-			return std::uniform_int_distribution<T>{min, max}(random_engine);
-		}
-		else
-		{
-			return std::uniform_real_distribution<T>{min, max}(random_engine);
-		}
+		using Distribution = std::conditional_t<std::is_integral_v<T>,
+			std::uniform_int_distribution<T>, std::uniform_real_distribution<T>>;
+		return Distribution{min, max}(random_engine);
 	}
 
 	template <class T, class U>
