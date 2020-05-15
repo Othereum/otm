@@ -17,26 +17,38 @@ namespace otm
 	constexpr auto kKindaSmallNumberV = static_cast<T>(1e-4);
 	constexpr auto kKindaSmallNumber = kKindaSmallNumberV<float>;
 
-	template <class T, class... U>
-	[[nodiscard]] constexpr CommonFloat<T, U...> ToFloat(T x) noexcept
+	template <class T, class... Ts>
+	[[nodiscard]] constexpr CommonFloat<T, Ts...> ToFloat(T x) noexcept
 	{
-		return static_cast<CommonFloat<T, U...>>(x);
+		return static_cast<CommonFloat<T, Ts...>>(x);
 	}
 	
 	template <class T, class U>
-	[[nodiscard]] constexpr std::common_type_t<T, U> Min(T a, U b) noexcept
+	[[nodiscard]] constexpr auto Min(T a, U b) noexcept
 	{
 		return a < b ? a : b;
 	}
 
+	template <class T1, class T2, class T3, class... Ts>
+	[[nodiscard]] constexpr auto Min(T1 x1, T2 x2, T3 x3, Ts... xs) noexcept
+	{
+		return Min(Min(x1, x2), x3, xs...);
+	}
+
 	template <class T, class U>
-	[[nodiscard]] constexpr std::common_type_t<T, U> Max(T a, U b) noexcept
+	[[nodiscard]] constexpr auto Max(T a, U b) noexcept
 	{
 		return a > b ? a : b;
 	}
 
+	template <class T1, class T2, class T3, class... Ts>
+	[[nodiscard]] constexpr auto Max(T1 x1, T2 x2, T3 x3, Ts... xs) noexcept
+	{
+		return Max(Max(x1, x2), x3, xs...);
+	}
+
 	template <class T, class U, class V>
-	[[nodiscard]] constexpr std::common_type_t<T, U, V> Clamp(T v, U min, V max) noexcept
+	[[nodiscard]] constexpr auto Clamp(T v, U min, V max) noexcept
 	{
 		return Max(Min(v, max), min);
 	}
@@ -75,11 +87,12 @@ namespace otm
 
 	// [min, max] for int
 	// [min, max) for float
-	template <class T = float>
-	[[nodiscard]] T Rand(T min = 0, T max = std::is_integral_v<T> ? std::numeric_limits<T>::max() : 1) noexcept
+	template <class T1 = float, class T2 = float, class T = std::common_type_t<T1, T2>>
+	[[nodiscard]] T Rand(T1 min = 0, T2 max = std::is_integral_v<T> ? std::numeric_limits<T>::max() : 1) noexcept
 	{
 		using Distribution = std::conditional_t<std::is_integral_v<T>,
 			std::uniform_int_distribution<T>, std::uniform_real_distribution<T>>;
+		
 		return Distribution{min, max}(random_engine);
 	}
 
