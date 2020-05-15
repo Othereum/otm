@@ -19,6 +19,12 @@ namespace otm
 		struct MatrixGeometry : MatrixBase<T, R, C> {};
 
 		template <std::floating_point T>
+		struct MatrixGeometry<T, 3, 3> : MatrixBase<T, 3, 3>
+		{
+			static constexpr Matrix<T, 3, 3> SimpleViewProj(const Vector<T, 2>& scr) noexcept;
+		};
+		
+		template <std::floating_point T>
 		struct MatrixGeometry<T, 4, 4> : MatrixBase<T, 4, 4>
 		{
 			static constexpr Matrix<T, 4, 4> Translation(const Vector<T, 3>& pos) noexcept;
@@ -40,14 +46,6 @@ namespace otm
 			return matrix;
 		}
 
-		static constexpr Matrix SimpleViewProj(const Vec2& scr) noexcept
-		{
-			auto proj = Mat4::Identity();
-			proj[0][0] = 2 / scr.x;
-			proj[1][1] = 2 / scr.y;
-			return proj;
-		}
-
 		constexpr Matrix() noexcept :arr{} {}
 
 		constexpr Matrix(All, T x) noexcept
@@ -55,11 +53,39 @@ namespace otm
 			std::fill(flat, flat + R*C, x);
 		}
 
+		template <class T2, size_t R2, size_t C2>
+		explicit constexpr Matrix(const Matrix<T2, R2, C2>& other)
+		{
+			Replace(other);
+		}
+
 		template <class... Args>
 		explicit(sizeof...(Args) == 0)
 		constexpr Matrix(T x, Args... args) noexcept
 			:arr{x, static_cast<T>(args)...}
 		{
+		}
+
+		constexpr void Reset() noexcept
+		{
+			for (auto& v : m) v.Reset();
+		}
+
+		template <class T2, size_t R2, size_t C2>
+		constexpr void Reset(const Matrix<T2, R2, C2>& other, const Vector<size_t, 2>& offset = {}) noexcept
+		{
+			for (size_t i = 0; i < offset.y; ++i) (*this)[i].Reset();
+			Replace(other, offset);
+			for (auto i = offset.y + R2; i < R; ++i) (*this)[i].Reset();
+		}
+
+		template <class T2, size_t R2, size_t C2>
+		constexpr void Replace(const Matrix<T2, R2, C2>& other, const Vector<size_t, 2>& offset = {}) noexcept
+		{
+			for (size_t i = 0; i < Min(R - offset.y, R2); ++i)
+			{
+				(*this)[i + offset.y].Replace(other[i], offset.x);
+			}
 		}
 
 		constexpr bool operator==(const Matrix&) const noexcept = default;
@@ -191,6 +217,16 @@ namespace otm
 				using std::swap;
 				swap(self[j][i], self[i][j]);
 			}
+		}
+
+		template <std::floating_point T>
+		constexpr Matrix<T, 3, 3> MatrixGeometry<T, 3, 3>::SimpleViewProj(const Vector<T, 2>& scr) noexcept
+		{
+			Matrix<T, 3, 3> proj;
+			proj[0][0] = 2 / scr.x;
+			proj[1][1] = 2 / scr.y;
+			proj[2][2] = 1;
+			return proj;
 		}
 
 		template <std::floating_point T>
