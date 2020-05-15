@@ -166,17 +166,25 @@ namespace otm
 
 		/**
 		 * \brief Assign elements of other vector to this. The value of the unassigned elements does not change.
-		 * \param other Vector to be assigned to this
-		 * \param offset Must be less than L
 		 * \return Iterator pointing next to the last element assigned
 		 */
 		template <class T2, size_t L2>
-		constexpr iterator Assign(const Vector<T2, L2>& other, size_t offset = 0) noexcept
+		constexpr iterator Assign(const Vector<T2, L2>& other, ptrdiff_t offset = 0) noexcept
 		{
-			const auto size = Min(L - offset, L2);
-			
-			for (size_t i = 0; i < size; ++i)
-				(*this)[i + offset] = static_cast<T>(other[i]);
+			size_t size;
+
+			if (offset >= 0)
+			{
+				size = Min(L - Min(L, offset), L2);
+				for (size_t i = 0; i < size; ++i)
+					(*this)[i + offset] = static_cast<T>(other[i]);
+			}
+			else
+			{
+				size = Min(L, L2 - Min(L2, -offset));
+				for (size_t i = 0; i < size; ++i)
+					(*this)[i] = static_cast<T>(other[i - offset]);
+			}
 
 			return begin() + size;
 		}
