@@ -159,27 +159,19 @@ namespace otm
 		explicit(sizeof...(Args) == 0 && (L != M || !std::is_same_v<T, std::common_type_t<T, U>>))
 		constexpr Vector(const Vector<U, M>& v, Args... args) noexcept
 		{
-			Replace(v);
-
 			static_assert(sizeof...(Args) <= std::max<ptrdiff_t>(L - M, 0), "Too many arguments");
-			((begin() + M) << ... << static_cast<T>(args));
+			auto it = Assign(v);
+			(it << ... << static_cast<T>(args));
 		}
 
-		constexpr void Reset() noexcept
-		{
-			for (auto& x : this->data) x = {};
-		}
-
+		/**
+		 * \brief Assign elements of other vector to this. The value of the unassigned elements does not change.
+		 * \param other Vector to be assigned to this
+		 * \param offset Must be less than L
+		 * \return Iterator pointing next to the last element assigned
+		 */
 		template <class T2, size_t L2>
-		constexpr void Reset(const Vector<T2, L2>& other, size_t offset = 0) noexcept
-		{
-			for (size_t i = 0; i < offset; ++i) (*this)[i] = {};
-			Replace(other, offset);
-			for (auto i = offset + L2; i < L; ++i) (*this)[i] = {};
-		}
-
-		template <class T2, size_t L2>
-		constexpr iterator Replace(const Vector<T2, L2>& other, size_t offset = 0) noexcept
+		constexpr iterator Assign(const Vector<T2, L2>& other, size_t offset = 0) noexcept
 		{
 			const auto size = Min(L - offset, L2);
 			
