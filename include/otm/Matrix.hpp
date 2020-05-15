@@ -15,22 +15,12 @@ namespace otm
 			constexpr void Transpose() noexcept;
 			
 			// Matrix with ones on the main diagonal and zeros elsewhere
-			static constexpr Matrix Identity() noexcept
-			{
-				Matrix matrix;
-				for (size_t i = 0; i < L; ++i)
-					matrix[i][i] = 1;
-				return matrix;
-			}
+			static constexpr Matrix<T, L, L> Identity() noexcept;
 
 			// Matrix that assigned other matrix to the identity matrix
 			template <class T2, size_t R2, size_t C2>
-			static constexpr Matrix Identity(const Matrix<T2, R2, C2>& other, const Vector<ptrdiff_t, 2>& offset = {}) noexcept
-			{
-				auto m = Identity();
-				m.Assign(other, offset);
-				return m;
-			}
+			static constexpr Matrix<T, L, L> Identity(const Matrix<T2, R2, C2>& other,
+			                                          const Vector<ptrdiff_t, 2>& offset = {}) noexcept;
 		};
 
 		template <class T, size_t R, size_t C>
@@ -64,7 +54,7 @@ namespace otm
 		}
 
 		template <class T2, size_t R2, size_t C2>
-		explicit constexpr Matrix(const Matrix<T2, R2, C2>& other)
+		explicit constexpr Matrix(const Matrix<T2, R2, C2>& other, const Vector<ptrdiff_t, 2>& offset = {})
 		{
 			Assign(other);
 		}
@@ -76,11 +66,7 @@ namespace otm
 		{
 		}
 
-		/**
-		 * \brief Assign elements of other matrix to this. The value of the unassigned elements does not change.
-		 * \param other Matrix to be assigned to this
-		 * \param offset Must be (x < C && y < R)
-		 */
+		// Assign elements of other matrix to this. The value of the unassigned elements does not change.
 		template <class T2, size_t R2, size_t C2>
 		constexpr void Assign(const Matrix<T2, R2, C2>& other, const Vector<ptrdiff_t, 2>& offset = {}) noexcept
 		{
@@ -227,6 +213,24 @@ namespace otm
 				using std::swap;
 				swap(self[j][i], self[i][j]);
 			}
+		}
+
+		template <class T, size_t L>
+		constexpr Matrix<T, L, L> MatrixBase<T, L, L>::Identity() noexcept
+		{
+			Matrix<T, L, L> matrix;
+			for (size_t i = 0; i < L; ++i)
+				matrix[i][i] = 1;
+			return matrix;
+		}
+
+		template <class T, size_t L>
+		template <class T2, size_t R2, size_t C2>
+		constexpr Matrix<T, L, L> MatrixBase<T, L, L>::Identity(const Matrix<T2, R2, C2>& other, const Vector<ptrdiff_t, 2>& offset) noexcept
+		{
+			auto m = Identity();
+			m.Assign(other, offset);
+			return m;
 		}
 
 		template <std::floating_point T>
