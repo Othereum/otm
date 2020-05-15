@@ -13,6 +13,24 @@ namespace otm
 		struct MatrixBase<T, L, L>
 		{
 			constexpr void Transpose() noexcept;
+			
+			// Matrix with ones on the main diagonal and zeros elsewhere
+			static constexpr Matrix Identity() noexcept
+			{
+				Matrix matrix;
+				for (size_t i = 0; i < L; ++i)
+					matrix[i][i] = 1;
+				return matrix;
+			}
+
+			// Matrix that assigned other matrix to the identity matrix
+			template <class T2, size_t R2, size_t C2>
+			static constexpr Matrix Identity(const Matrix<T2, R2, C2>& other, const Vector<ptrdiff_t, 2>& offset = {}) noexcept
+			{
+				auto m = Identity();
+				m.Assign(other, offset);
+				return m;
+			}
 		};
 
 		template <class T, size_t R, size_t C>
@@ -38,25 +56,17 @@ namespace otm
 	template <class T, size_t R, size_t C>
 	struct Matrix : detail::MatrixGeometry<T, R, C>
 	{
-		static constexpr Matrix Identity() noexcept
-		{
-			Matrix matrix;
-			for (size_t i = 0; i < std::min(R, C); ++i)
-				matrix[i][i] = 1;
-			return matrix;
-		}
-
 		constexpr Matrix() noexcept :arr{} {}
 
 		constexpr Matrix(All, T x) noexcept
 		{
-			std::fill(flat, flat + R*C, x);
+			for (auto& v : flat) v = x;
 		}
 
 		template <class T2, size_t R2, size_t C2>
 		explicit constexpr Matrix(const Matrix<T2, R2, C2>& other)
 		{
-			Replace(other);
+			Assign(other);
 		}
 
 		template <class... Args>
@@ -66,25 +76,25 @@ namespace otm
 		{
 		}
 
-		constexpr void Reset() noexcept
-		{
-			for (auto& v : m) v.Reset();
-		}
-
+		/**
+		 * \brief Assign elements of other matrix to this. The value of the unassigned elements does not change.
+		 * \param other Matrix to be assigned to this
+		 * \param offset Must be (x < C && y < R)
+		 */
 		template <class T2, size_t R2, size_t C2>
-		constexpr void Reset(const Matrix<T2, R2, C2>& other, const Vector<size_t, 2>& offset = {}) noexcept
+		constexpr void Assign(const Matrix<T2, R2, C2>& other, const Vector<ptrdiff_t, 2>& offset = {}) noexcept
 		{
-			for (size_t i = 0; i < offset.y; ++i) (*this)[i].Reset();
-			Replace(other, offset);
-			for (auto i = offset.y + R2; i < R; ++i) (*this)[i].Reset();
-		}
-
-		template <class T2, size_t R2, size_t C2>
-		constexpr void Replace(const Matrix<T2, R2, C2>& other, const Vector<size_t, 2>& offset = {}) noexcept
-		{
-			for (size_t i = 0; i < Min(R - offset.y, R2); ++i)
+			if (offset.y >= 0)
 			{
-				(*this)[i + offset.y].Replace(other[i], offset.x);
+				const auto size = Min(R - Min(R, offset.y), R2);
+				for (size_t i = 0; i < size; ++i)
+					(*this)[i + offset.y].Assign(other[i], offset.x);
+			}
+			else
+			{
+				const auto size = Min(R, R2 - Min(R2, -offset.y));
+				for (size_t i = 0; i < size; ++i)
+					(*this)[i].Assign(other[i - offset.y], offset.x);
 			}
 		}
 
