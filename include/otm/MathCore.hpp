@@ -23,10 +23,11 @@ namespace otm
 		return static_cast<CommonFloat<T, Ts...>>(x);
 	}
 	
-	template <class T, class U>
-	[[nodiscard]] constexpr auto Min(T a, U b) noexcept
+	template <class T1, class T2>
+	[[nodiscard]] constexpr auto Min(T1 a, T2 b) noexcept
 	{
-		return a < b ? a : b;
+		using T = std::common_type_t<T1, T2>;
+		return static_cast<T>(a) < static_cast<T>(b) ? a : b;
 	}
 
 	template <class T1, class T2, class T3, class... Ts>
@@ -35,10 +36,11 @@ namespace otm
 		return Min(Min(x1, x2), x3, xs...);
 	}
 
-	template <class T, class U>
-	[[nodiscard]] constexpr auto Max(T a, U b) noexcept
+	template <class T1, class T2>
+	[[nodiscard]] constexpr auto Max(T1 a, T2 b) noexcept
 	{
-		return a > b ? a : b;
+		using T = std::common_type_t<T1, T2>;
+		return static_cast<T>(a) > static_cast<T>(b) ? a : b;
 	}
 
 	template <class T1, class T2, class T3, class... Ts>
