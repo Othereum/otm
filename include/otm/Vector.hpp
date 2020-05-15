@@ -27,7 +27,7 @@ namespace otm
 
 			constexpr bool operator==(const VecBase&) const noexcept = default;
 
-			[[nodiscard]] Angle<RadR, CommonFloat<T>> ToAngle() const noexcept
+			[[nodiscard]] auto ToAngle() const noexcept
 			{
 				return Atan2(y, x);
 			}
@@ -159,31 +159,54 @@ namespace otm
 		explicit(sizeof...(Args) == 0 && (L != M || !std::is_same_v<T, std::common_type_t<T, U>>))
 		constexpr Vector(const Vector<U, M>& v, Args... args) noexcept
 		{
-			for (size_t i = 0; i < std::min(L, M); ++i)
-				(*this)[i] = static_cast<T>(v[i]);
+			Replace(v);
 
 			static_assert(sizeof...(Args) <= std::max<ptrdiff_t>(L - M, 0), "Too many arguments");
 			((begin() + M) << ... << static_cast<T>(args));
 		}
 
+		constexpr void Reset() noexcept
+		{
+			for (auto& x : this->data) x = {};
+		}
+
+		template <class T2, size_t L2>
+		constexpr void Reset(const Vector<T2, L2>& other, size_t offset = 0) noexcept
+		{
+			for (size_t i = 0; i < offset; ++i) (*this)[i] = {};
+			Replace(other, offset);
+			for (auto i = offset + L2; i < L; ++i) (*this)[i] = {};
+		}
+
+		template <class T2, size_t L2>
+		constexpr iterator Replace(const Vector<T2, L2>& other, size_t offset = 0) noexcept
+		{
+			const auto size = Min(L - offset, L2);
+			
+			for (size_t i = 0; i < size; ++i)
+				(*this)[i + offset] = static_cast<T>(other[i]);
+
+			return begin() + size;
+		}
+
 		[[nodiscard]] constexpr T LenSqr() const noexcept { return *this | *this; }
-		[[nodiscard]] auto Len() const noexcept { return std::sqrt(static_cast<std::common_type_t<float, T>>(LenSqr())); }
+		[[nodiscard]] CommonFloat<T> Len() const noexcept { return std::sqrt(ToFloat(LenSqr())); }
 
 		[[nodiscard]] constexpr T DistSqr(const Vector& v) const noexcept { return (*this - v).LenSqr(); }
-		[[nodiscard]] auto Dist(const Vector& v) const noexcept { return (*this - v).Len(); }
+		[[nodiscard]] CommonFloat<T> Dist(const Vector& v) const noexcept { return (*this - v).Len(); }
 
 		void Normalize() noexcept
 		{
-			static_assert(std::is_same_v<T, decltype(Len())>, "Can't use Normalize() for this type. Use Unit() instead.");
+			static_assert(std::is_same_v<T, CommonFloat<T>>, "Can't use Normalize() for this type. Use Unit() instead.");
 			*this /= Len();
 		}
-		
-		[[nodiscard]] auto Unit() const noexcept;
+
+		[[nodiscard]] UnitVec<CommonFloat<T>, L> Unit() const noexcept;
 
 		constexpr T& operator[](size_t i) noexcept { return this->data[i]; }
 		constexpr T operator[](size_t i) const noexcept { return this->data[i]; }
 
-		template <class Fn>
+		template <std::invocable<T> Fn>
 		constexpr Vector& Transform(const Vector& other, Fn&& fn) noexcept(std::is_nothrow_invocable_v<Fn, T, T>)
 		{
 			for (size_t i = 0; i < L; ++i)
@@ -192,7 +215,7 @@ namespace otm
 			return *this;
 		}
 
-		template <class Fn>
+		template <std::invocable<T> Fn>
 		constexpr Vector& Transform(Fn&& fn) noexcept(std::is_nothrow_invocable_v<Fn, T>)
 		{
 			for (size_t i = 0; i < L; ++i)
@@ -493,9 +516,9 @@ namespace otm
 	};
 
 	template <class T, size_t L>
-	auto Vector<T, L>::Unit() const noexcept
+	UnitVec<CommonFloat<T>, L> Vector<T, L>::Unit() const noexcept
 	{
-		return UnitVec{*this / Len()};
+		return *this / Len();
 	}
 	
 	template <class Ratio, class T>
