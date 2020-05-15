@@ -204,6 +204,9 @@ namespace otm
 
 		[[nodiscard]] UnitVec<CommonFloat<T>, L> Unit() const noexcept;
 
+		[[nodiscard]] const Matrix<T, 1, L>& RowMatrix() const noexcept;
+		[[nodiscard]] const Matrix<T, L, 1>& ColMatrix() const noexcept;
+
 		constexpr T& operator[](size_t i) noexcept { return this->data[i]; }
 		constexpr T operator[](size_t i) const noexcept { return this->data[i]; }
 

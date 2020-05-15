@@ -293,4 +293,16 @@ namespace otm
 			};
 		}
 	}
+	
+	template <class T, size_t L>
+	const Matrix<T, 1, L>& Vector<T, L>::RowMatrix() const noexcept
+	{
+		return reinterpret_cast<const Matrix<T, 1, L>&>(*this);
+	}
+
+	template <class T, size_t L>
+	const Matrix<T, L, 1>& Vector<T, L>::ColMatrix() const noexcept
+	{
+		return reinterpret_cast<const Matrix<T, L, 1>&>(*this);
+	}
 }
