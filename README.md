@@ -43,12 +43,13 @@ float x, y, z, w;
 v8 >> x >> y >> z >> w;
 
 std::cin >> v8;
-std::cout << v8 << std::endl; 
+std::cout << v8 << std::endl;
 ```
 
 #### Operations
 
 ```cpp
+v1.Len(); // sqrt(v1.LenSqr())
 v1.Dist(v2); // sqrt(v1.DistSqr(v2))
 
 v1.y = v2[1]; // x, y, z, w are only available for Vector<T, 1...4>
@@ -65,6 +66,10 @@ v1 | v2; // dot product
 v1 ^ v2; // cross product. Only available for Vector<T, 3>
 
 for (float x : v1) { ... }
+v1.Transform([](float x) { return x + 1; });
+v2.Transform(v2, std::plus<>{});
+
+// I don't know if you need this, but it works anyway.
 std::sort(v1.begin(), v1.end());
 ```
 
@@ -106,7 +111,7 @@ Mat3 m2{
     7, 8//, 0
 };
 
-Mat4 m3 = Mat4::Identity();
+Mat4 m3 = Mat4::Identity(); // Only available for square matrix
 m3[3] << 2 << 3 << 4;
 /*
 1, 0, 0, 0,
@@ -121,8 +126,28 @@ std::cout << m3 << std::endl;
 Matrix<float, 2, 4> a;
 Matrix<double, 4, 2> b;
 Matrix<double, 2, 2> c = a * b;
-c *= Mat2::Identity(); // Only available for square matrix
+c *= Mat2{}; // Only available for square matrix
 
 Matrix<float, 4, 2> at = a.Transposed();
 c.Transpose(); // Only available for square matrix
+
+Vec3 pos{2, 4, 5};
+Matrix<float, 1, 4> rv = pos.RowMatrix();
+Matrix<float, 4, 1> cv = pos.ColMatrix();
+
+Mat4 t1 = Mat4::Identity(rv, /*offset=*/{0, 3});
+/* offset is optional
+1, 0, 0, 0,
+0, 1, 0, 0,
+0, 0, 1, 0,
+2, 4, 5, 1
+*/
+
+t1.Assign(m2, /*offset=*/{2, -1});
+/* offset is optional
+1, 0, 4, 5,
+0, 1, 7, 8,
+0, 0, 1, 0,
+2, 4, 5, 1
+*/
 ```
