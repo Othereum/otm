@@ -66,7 +66,10 @@ namespace otm
 		{
 		}
 
-		// Assign elements of other matrix to this. The value of the unassigned elements does not change.
+		/**
+		 * \brief Assign elements of other matrix to this. The value of the unassigned elements does not change.
+		 * \note Do nothing if offset is out of range
+		 */
 		template <class T2, size_t R2, size_t C2>
 		constexpr void Assign(const Matrix<T2, R2, C2>& other, const Vector<ptrdiff_t, 2>& offset = {}) noexcept
 		{
