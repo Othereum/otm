@@ -136,7 +136,7 @@ namespace otm
 		}
 
 		constexpr Vector() noexcept = default;
-		
+
 		constexpr Vector(All, T x) noexcept
 			:Vector{[x] { return x; }}
 		{
@@ -148,18 +148,18 @@ namespace otm
 			Transform([&fn](auto&&...) { return fn(); });
 		}
 
-		template <class... Args>
-		explicit(sizeof...(Args) == 0)
-		constexpr Vector(T x, Args... args) noexcept
-			:detail::VecBase2<T, L>{x, static_cast<T>(args)...}
+		template <std::convertible_to<T>... Args>
+		explicit(sizeof...(Args) == 1)
+		constexpr Vector(Args... args) noexcept
+			:detail::VecBase2<T, L>{static_cast<T>(args)...}
 		{
 		}
 
-		template <class U, size_t M, class... Args>
+		template <std::convertible_to<T> U, size_t M, std::convertible_to<T>... Args>
 		explicit(sizeof...(Args) == 0 && (L != M || !std::is_same_v<T, std::common_type_t<T, U>>))
 		constexpr Vector(const Vector<U, M>& v, Args... args) noexcept
 		{
-			static_assert(sizeof...(Args) <= std::max<ptrdiff_t>(L - M, 0), "Too many arguments");
+			static_assert(sizeof...(Args) <= Max(static_cast<ptrdiff_t>(L - M), 0), "Too many arguments");
 			auto it = Assign(v);
 			(it << ... << static_cast<T>(args));
 		}
