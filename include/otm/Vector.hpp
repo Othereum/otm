@@ -108,6 +108,14 @@ namespace otm
 
 	struct All {};
 
+	class DivByZero final : public std::logic_error
+	{
+	public:
+		DivByZero() :logic_error{"Division by zero"} {}
+		DivByZero(const std::string& s) :logic_error{s} {}
+		DivByZero(const char* s) :logic_error{s} {}
+	};
+
 	template <class T, size_t L>
 	struct Vector : detail::VecBase2<T, L>
 	{
@@ -200,13 +208,24 @@ namespace otm
 		[[nodiscard]] constexpr T DistSqr(const Vector& v) const noexcept { return (*this - v).LenSqr(); }
 		[[nodiscard]] CommonFloat<T> Dist(const Vector& v) const noexcept { return (*this - v).Len(); }
 
-		void Normalize() noexcept
+		void Normalize()
 		{
 			static_assert(std::is_same_v<T, CommonFloat<T>>, "Can't use Normalize() for this type. Use Unit() instead.");
-			*this /= Len();
+			const auto len = Len();
+			if (IsNearlyZero(len)) throw DivByZero{};
+			*this /= len;
 		}
 
-		[[nodiscard]] UnitVec<CommonFloat<T>, L> Unit() const noexcept;
+		void Normalize(std::nothrow_t) noexcept
+		{
+			static_assert(std::is_same_v<T, CommonFloat<T>>, "Can't use Normalize() for this type. Use Unit() instead.");
+			const auto len = Len();
+			assert(!IsNearlyZero(len));
+			*this /= len;
+		}
+
+		[[nodiscard]] UnitVec<CommonFloat<T>, L> Unit() const;
+		[[nodiscard]] UnitVec<CommonFloat<T>, L> Unit(std::nothrow_t) const noexcept;
 
 		[[nodiscard]] const Matrix<T, 1, L>& RowMatrix() const noexcept;
 		[[nodiscard]] const Matrix<T, L, 1>& ColMatrix() const noexcept;
@@ -524,9 +543,19 @@ namespace otm
 	};
 
 	template <class T, size_t L>
-	UnitVec<CommonFloat<T>, L> Vector<T, L>::Unit() const noexcept
+	UnitVec<CommonFloat<T>, L> Vector<T, L>::Unit() const
 	{
-		return *this / Len();
+		const auto len = Len();
+		if (IsNearlyZero(len)) throw DivByZero{};
+		return *this / len;
+	}
+
+	template <class T, size_t L>
+	UnitVec<CommonFloat<T>, L> Vector<T, L>::Unit(std::nothrow_t) const noexcept
+	{
+		const auto len = Len();
+		assert(!IsNearlyZero(len));
+		return *this / len;
 	}
 	
 	template <class Ratio, class T>
