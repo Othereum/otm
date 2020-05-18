@@ -1,5 +1,4 @@
 #pragma once
-#include <algorithm>
 #include <compare>
 #include <ostream>
 #include "MathUtil.hpp"
@@ -42,6 +41,13 @@ namespace otm
 		template <class T>
 		struct VecBase<T, 3>
 		{
+			constexpr static Vector<T, 3> Forward() noexcept { return {1, 0, 0}; }
+			constexpr static Vector<T, 3> Backward() noexcept { return -Forward(); }
+			constexpr static Vector<T, 3> Right() noexcept { return {0, 1, 0}; }
+			constexpr static Vector<T, 3> Left() noexcept { return -Right(); }
+			constexpr static Vector<T, 3> Up() noexcept { return {0, 0, 1}; }
+			constexpr static Vector<T, 3> Down() noexcept { return -Up(); }
+			
 			template <class... Args>
 			constexpr VecBase(Args... args) noexcept: data{args...} {}
 
@@ -117,10 +123,8 @@ namespace otm
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-		static constexpr Vector One() noexcept
-		{
-			return {All{}, 1};
-		}
+		constexpr static Vector Zero() noexcept { return {}; }
+		constexpr static Vector One() noexcept { return {All{}, 1}; }
 
 		static Vector Rand(const Vector& min, const Vector& max) noexcept
 		{
