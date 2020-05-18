@@ -393,7 +393,7 @@ namespace otm
 
 		protected:
 			friend Vector;
-			constexpr const_iterator(T* data) noexcept: ptr{data} {}
+			constexpr const_iterator(const T* data) noexcept: ptr{const_cast<T*>(data)} {}
 			T* ptr = nullptr;
 		};
 
