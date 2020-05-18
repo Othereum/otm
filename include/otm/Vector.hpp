@@ -172,7 +172,7 @@ namespace otm
 		template <class T2, size_t L2>
 		constexpr iterator Assign(const Vector<T2, L2>& other, ptrdiff_t offset = 0) noexcept
 		{
-			size_t size;
+			size_t size = 0;
 
 			if (offset >= 0)
 			{
