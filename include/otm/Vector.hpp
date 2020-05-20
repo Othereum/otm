@@ -211,22 +211,19 @@ namespace otm
 
 		void Normalize()
 		{
-			static_assert(std::is_same_v<T, CommonFloat<T>>, "Can't use Normalize() for this type. Use Unit() instead.");
-			const auto len = Len();
-			if (IsNearlyZero(len)) throw DivByZero{};
-			*this /= len;
+			if (!Normalize(std::nothrow)) throw DivByZero{};
 		}
 
-		void Normalize(std::nothrow_t) noexcept
+		bool Normalize(std::nothrow_t) noexcept
 		{
 			static_assert(std::is_same_v<T, CommonFloat<T>>, "Can't use Normalize() for this type. Use Unit() instead.");
-			const auto len = Len();
-			assert(!IsNearlyZero(len));
-			*this /= len;
+			const auto lensqr = LenSqr();
+			if (IsNearlyZero(lensqr)) return false;
+			*this /= std::sqrt(lensqr);
+			return true;
 		}
 
 		[[nodiscard]] UnitVec<CommonFloat<T>, L> Unit() const;
-		[[nodiscard]] UnitVec<CommonFloat<T>, L> Unit(std::nothrow_t) const noexcept;
 
 		[[nodiscard]] const Matrix<T, 1, L>& RowMatrix() const noexcept;
 		[[nodiscard]] const Matrix<T, L, 1>& ColMatrix() const noexcept;
@@ -546,17 +543,9 @@ namespace otm
 	template <class T, size_t L>
 	UnitVec<CommonFloat<T>, L> Vector<T, L>::Unit() const
 	{
-		const auto len = Len();
-		if (IsNearlyZero(len)) throw DivByZero{};
-		return *this / len;
-	}
-
-	template <class T, size_t L>
-	UnitVec<CommonFloat<T>, L> Vector<T, L>::Unit(std::nothrow_t) const noexcept
-	{
-		const auto len = Len();
-		assert(!IsNearlyZero(len));
-		return *this / len;
+		const auto lensqr = LenSqr();
+		if (IsNearlyZero(lensqr)) throw DivByZero{};
+		return *this / std::sqrt(lensqr);
 	}
 	
 	template <class Ratio, class T>
