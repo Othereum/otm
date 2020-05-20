@@ -66,4 +66,14 @@ TEST(VectorTest, Ext)
 	
 	auto v2 = UVec3::Rand();
 	EXPECT_NEAR(v2.Get().LenSqr(), 1, kSmallNum);
+
+	float f1, f2, f3;
+	v1 >> f1 >> f2 >> f3;
+	EXPECT_EQ(v1.x, f1);
+	EXPECT_EQ(v1.y, f2);
+	EXPECT_EQ(v1.z, f3);
+
+	Vec3 v3;
+	v3 << f1 << f2 << f3;
+	EXPECT_EQ(v1, v3);
 }
