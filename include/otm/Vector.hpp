@@ -1,6 +1,7 @@
 #pragma once
 #include <compare>
 #include <ostream>
+#include <optional>
 #include "MathUtil.hpp"
 
 namespace otm
@@ -224,6 +225,7 @@ namespace otm
 		}
 
 		[[nodiscard]] UnitVec<CommonFloat<T>, L> Unit() const;
+		[[nodiscard]] std::optional<UnitVec<CommonFloat<T>, L>> Unit(std::nothrow_t) const;
 
 		[[nodiscard]] const Matrix<T, 1, L>& RowMatrix() const noexcept;
 		[[nodiscard]] const Matrix<T, L, 1>& ColMatrix() const noexcept;
@@ -548,6 +550,14 @@ namespace otm
 		return *this / std::sqrt(lensqr);
 	}
 	
+	template <class T, size_t L>
+	std::optional<UnitVec<CommonFloat<T>, L>> Vector<T, L>::Unit(std::nothrow_t) const
+	{
+		const auto lensqr = LenSqr();
+		if (IsNearlyZero(lensqr)) return {};
+		return UnitVec{*this / std::sqrt(lensqr)};
+	}
+
 	template <class Ratio, class T>
 	UnitVec<CommonFloat<T>, 2> Angle<Ratio, T>::ToVector() const noexcept
 	{
