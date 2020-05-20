@@ -134,7 +134,7 @@ namespace otm
 		constexpr static Vector Zero() noexcept { return {}; }
 		constexpr static Vector One() noexcept { return {All{}, 1}; }
 
-		static Vector Rand(const Vector& min, const Vector& max) noexcept
+		[[nodiscard]] static Vector Rand(const Vector& min, const Vector& max) noexcept
 		{
 			Vector v;
 			for (size_t i=0; i<L; ++i)
@@ -142,7 +142,7 @@ namespace otm
 			return v;
 		}
 
-		static Vector Rand(T min, T max) noexcept
+		[[nodiscard]] static Vector Rand(T min, T max) noexcept
 		{
 			return Vector{[min, max]{ return otm::Rand(min, max); }};
 		}
