@@ -10,12 +10,8 @@ namespace otm
 	constexpr auto kPi = kPiV<float>;
 	
 	template <std::floating_point T>
-	constexpr auto kSmallNumberV = static_cast<T>(1e-8);
-	constexpr auto kSmallNumber = kSmallNumberV<float>;
-	
-	template <std::floating_point T>
-	constexpr auto kKindaSmallNumberV = static_cast<T>(1e-4);
-	constexpr auto kKindaSmallNumber = kKindaSmallNumberV<float>;
+	constexpr auto kSmallNumV = static_cast<T>(1e-6);
+	constexpr auto kSmallNum = kSmallNumV<float>;
 
 	template <class T, class... Ts>
 	[[nodiscard]] constexpr CommonFloat<T, Ts...> ToFloat(T x) noexcept
@@ -62,13 +58,13 @@ namespace otm
 	}
 
 	template <class T, class U, class V = CommonFloat<T>>
-	[[nodiscard]] constexpr bool IsNearlyEqual(T a, U b, V tolerance = kSmallNumberV<V>) noexcept
+	[[nodiscard]] constexpr bool IsNearlyEqual(T a, U b, V tolerance = kSmallNumV<V>) noexcept
 	{
 		return Abs(a - b) < tolerance;
 	}
 
 	template <class T, class U = CommonFloat<T>>
-	[[nodiscard]] constexpr bool IsNearlyZero(T a, U tolerance = kSmallNumberV<U>) noexcept
+	[[nodiscard]] constexpr bool IsNearlyZero(T a, U tolerance = kSmallNumV<U>) noexcept
 	{
 		return Abs(a) < tolerance;
 	}
