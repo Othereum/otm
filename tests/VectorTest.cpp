@@ -35,8 +35,9 @@ TEST(VectorTest, Operations)
 {
 	Vec4 v1;
 	EXPECT_THROW(v1.Normalize(), DivByZero);
-	EXPECT_THROW((void)v1.Unit(), DivByZero);
 	EXPECT_FALSE(v1.Normalize(std::nothrow));
+	EXPECT_THROW((void)v1.Unit(), DivByZero);
+	EXPECT_FALSE(v1.Unit(std::nothrow).has_value());
 	
 	constexpr Vec3 v2{1, 1, 1};
 	const Vec3 v3 = v2.Unit();
