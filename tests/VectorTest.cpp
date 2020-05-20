@@ -19,16 +19,16 @@ TEST(VectorTest, Basic)
 
 	Vec4 v4;
 	v4.Assign(v1, 2);
-	EXPECT_FLOAT_EQ(v4.x, 0);
-	EXPECT_FLOAT_EQ(v4.y, 0);
-	EXPECT_FLOAT_EQ(v4.z, 1);
-	EXPECT_FLOAT_EQ(v4.w, 1);
+	EXPECT_NEAR(v4.x, 0, kSmallNumber);
+	EXPECT_NEAR(v4.y, 0, kSmallNumber);
+	EXPECT_NEAR(v4.z, 1, kSmallNumber);
+	EXPECT_NEAR(v4.w, 1, kSmallNumber);
 
 	v4.Assign(v1, -2);
-	EXPECT_FLOAT_EQ(v4.x, 1);
-	EXPECT_FLOAT_EQ(v4.y, 0);
-	EXPECT_FLOAT_EQ(v4.z, 1);
-	EXPECT_FLOAT_EQ(v4.w, 1);
+	EXPECT_NEAR(v4.x, 1, kSmallNumber);
+	EXPECT_NEAR(v4.y, 0, kSmallNumber);
+	EXPECT_NEAR(v4.z, 1, kSmallNumber);
+	EXPECT_NEAR(v4.w, 1, kSmallNumber);
 }
 
 TEST(VectorTest, Operations)
@@ -39,14 +39,14 @@ TEST(VectorTest, Operations)
 	constexpr Vec3 v2{1, 1, 1};
 	const Vec3 v3 = v2.Unit();
 	constexpr auto f = 0.5773502691896258f;
-	EXPECT_FLOAT_EQ(v3.x, f);
-	EXPECT_FLOAT_EQ(v3.y, f);
-	EXPECT_FLOAT_EQ(v3.z, f);
+	EXPECT_NEAR(v3.x, f, kSmallNumber);
+	EXPECT_NEAR(v3.y, f, kSmallNumber);
+	EXPECT_NEAR(v3.z, f, kSmallNumber);
 
-	EXPECT_FLOAT_EQ(v2.LenSqr(), 3);
-	EXPECT_FLOAT_EQ(v2.Len(), 1.732050807568877f);
+	EXPECT_NEAR(v2.LenSqr(), 3, kSmallNumber);
+	EXPECT_NEAR(v2.Len(), 1.732050807568877f, kSmallNumber);
 
 	constexpr Vec3 v4{3, 10, 2};
-	EXPECT_FLOAT_EQ(v4.DistSqr(v2), 86);
-	EXPECT_FLOAT_EQ(v4.Dist(v2), 9.273618495495704f);
+	EXPECT_NEAR(v4.DistSqr(v2), 86, kSmallNumber);
+	EXPECT_NEAR(v4.Dist(v2), 9.273618495495704f, kSmallNumber);
 }
