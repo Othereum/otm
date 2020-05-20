@@ -62,7 +62,8 @@ namespace otm
 			template <class U>
 			constexpr auto operator^(const Vector<U, 3>& b) const noexcept
 			{
-				return Vector{y*b.z - z*b.y, z*b.x - x*b.z, x*b.y - y*b.x};
+				auto& a = static_cast<const Vector<T, 3>&>(*this);
+				return Vector{a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0]};
 			}
 			
 			constexpr Vector<T, 3>& operator^=(const Vector<T, 3>& b) noexcept
