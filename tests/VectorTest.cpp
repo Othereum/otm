@@ -41,9 +41,8 @@ TEST(VectorTest, Operations)
 	constexpr Vec3 v2{1, 1, 1};
 	const Vec3 v3 = v2.Unit();
 	constexpr auto f = 0.5773502691896258f;
-	EXPECT_NEAR(v3.x, f, kSmallNum);
-	EXPECT_NEAR(v3.y, f, kSmallNum);
-	EXPECT_NEAR(v3.z, f, kSmallNum);
+	auto pred = [f](float x){ return IsNearlyEqual(x, f); };
+	EXPECT_TRUE(std::all_of(v3.begin(), v3.end(), pred));
 
 	EXPECT_NEAR(v2.LenSqr(), 3, kSmallNum);
 	EXPECT_NEAR(v2.Len(), 1.732050807568877f, kSmallNum);
