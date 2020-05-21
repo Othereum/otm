@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <compare>
 #include <ostream>
 #include <optional>
@@ -186,7 +187,7 @@ namespace otm
 		constexpr iterator Assign(const Vector<T2, L2>& other, ptrdiff_t offset = 0) noexcept
 		{
 			// ReSharper disable once CppInitializedValueIsAlwaysRewritten
-			size_t size = 0;
+			size_t size = 0; // Initialization is required for constexpr
 
 			if (offset >= 0)
 			{
@@ -230,8 +231,20 @@ namespace otm
 		[[nodiscard]] const Matrix<T, 1, L>& RowMatrix() const noexcept;
 		[[nodiscard]] const Matrix<T, L, 1>& ColMatrix() const noexcept;
 
-		constexpr T& operator[](size_t i) noexcept { return this->data[i]; }
-		constexpr T operator[](size_t i) const noexcept { return this->data[i]; }
+		constexpr T& operator[](size_t i) noexcept { assert(i < L); return this->data[i]; }
+		constexpr T operator[](size_t i) const noexcept { assert(i < L); return this->data[i]; }
+		
+		[[nodiscard]] constexpr T& at(size_t i)
+		{
+			if (i>=L) throw std::out_of_range{"Vector out of range"};
+			return this->data[i];
+		}
+
+		[[nodiscard]] constexpr T at(size_t i) const
+		{
+			if (i>=L) throw std::out_of_range{"Vector out of range"};
+			return this->data[i];
+		}
 
 		template <std::invocable<T> Fn>
 		constexpr Vector& Transform(const Vector& other, Fn&& fn) noexcept(std::is_nothrow_invocable_v<Fn, T, T>)
@@ -513,8 +526,7 @@ namespace otm
 	template <class T, size_t L>
 	std::istream& operator>>(std::istream& is, Vector<T, L>& v)
 	{
-		for (size_t i=0; i<L; ++i)
-			is >> v[i];
+		for (size_t i=0; i<L; ++i) is >> v[i];
 		return is;
 	}
 
