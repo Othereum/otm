@@ -40,4 +40,28 @@ TEST(MatrixTest, Basic)
 		120, 94
 	};
 	EXPECT_EQ(mmr, mmre);
+	
+	auto mma = mmr;
+	mma *= Matrix<long, 2, 2>::Identity();
+	EXPECT_EQ(mma, mmr);
+
+	constexpr auto mt = mm1.Transposed();
+	static_assert(std::is_same_v<decltype(mt), const Matrix<int, 4, 2>>);
+	constexpr Matrix<int, 4, 2> mte{
+		1, 5,
+		2, 6,
+		3, 7,
+		4, 8
+	};
+	EXPECT_EQ(mt, mte);
+
+	constexpr Vector v{2, 4, 5};
+	constexpr auto rv = v.ToRowMatrix();
+	constexpr auto cv = v.ToColMatrix();
+	static_assert(std::is_same_v<decltype(rv), const Matrix<int, 1, 3>>);
+	static_assert(std::is_same_v<decltype(cv), const Matrix<int, 3, 1>>);
+	constexpr Matrix<int, 1, 3> rve{2, 4, 5};
+	constexpr Matrix<int, 3, 1> cve{2, 4, 5};
+	EXPECT_EQ(rv, rve);
+	EXPECT_EQ(cv, cve);
 }
