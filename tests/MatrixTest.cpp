@@ -64,4 +64,22 @@ TEST(MatrixTest, Basic)
 	constexpr Matrix<int, 3, 1> cve{2, 4, 5};
 	EXPECT_EQ(rv, rve);
 	EXPECT_EQ(cv, cve);
+
+	auto t1 = Matrix<int, 4, 4>::Identity(rv, {0, 3});
+	constexpr Matrix<int, 4, 4> t1e{
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		2, 4, 5, 1
+	};
+	EXPECT_EQ(t1, t1e);
+
+	t1.Assign(m2, {2, -1});
+	constexpr Matrix<int, 4, 4> t2e{
+		1, 0, 4, 5,
+		0, 1, 7, 8,
+		0, 0, 1, 0,
+		2, 4, 5, 1
+	};
+	EXPECT_EQ(t1, t2e);
 }
