@@ -117,13 +117,25 @@ namespace otm
 			return true;
 		}
 
-		constexpr auto& operator[](size_t i) noexcept { return varr[i]; }
-		constexpr auto& operator[](size_t i) const noexcept { return varr[i]; }
-		constexpr auto& Row(size_t i) noexcept { return varr[i]; }
-		[[nodiscard]] constexpr auto& Row(size_t i) const noexcept { return varr[i]; }
-
-		[[nodiscard]] constexpr auto Col(size_t c) const noexcept
+		constexpr auto& operator[](size_t i) noexcept { assert(i < R); return varr[i]; }
+		constexpr auto& operator[](size_t i) const noexcept { assert(i < R); return varr[i]; }
+		
+		[[nodiscard]] constexpr auto& Row(size_t i)
 		{
+			if (i >= R) OutOfRange();
+			return varr[i];
+		}
+		
+		[[nodiscard]] constexpr auto& Row(size_t i) const
+		{
+			if (i >= R) OutOfRange();
+			return varr[i];
+		}
+
+		[[nodiscard]] constexpr auto Col(size_t c) const
+		{
+			if (c >= C) OutOfRange();
+
 			Vector<T, R> v;
 			
 			for (size_t r = 0; r < R; ++r)
@@ -132,8 +144,10 @@ namespace otm
 			return v;
 		}
 
-		constexpr void ColAssign(size_t c, const Vector<T, R>& v) noexcept
+		constexpr void ColAssign(size_t c, const Vector<T, R>& v)
 		{
+			if (c >= C) OutOfRange();
+
 			for (size_t r = 0; r < R; ++r)
 				varr[r][c] = v[r];
 		}
@@ -229,6 +243,11 @@ namespace otm
 		[[nodiscard]] constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator{cbegin()}; }
 
 	private:
+		[[noreturn]] static void OutOfRange()
+		{
+			throw std::out_of_range{"Matrix out of range"};
+		}
+		
 		Vector<T, C> varr[R];
 	};
 
@@ -334,14 +353,18 @@ namespace otm
 	}
 	
 	template <class T, size_t L>
-	const Matrix<T, 1, L>& Vector<T, L>::RowMatrix() const noexcept
+	constexpr Matrix<T, 1, L> Vector<T, L>::ToRowMatrix() const noexcept
 	{
-		return reinterpret_cast<const Matrix<T, 1, L>&>(*this);
+		Matrix<T, 1, L> m;
+		for (size_t i=0; i<L; ++i) m[0][i] = (*this)[i];
+		return m;
 	}
 
 	template <class T, size_t L>
-	const Matrix<T, L, 1>& Vector<T, L>::ColMatrix() const noexcept
+	constexpr Matrix<T, L, 1> Vector<T, L>::ToColMatrix() const noexcept
 	{
-		return reinterpret_cast<const Matrix<T, L, 1>&>(*this);
+		Matrix<T, L, 1> m;
+		for (size_t i=0; i<L; ++i) m[i][0] = (*this)[i];
+		return m;
 	}
 }
