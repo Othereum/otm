@@ -52,6 +52,10 @@ TEST(VectorTest, Operations)
 	EXPECT_NEAR(v4.DistSqr(v2), 86, kSmallNum);
 	EXPECT_NEAR(v4.Dist(v2), 9.273618495495704f, kSmallNum);
 
+	constexpr Vector dp1{1, 3}, dp2{6, 2};
+	constexpr auto dpr = dp1 | dp2;
+	EXPECT_EQ(dpr, 12);
+
 	constexpr Vector cp1{2, 5, 1}, cp2{3, 1, 7};
 	constexpr auto cpr = cp1 ^ cp2;
 	constexpr Vector cpe{34, -11, -13};
