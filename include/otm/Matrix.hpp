@@ -46,11 +46,23 @@ namespace otm
 	template <class T, size_t R, size_t C>
 	struct Matrix : detail::MatrixGeometry<T, R, C>
 	{
-		constexpr Matrix() noexcept :arr{} {}
+		using value_type = Vector<T, C>;
+		using size_type = size_t;
+		using difference_type = ptrdiff_t;
+		using reference = Vector<T, C>&;
+		using const_reference = const Vector<T, C>&;
+		using pointer = Vector<T, C>*;
+		using const_pointer = const Vector<T, C>*;
+		using iterator = Vector<T, C>*;
+		using const_iterator = const Vector<T, C>*;
+		using reverse_iterator = std::reverse_iterator<iterator>;
+		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+		
+		constexpr Matrix() noexcept = default;
 
 		constexpr Matrix(All, T x) noexcept
 		{
-			for (auto& v : flat) v = x;
+			for (auto& v : varr) for (auto& c : v) c = x;
 		}
 
 		template <class T2, size_t R2, size_t C2>
@@ -62,13 +74,14 @@ namespace otm
 		template <class... Args>
 		explicit(sizeof...(Args) == 0)
 		constexpr Matrix(T x, Args... args) noexcept
-			:arr{x, static_cast<T>(args)...}
 		{
+			static_assert(sizeof...(Args) < R*C, "Too many arguments");
+			Assign({x, static_cast<T>(args)...});
 		}
 
 		/**
 		 * \brief Assign elements of other matrix to this. The value of the unassigned elements does not change.
-		 * \note Do nothing if offset is out of range
+		 * \note Does nothing if offset is out of range
 		 */
 		template <class T2, size_t R2, size_t C2>
 		constexpr void Assign(const Matrix<T2, R2, C2>& other, const Vector<ptrdiff_t, 2>& offset = {}) noexcept
@@ -87,19 +100,34 @@ namespace otm
 			}
 		}
 
-		constexpr bool operator==(const Matrix&) const noexcept = default;
+		// Assign elements from initializer list. The value of the unassigned elements does not change.
+		constexpr void Assign(std::initializer_list<T> list) noexcept
+		{
+			auto it = list.begin();
+			for (size_t i=0; i<R && it != list.end(); ++i)
+				for (size_t j=0; j<C && it != list.end(); ++j)
+					varr[i][j] = *it++;
+		}
+		
+		constexpr bool operator==(const Matrix& b) const noexcept
+		{
+			for (size_t i=0; i<R; ++i)
+				if (Row(i) != b[i]) return false;
 
-		constexpr auto& operator[](size_t i) noexcept { return m[i]; }
-		constexpr auto& operator[](size_t i) const noexcept { return m[i]; }
-		constexpr auto& Row(size_t i) noexcept { return m[i]; }
-		[[nodiscard]] constexpr auto& Row(size_t i) const noexcept { return m[i]; }
+			return true;
+		}
+
+		constexpr auto& operator[](size_t i) noexcept { return varr[i]; }
+		constexpr auto& operator[](size_t i) const noexcept { return varr[i]; }
+		constexpr auto& Row(size_t i) noexcept { return varr[i]; }
+		[[nodiscard]] constexpr auto& Row(size_t i) const noexcept { return varr[i]; }
 
 		[[nodiscard]] constexpr auto Col(size_t c) const noexcept
 		{
 			Vector<T, R> v;
 			
 			for (size_t r = 0; r < R; ++r)
-				v[r] = m[r][c];
+				v[r] = varr[r][c];
 			
 			return v;
 		}
@@ -107,13 +135,13 @@ namespace otm
 		constexpr void ColAssign(size_t c, const Vector<T, R>& v) noexcept
 		{
 			for (size_t r = 0; r < R; ++r)
-				m[r][c] = v[r];
+				varr[r][c] = v[r];
 		}
 
-		[[nodiscard]] constexpr auto& AsVectors() noexcept { return m; }
-		[[nodiscard]] constexpr auto& AsVectors() const noexcept { return m; }
-		[[nodiscard]] constexpr auto& AsFloats() noexcept { return flat; }
-		[[nodiscard]] constexpr auto& AsFloats() const noexcept { return flat; }
+		[[nodiscard]] constexpr auto& AsVectors() noexcept { return varr; }
+		[[nodiscard]] constexpr auto& AsVectors() const noexcept { return varr; }
+		[[nodiscard]] auto& AsFlatArr() noexcept { return reinterpret_cast<T(&)[R*C]>(varr); }
+		[[nodiscard]] auto& AsFlatArr() const noexcept { return reinterpret_cast<const T(&)[R*C]>(varr); }
 
 		constexpr Matrix operator+(const Matrix& b) const noexcept
 		{
@@ -123,7 +151,7 @@ namespace otm
 
 		constexpr Matrix& operator+=(const Matrix& b) noexcept
 		{
-			for (auto i = 0; i < R; ++i) m[i] += b[i];
+			for (auto i = 0; i < R; ++i) varr[i] += b[i];
 			return *this;
 		}
 
@@ -135,7 +163,7 @@ namespace otm
 
 		constexpr Matrix& operator-=(const Matrix& b) noexcept
 		{
-			for (auto i = 0; i < R; ++i) m[i] -= b[i];
+			for (auto i = 0; i < R; ++i) varr[i] -= b[i];
 			return *this;
 		}
 
@@ -147,7 +175,7 @@ namespace otm
 
 		constexpr Matrix& operator*=(T f) noexcept
 		{
-			for (auto i = 0; i < R; ++i) m[i] *= f;
+			for (auto i = 0; i < R; ++i) varr[i] *= f;
 			return *this;
 		}
 
@@ -159,14 +187,14 @@ namespace otm
 
 		constexpr Matrix& operator/=(T f) noexcept
 		{
-			for (auto i = 0; i < R; ++i) m[i] /= f;
+			for (auto i = 0; i < R; ++i) varr[i] /= f;
 			return *this;
 		}
 
-		template <size_t C2>
-		constexpr Matrix<T, R, C2> operator*(const Matrix<T, C, C2>& b) const noexcept
+		template <class T2, size_t C2>
+		constexpr Matrix<std::common_type_t<T, T2>, R, C2> operator*(const Matrix<T2, C, C2>& b) const noexcept
 		{
-			Matrix<T, R, C2> c;
+			Matrix<std::common_type_t<T, T2>, R, C2> c;
 			for (size_t i = 0; i < R; ++i)
 				for (size_t j = 0; j < C2; ++j)
 					c[i][j] = Row(i) | b.Col(j);
@@ -180,20 +208,31 @@ namespace otm
 			Matrix<T, C, R> t;
 			for (auto i = 0; i < R; ++i)
 				for (auto j = 0; j < C; ++j)
-					t[j][i] = m[i][j];
+					t[j][i] = varr[i][j];
 			return t;
 		}
 
+		[[nodiscard]] constexpr iterator begin() noexcept { return varr; }
+		[[nodiscard]] constexpr const_iterator begin() const noexcept { return varr; }
+		[[nodiscard]] constexpr const_iterator cbegin() const noexcept { return varr; }
+
+		[[nodiscard]] constexpr iterator end() noexcept { return varr + R; }
+		[[nodiscard]] constexpr const_iterator end() const noexcept { return varr + R; }
+		[[nodiscard]] constexpr const_iterator cend() const noexcept { return varr + R; }
+		
+		[[nodiscard]] constexpr reverse_iterator rbegin() noexcept { return reverse_iterator{end()}; }
+		[[nodiscard]] constexpr const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator{end()}; }
+		[[nodiscard]] constexpr const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator{cend()}; }
+
+		[[nodiscard]] constexpr reverse_iterator rend() noexcept { return reverse_iterator{begin()}; }
+		[[nodiscard]] constexpr const_reverse_iterator rend() const noexcept { return const_reverse_iterator{begin()}; }
+		[[nodiscard]] constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator{cbegin()}; }
+
 	private:
-		union
-		{
-			Vector<T, C> m[R];
-			T arr[R][C];
-			T flat[R*C];
-		};
+		Vector<T, C> varr[R];
 	};
 
-	template <class F, class T, size_t R, size_t C>
+	template <class T, size_t R, size_t C, std::convertible_to<T> F>
 	constexpr auto operator*(F f, const Matrix<T, R, C>& m) noexcept { return m * f; }
 
 	template <class T, size_t R, size_t C>
