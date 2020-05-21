@@ -181,7 +181,7 @@ namespace otm
 		/**
 		 * \brief Assign elements of other vector to this. The value of the unassigned elements does not change.
 		 * \return Iterator pointing next to the last element assigned
-		 * \note Do nothing if offset is out of range
+		 * \note Does nothing if offset is out of range
 		 */
 		template <class T2, size_t L2>
 		constexpr iterator Assign(const Vector<T2, L2>& other, ptrdiff_t offset = 0) noexcept
@@ -348,9 +348,10 @@ namespace otm
 			return v;
 		}
 
-		constexpr T operator|(const Vector& v) const noexcept
+		template <class T2>
+		constexpr std::common_type_t<T, T2> operator|(const Vector<T2, L>& v) const noexcept
 		{
-			T t{};
+			std::common_type_t<T, T2> t{};
 			for (size_t i = 0; i < L; ++i) t += (*this)[i] * v[i];
 			return t;
 		}
