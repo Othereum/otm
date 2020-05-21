@@ -1,6 +1,7 @@
 #pragma once
 #include <cassert>
 #include <compare>
+#include <functional>
 #include <ostream>
 #include <optional>
 #include "MathUtil.hpp"
@@ -17,7 +18,7 @@ namespace otm
 
 			constexpr bool operator==(const VecBase&) const noexcept = default;
 
-			T data[L];
+			T data[L]{};
 		};
 
 		template <class T>
@@ -35,7 +36,7 @@ namespace otm
 			
 			union
 			{
-				T data[2];
+				T data[2]{};
 				struct { T x, y; };
 			};
 		};
@@ -57,7 +58,7 @@ namespace otm
 
 			union
 			{
-				T data[3];
+				T data[3]{};
 				struct { T x, y, z; };
 			};
 
@@ -85,7 +86,7 @@ namespace otm
 
 			union
 			{
-				T data[4];
+				T data[4]{};
 				struct { T x, y, z, w; };
 			};
 		};
@@ -149,8 +150,6 @@ namespace otm
 		{
 			return Vector{[min, max]{ return otm::Rand(min, max); }};
 		}
-
-		constexpr Vector() noexcept = default;
 
 		constexpr Vector(All, T x) noexcept
 			:Vector{[x] { return x; }}
