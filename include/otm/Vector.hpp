@@ -211,6 +211,10 @@ namespace otm
 		[[nodiscard]] constexpr T DistSqr(const Vector& v) const noexcept { return (*this - v).LenSqr(); }
 		[[nodiscard]] CommonFloat<T> Dist(const Vector& v) const noexcept { return (*this - v).Len(); }
 
+		/**
+		 * \brief Normalize this vector
+		 * \throws DivByZero if IsNearlyZero(LenSqr())
+		 */
 		void Normalize()
 		{
 			if (!Normalize(std::nothrow)) throw DivByZero{};
@@ -225,6 +229,11 @@ namespace otm
 			return true;
 		}
 
+		/**
+		 * \brief Get normalized vector
+		 * \return Normalized vector
+		 * \throws DivByZero if IsNearlyZero(LenSqr())
+		 */
 		[[nodiscard]] UnitVec<CommonFloat<T>, L> Unit() const;
 		[[nodiscard]] std::optional<UnitVec<CommonFloat<T>, L>> Unit(std::nothrow_t) const;
 
@@ -536,7 +545,7 @@ namespace otm
 		[[nodiscard]] static UnitVec Rand() noexcept
 		{
 			Vector<T, L> v;
-			v.Transform([](auto&&...) noexcept { return Gauss<T, T>(0, 1); });
+			v.Transform([](auto&&...) { return Gauss<T, T>(0, 1); });
 			try
 			{
 				return v.Unit();
