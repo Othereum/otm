@@ -524,8 +524,15 @@ namespace otm
 		[[nodiscard]] static UnitVec Rand() noexcept
 		{
 			Vector<T, L> v;
-			v.Transform([](auto&&...) { return Gauss<T, T>(0, 1); });
-			return v.Unit();
+			v.Transform([](auto&&...) noexcept { return Gauss<T, T>(0, 1); });
+			try
+			{
+				return v.Unit();
+			}
+			catch (const DivByZero&)
+			{
+				return Rand();
+			}
 		}
 		
 		[[nodiscard]] constexpr const Vector<T, L>& Get() const noexcept { return v; }
@@ -534,11 +541,9 @@ namespace otm
 	private:
 		template <class, class>
 		friend struct Angle;
-		
 		friend Vector<T, L>;
 		
 		constexpr UnitVec(const Vector<T, L>& v) noexcept: v{v} {}
-		
 		const Vector<T, L> v;
 	};
 
