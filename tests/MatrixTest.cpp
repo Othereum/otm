@@ -22,7 +22,10 @@ TEST(MatrixTest, Basic)
 	EXPECT_EQ(m2[2][0], 7);
 	EXPECT_EQ(m2[2][1], 8);
 	EXPECT_EQ(m2[2][2], 0);
+}
 
+TEST(MatrixTest, Operations)
+{
 	constexpr Matrix<int, 2, 4> mm1{
 		1, 2, 3, 4,
 		5, 6, 7, 8
@@ -54,7 +57,10 @@ TEST(MatrixTest, Basic)
 		4, 8
 	};
 	EXPECT_EQ(mt, mte);
+}
 
+TEST(MatrixTest, Ext)
+{
 	constexpr Vector v{2, 4, 5};
 	constexpr auto rv = v.ToRowMatrix();
 	constexpr auto cv = v.ToColMatrix();
@@ -74,6 +80,11 @@ TEST(MatrixTest, Basic)
 	};
 	EXPECT_EQ(t1, t1e);
 
+	constexpr Mat3 m2{
+		1, 2, 3,
+		4, 5, 6,
+		7, 8
+	};
 	t1.Assign(m2, {2, -1});
 	constexpr Matrix<int, 4, 4> t2e{
 		1, 0, 4, 5,
