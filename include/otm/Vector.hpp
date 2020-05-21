@@ -237,21 +237,41 @@ namespace otm
 		[[nodiscard]] UnitVec<CommonFloat<T>, L> Unit() const;
 		[[nodiscard]] std::optional<UnitVec<CommonFloat<T>, L>> Unit(std::nothrow_t) const;
 
-		[[nodiscard]] const Matrix<T, 1, L>& RowMatrix() const noexcept;
-		[[nodiscard]] const Matrix<T, L, 1>& ColMatrix() const noexcept;
+		[[nodiscard]] Matrix<T, 1, L>& AsRowMatrix() noexcept
+		{
+			return reinterpret_cast<Matrix<T, 1, L>&>(*this);
+		}
+		
+		[[nodiscard]] const Matrix<T, 1, L>& AsRowMatrix() const noexcept
+		{
+			return reinterpret_cast<const Matrix<T, 1, L>&>(*this);
+		}
+		
+		[[nodiscard]] Matrix<T, L, 1>& AsColMatrix() noexcept
+		{
+			return reinterpret_cast<Matrix<T, L, 1>&>(*this);
+		}
+
+		[[nodiscard]] const Matrix<T, L, 1>& AsColMatrix() const noexcept
+		{
+			return reinterpret_cast<const Matrix<T, L, 1>&>(*this);
+		}
+
+		[[nodiscard]] constexpr Matrix<T, 1, L> ToRowMatrix() const noexcept;
+		[[nodiscard]] constexpr Matrix<T, L, 1> ToColMatrix() const noexcept;
 
 		constexpr T& operator[](size_t i) noexcept { assert(i < L); return this->data[i]; }
 		constexpr T operator[](size_t i) const noexcept { assert(i < L); return this->data[i]; }
 		
 		[[nodiscard]] constexpr T& at(size_t i)
 		{
-			if (i>=L) throw std::out_of_range{"Vector out of range"};
+			if (i>=L) OutOfRange();
 			return this->data[i];
 		}
 
 		[[nodiscard]] constexpr T at(size_t i) const
 		{
-			if (i>=L) throw std::out_of_range{"Vector out of range"};
+			if (i>=L) OutOfRange();
 			return this->data[i];
 		}
 
@@ -510,6 +530,12 @@ namespace otm
 			friend Vector;
 			constexpr iterator(pointer data) noexcept: const_iterator{data} {}
 		};
+
+	private:
+		[[noreturn]] static void OutOfRange()
+		{
+			throw std::out_of_range{"Vector out of range"};
+		}
 	};
 
 	template <class... Args>
