@@ -157,7 +157,7 @@ namespace otm
 		}
 
 		template <std::invocable Fn>
-		explicit constexpr Vector(Fn&& fn) noexcept
+		explicit constexpr Vector(Fn&& fn) noexcept  // NOLINT(bugprone-forwarding-reference-overload)
 		{
 			Transform([&fn](auto&&...) { return fn(); });
 		}
@@ -174,8 +174,7 @@ namespace otm
 		constexpr Vector(const Vector<U, M>& v, Args... args) noexcept
 		{
 			static_assert(sizeof...(Args) <= Max(static_cast<ptrdiff_t>(L - M), 0), "Too many arguments");
-			auto it = Assign(v);
-			(it << ... << static_cast<T>(args));
+			(Assign(v) << ... << static_cast<T>(args));
 		}
 
 		/**
@@ -186,6 +185,7 @@ namespace otm
 		template <class T2, size_t L2>
 		constexpr iterator Assign(const Vector<T2, L2>& other, ptrdiff_t offset = 0) noexcept
 		{
+			// ReSharper disable once CppInitializedValueIsAlwaysRewritten
 			size_t size = 0;
 
 			if (offset >= 0)
