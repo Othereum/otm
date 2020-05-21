@@ -132,8 +132,8 @@ Matrix<float, 4, 2> at = a.Transposed();
 c.Transpose(); // Only available for square matrix
 
 Vec3 pos{2, 4, 5};
-Matrix<float, 1, 4> rv = pos.RowMatrix();
-Matrix<float, 4, 1> cv = pos.ColMatrix();
+Matrix<float, 1, 3> rv = pos.RowMatrix();
+Matrix<float, 3, 1> cv = pos.ColMatrix();
 
 Mat4 t1 = Mat4::Identity(rv, /*offset=*/{0, 3});
 /* offset is optional
