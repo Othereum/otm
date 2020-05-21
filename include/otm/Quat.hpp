@@ -6,18 +6,13 @@ namespace otm
 	template <std::floating_point T>
 	struct Quaternion
 	{
-		union
-		{
-			struct { Vector<T, 3> v; T s; };
-			struct { T x, y, z, w; };
-			Vector<T, 4> v4;
-			T data[4];
-		};
+		Vector<T, 3> v;
+		T s = 1;
 
-		constexpr Quaternion() noexcept: v{}, s{1} {}
+		constexpr Quaternion() noexcept = default;
 		constexpr Quaternion(const Vector<T, 3>& v, T s) noexcept: v{v}, s{s} {}
-		constexpr Quaternion(T x, T y, T z, T w) noexcept: x{x}, y{y}, z{z}, w{w} {}
-		explicit constexpr Quaternion(const Vector<T, 4>& v4) noexcept: v4{v4} {}
+		constexpr Quaternion(T x, T y, T z, T w) noexcept: v{x, y, z}, s{w} {}
+		explicit constexpr Quaternion(const Vector<T, 4>& v4) noexcept: v{v4}, s{v4.w} {}
 		
 		Quaternion(const UnitVec<T, 3>& axis, Angle<RadR, T> angle) noexcept
 			:Quaternion{axis.Get() * Sin(angle / 2), Cos(angle / 2)}

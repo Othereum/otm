@@ -315,7 +315,8 @@ namespace otm
 		template <std::floating_point T>
 		constexpr Matrix<T, 4, 4> MatrixGeometry<T, 4, 4>::Rotation(const Quaternion<T>& rot) noexcept
 		{
-			const auto& [x, y, z, w] = rot.data;
+			const auto& [x, y, z] = rot.v.data;
+			const auto& w = rot.s;
 			
 			return {
 				1 - 2*(y*y + z*z),	2*(x*y + w*z),		2*(x*z - w*y),		0,
