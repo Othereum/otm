@@ -1,6 +1,6 @@
 # otm : Othereum's Math Library
 
-Math library for 3D programming.
+Math library for game programming
 
 ## Key features
 
