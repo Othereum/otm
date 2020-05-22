@@ -11,38 +11,49 @@ namespace otm
 	namespace detail
 	{
 		template <class T, size_t L>
-		struct VecBase
+		struct VecBase0
 		{
 			template <class... Args>
-			constexpr VecBase(Args... args) noexcept: data{args...} {}
+			constexpr VecBase0(Args... args) noexcept :data{static_cast<T>(args)...} {}
 
-			constexpr bool operator==(const VecBase&) const noexcept = default;
-
+			constexpr bool operator==(const VecBase0&) const noexcept = default;
+			
 			T data[L]{};
 		};
-
-		template <class T>
-		struct VecBase<T, 2>
+		
+		template <std::floating_point T, size_t L>
+		struct VecBase0<T, L>
 		{
 			template <class... Args>
-			constexpr VecBase(Args... args) noexcept: data{args...} {}
+			constexpr VecBase0(Args... args) noexcept :data{static_cast<T>(args)...} {}
 
-			constexpr bool operator==(const VecBase&) const noexcept = default;
-
-			[[nodiscard]] auto ToAngle() const noexcept
-			{
-				return Atan2(y, x);
-			}
+			constexpr bool operator==(const VecBase0&) const noexcept = delete;
 			
-			union
-			{
-				T data[2]{};
-				struct { T x, y; };
-			};
+			T data[L]{};
+		};
+		
+		template <class T, size_t L>
+		struct VecBase : VecBase0<T, L>
+		{
+			template <class... Args>
+			constexpr VecBase(Args... args) noexcept :VecBase0{args...} {}
 		};
 
 		template <class T>
-		struct VecBase<T, 3>
+		struct VecBase<T, 2> : VecBase0<T, 2>
+		{
+			template <class... Args>
+			constexpr VecBase(Args... args) noexcept :VecBase0{args...} {}
+			
+			[[nodiscard]] Angle<RadR, CommonFloat<T>> ToAngle() const noexcept
+			{
+				auto& v = static_cast<const Vector<T, 2>&>(*this);
+				return Atan2(v.y, v.x);
+			}
+		};
+
+		template <class T>
+		struct VecBase<T, 3> : VecBase0<T, 3>
 		{
 			constexpr static Vector<T, 3> Forward() noexcept { return {1, 0, 0}; }
 			constexpr static Vector<T, 3> Backward() noexcept { return -Forward(); }
@@ -52,20 +63,12 @@ namespace otm
 			constexpr static Vector<T, 3> Down() noexcept { return -Up(); }
 			
 			template <class... Args>
-			constexpr VecBase(Args... args) noexcept: data{args...} {}
-
-			constexpr bool operator==(const VecBase&) const noexcept = default;
-
-			union
-			{
-				T data[3]{};
-				struct { T x, y, z; };
-			};
-
+			constexpr VecBase(Args... args) noexcept :VecBase0{args...} {}
+			
 			template <class U>
 			constexpr auto operator^(const Vector<U, 3>& b) const noexcept
 			{
-				auto& a = static_cast<const Vector<T, 3>&>(*this);
+				auto& a = this->data;
 				return Vector{a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0]};
 			}
 			
@@ -74,39 +77,40 @@ namespace otm
 				*this = *this ^ b;
 				return static_cast<Vector<T, 3>&>(*this);
 			}
+
+			template <std::floating_point F>
+			[[nodiscard]] Vector<std::common_type_t<T, F>, 3> RotatedBy(const Quaternion<F>& q) const noexcept;
 		};
-
-		template <class T>
-		struct VecBase<T, 4>
-		{
-			template <class... Args>
-			constexpr VecBase(Args... args) noexcept: data{args...} {}
-
-			constexpr bool operator==(const VecBase&) const noexcept = default;
-
-			union
-			{
-				T data[4]{};
-				struct { T x, y, z, w; };
-			};
-		};
-
 		
 		template <class T, size_t L>
 		struct VecBase2 : VecBase<T, L>
 		{
 			template <class... Args>
-			constexpr VecBase2(Args... args) noexcept: VecBase{args...} {}
+			constexpr VecBase2(Args... args) noexcept :VecBase{args...} {}
 		};
 
 		template <std::floating_point T>
 		struct VecBase2<T, 3> : VecBase<T, 3>
 		{
 			template <class... Args>
-			constexpr VecBase2(Args... args) noexcept: VecBase{args...} {}
+			constexpr VecBase2(Args... args) noexcept :VecBase{args...} {}
+			
+			template <std::floating_point F>
+			void RotateBy(const Quaternion<F>& q) noexcept;
+		};
 
-			[[nodiscard]] Vector<T, 3> Rotated(const Quaternion<T>& q) const noexcept;
-			void Rotate(const Quaternion<T>& q) noexcept;
+		template <std::floating_point T, size_t L>
+		struct UnitVecBase {};
+
+		template <std::floating_point T>
+		struct UnitVecBase<T, 3>
+		{
+			constexpr static UnitVec<T, 3> Forward() noexcept { return {1, 0, 0}; }
+			constexpr static UnitVec<T, 3> Backward() noexcept { return {-1, 0, 0}; }
+			constexpr static UnitVec<T, 3> Right() noexcept { return {0, 1, 0}; }
+			constexpr static UnitVec<T, 3> Left() noexcept { return {0, -1, 0}; }
+			constexpr static UnitVec<T, 3> Up() noexcept { return {0, 0, 1}; }
+			constexpr static UnitVec<T, 3> Down() noexcept { return {0, 0, -1}; }
 		};
 	}
 
@@ -165,7 +169,7 @@ namespace otm
 		template <std::convertible_to<T>... Args>
 		explicit(sizeof...(Args) == 1)
 		constexpr Vector(Args... args) noexcept
-			:detail::VecBase2<T, L>{static_cast<T>(args)...}
+			:detail::VecBase2<T, L>{args...}
 		{
 		}
 
@@ -566,7 +570,7 @@ namespace otm
 	}
 
 	template <std::floating_point T, size_t L>
-	struct UnitVec
+	struct UnitVec : detail::UnitVecBase<T, L>
 	{
 		[[nodiscard]] static UnitVec Rand() noexcept
 		{
@@ -589,9 +593,13 @@ namespace otm
 		template <class, class>
 		friend struct Angle;
 		friend Vector<T, L>;
-		
+		friend detail::UnitVecBase<T, L>;
+
+		template <class... Args>
+		constexpr UnitVec(Args... args) noexcept: v{static_cast<T>(args)...} {}
 		constexpr UnitVec(const Vector<T, L>& v) noexcept: v{v} {}
-		const Vector<T, L> v;
+		
+		const Vector<T, L> v{};
 	};
 
 	template <class T, size_t L>

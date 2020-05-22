@@ -29,15 +29,20 @@ namespace otm
 		constexpr Quaternion operator~() const noexcept { return {-v, s}; }
 	};
 
-	template <std::floating_point T>
-	Vector<T, 3> detail::VecBase2<T, 3>::Rotated(const Quaternion<T>& q) const noexcept
+	template <class T>
+	template <std::floating_point F>
+	Vector<std::common_type_t<T, F>, 3> detail::VecBase<T, 3>::RotatedBy(const Quaternion<F>& q) const noexcept
 	{
-		return (q * Quaternion<T>{static_cast<const Vector<T, 3>&>(*this), 0} * ~q).v;
+		using TF = std::common_type_t<T, F>;
+		auto& v = static_cast<const Vector<T, 3>&>(*this);
+		return (q * Quaternion<TF>{v, 0} * ~q).v;
 	}
 
 	template <std::floating_point T>
-	void detail::VecBase2<T, 3>::Rotate(const Quaternion<T>& q) noexcept
+	template <std::floating_point F>
+	void detail::VecBase2<T, 3>::RotateBy(const Quaternion<F>& q) noexcept
 	{
-		return *this = Rotated(q);
+		static_assert(std::is_same_v<std::remove_cvref_t<decltype(this->RotatedBy())>, std::remove_cvref_t<decltype(*this)>>);
+		*this = this->RotatedBy();
 	}
 }
