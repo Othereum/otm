@@ -6,29 +6,29 @@ using namespace otm;
 TEST(VectorTest, Basic)
 {
 	constexpr Vec4 v1{1, 1, 1};
-	EXPECT_EQ(v1.x, 1);
-	EXPECT_EQ(v1.y, 1);
-	EXPECT_EQ(v1.z, 1);
-	EXPECT_EQ(v1.w, 0);
+	EXPECT_EQ(v1[0], 1);
+	EXPECT_EQ(v1[1], 1);
+	EXPECT_EQ(v1[2], 1);
+	EXPECT_EQ(v1[3], 0);
 
 	constexpr Vec4 v2{All{}, 1};
-	EXPECT_NE(v1, v2);
+	EXPECT_FALSE(IsNearlyEqual(v1, v2));
 
 	constexpr Vec4 v3{Vec3{v1}, 1};
-	EXPECT_EQ(v2, v3);
+	EXPECT_TRUE(IsNearlyEqual(v2, v3));
 
 	Vec4 v4;
 	v4.Assign(v1, 2);
-	EXPECT_NEAR(v4.x, 0, kSmallNum);
-	EXPECT_NEAR(v4.y, 0, kSmallNum);
-	EXPECT_NEAR(v4.z, 1, kSmallNum);
-	EXPECT_NEAR(v4.w, 1, kSmallNum);
+	EXPECT_NEAR(v4[0], 0, kSmallNum);
+	EXPECT_NEAR(v4[1], 0, kSmallNum);
+	EXPECT_NEAR(v4[2], 1, kSmallNum);
+	EXPECT_NEAR(v4[3], 1, kSmallNum);
 
 	v4.Assign(v1, -2);
-	EXPECT_NEAR(v4.x, 1, kSmallNum);
-	EXPECT_NEAR(v4.y, 0, kSmallNum);
-	EXPECT_NEAR(v4.z, 1, kSmallNum);
-	EXPECT_NEAR(v4.w, 1, kSmallNum);
+	EXPECT_NEAR(v4[0], 1, kSmallNum);
+	EXPECT_NEAR(v4[1], 0, kSmallNum);
+	EXPECT_NEAR(v4[2], 1, kSmallNum);
+	EXPECT_NEAR(v4[3], 1, kSmallNum);
 }
 
 TEST(VectorTest, Operations)
@@ -73,13 +73,13 @@ TEST(VectorTest, Ext)
 
 	float f1, f2, f3;
 	v1 >> f1 >> f2 >> f3;
-	EXPECT_EQ(v1.x, f1);
-	EXPECT_EQ(v1.y, f2);
-	EXPECT_EQ(v1.z, f3);
+	EXPECT_EQ(v1[0], f1);
+	EXPECT_EQ(v1[1], f2);
+	EXPECT_EQ(v1[2], f3);
 
 	Vec3 v3;
 	v3 << f1 << f2 << f3;
-	EXPECT_EQ(v1, v3);
+	EXPECT_TRUE(IsNearlyEqual(v1, v3));
 
 	EXPECT_THROW((void)v3.at(3), std::out_of_range);
 }
