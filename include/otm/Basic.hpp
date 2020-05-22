@@ -13,6 +13,27 @@ namespace otm
 	constexpr auto kSmallNumV = static_cast<T>(1e-6);
 	constexpr auto kSmallNum = kSmallNumV<float>;
 
+	inline thread_local std::default_random_engine random_engine{std::random_device{}()};
+
+	// [min, max] for integral
+	// [min, max) for floating point
+	template <class T1 = float, class T2 = float, class T = std::common_type_t<T1, T2>>
+	[[nodiscard]] T Rand(T1 min = 0, T2 max = std::is_integral_v<T> ? std::numeric_limits<T>::max() : 1) noexcept
+	{
+		using Distribution = std::conditional_t<std::is_integral_v<T>,
+			std::uniform_int_distribution<T>, std::uniform_real_distribution<T>>;
+		
+		return Distribution{min, max}(random_engine);
+	}
+
+	template <class T, class U>
+	[[nodiscard]] CommonFloat<T, U> Gauss(T mean, U stddev) noexcept
+	{
+		return std::normal_distribution<CommonFloat<T, U>>{
+			ToFloat<U>(mean), ToFloat<T>(stddev)
+		}(random_engine);
+	}
+	
 	template <class T, class... Ts>
 	[[nodiscard]] constexpr CommonFloat<T, Ts...> ToFloat(T x) noexcept
 	{
@@ -55,6 +76,44 @@ namespace otm
 	[[nodiscard]] constexpr T Abs(T x) noexcept
 	{
 		return x >= 0 ? x : -x;
+	}
+
+	template <class T>
+	CommonFloat<T> Cos(Angle<RadR, T> t) noexcept
+	{
+		return std::cos(ToFloat(t.Get()));
+	}
+	
+	template <class T>
+	CommonFloat<T> Sin(Angle<RadR, T> t) noexcept
+	{
+		return std::sin(ToFloat(t.Get()));
+	}
+	
+	template <class T>
+	CommonFloat<T> Tan(Angle<RadR, T> t) noexcept
+	{
+		return std::tan(ToFloat(t.Get()));
+	}
+	
+	template <class T>
+	Angle<RadR, CommonFloat<T>> Acos(T x) noexcept
+	{
+		return Angle<RadR, CommonFloat<T>>{std::acos(x)};
+	}
+	
+	template <class T>
+	Angle<RadR, CommonFloat<T>> Asin(T y) noexcept
+	{
+		return Angle<RadR, CommonFloat<T>>{std::asin(y)};
+	}
+	
+	template <class T, class U>
+	Angle<RadR, CommonFloat<T, U>> Atan2(T y, U x) noexcept
+	{
+		return Angle<RadR, CommonFloat<T, U>>{
+			std::atan2(ToFloat<U>(y), ToFloat<T>(x))
+		};
 	}
 
 	template <class T, class U, class V = CommonFloat<T>>
@@ -105,24 +164,29 @@ namespace otm
 		return a + alpha * (b - a);
 	}
 	
-	inline thread_local std::default_random_engine random_engine{std::random_device{}()};
-
-	// [min, max] for int
-	// [min, max) for float
-	template <class T1 = float, class T2 = float, class T = std::common_type_t<T1, T2>>
-	[[nodiscard]] T Rand(T1 min = 0, T2 max = std::is_integral_v<T> ? std::numeric_limits<T>::max() : 1) noexcept
+	template <class T, class U = float>
+	CommonFloat<T, U> GetRangePct(const Vector<U, 2>& range, T val) noexcept
 	{
-		using Distribution = std::conditional_t<std::is_integral_v<T>,
-			std::uniform_int_distribution<T>, std::uniform_real_distribution<T>>;
-		
-		return Distribution{min, max}(random_engine);
+		return GetRangePct(range[0], range[1], val);
 	}
 
-	template <class T, class U>
-	[[nodiscard]] CommonFloat<T, U> Gauss(T mean, U stddev) noexcept
+	template <class T, class U = float>
+	std::common_type_t<T, U> GetRangeValue(const Vector<U, 2>& range, T pct) noexcept
 	{
-		return std::normal_distribution<CommonFloat<T, U>>{
-			ToFloat<U>(mean), ToFloat<T>(stddev)
-		}(random_engine);
+		return Lerp(range[0], range[1], pct);
 	}
+
+	template <class T, class U = float, class V = float>
+	std::common_type_t<T, U, V> MapRngClamp(const Vector<U, 2>& in_rng, const Vector<V, 2>& out_rng, T val) noexcept
+	{
+		const auto pct = Clamp(GetRangePct(in_rng, val), 0, 1);
+		return GetRangeValue(out_rng, pct);
+	}
+
+	template <class T, class U = float, class V = float>
+	std::common_type_t<T, U, V> MapRng(const Vector<U, 2>& in_rng, const Vector<V, 2>& out_rng, T val) noexcept
+	{
+		return GetRangeValue(out_rng, GetRangePct(in_rng, val));
+	}
+
 }

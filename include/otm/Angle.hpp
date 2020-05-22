@@ -1,6 +1,6 @@
 #pragma once
 #include <compare>
-#include "MathCore.hpp"
+#include "Basic.hpp"
 
 namespace otm
 {

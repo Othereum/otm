@@ -4,7 +4,8 @@
 #include <functional>
 #include <ostream>
 #include <optional>
-#include "MathUtil.hpp"
+#include "Angle.hpp"
+#include "Basic.hpp"
 
 namespace otm
 {
