@@ -48,7 +48,7 @@ namespace otm
 			[[nodiscard]] Angle<RadR, CommonFloat<T>> ToAngle() const noexcept
 			{
 				auto& v = static_cast<const Vector<T, 2>&>(*this);
-				return Atan2(v.y, v.x);
+				return Atan2(v[1], v[0]);
 			}
 		};
 
