@@ -1,5 +1,5 @@
 #pragma once
-#include "Quat.hpp"
+#include "Vector.hpp"
 
 namespace otm
 {
@@ -17,32 +17,18 @@ namespace otm
 			static constexpr Matrix<T, L, L> Identity() noexcept;
 
 			// Matrix that assigned other matrix to the identity matrix
+			// Efficient version (a little :D)
+			template <class T2, size_t L2>
+			static constexpr Matrix<T, L, L> Identity(const Matrix<T2, L2, L2>& other) noexcept;
+			
+			// Matrix that assigned other matrix to the identity matrix with offset
 			template <class T2, size_t R2, size_t C2>
-			static constexpr Matrix<T, L, L> Identity(const Matrix<T2, R2, C2>& other,
-			                                          const Vector<ptrdiff_t, 2>& offset = {}) noexcept;
-		};
-
-		template <class T, size_t R, size_t C>
-		struct MatrixGeometry : MatrixBase<T, R, C> {};
-
-		template <std::floating_point T>
-		struct MatrixGeometry<T, 3, 3> : MatrixBase<T, 3, 3>
-		{
-			static constexpr Matrix<T, 3, 3> SimpleViewProj(const Vector<T, 2>& scr) noexcept;
-		};
-		
-		template <std::floating_point T>
-		struct MatrixGeometry<T, 4, 4> : MatrixBase<T, 4, 4>
-		{
-			static constexpr Matrix<T, 4, 4> Translation(const Vector<T, 3>& pos) noexcept;
-			static constexpr Matrix<T, 4, 4> Rotation(const Quaternion<T>& rot) noexcept;
-			static constexpr Matrix<T, 4, 4> Scale(const Vector<T, 3>& scale) noexcept;
-			static Matrix<T, 4, 4> LookAt(const Vector<T, 3>& eye, const Vector<T, 3>& target, const Vector<T, 3>& up);
+			static constexpr Matrix<T, L, L> Identity(const Matrix<T2, R2, C2>& other, const Vector<ptrdiff_t, 2>& offset = {}) noexcept;
 		};
 	}
 
 	template <class T, size_t R, size_t C>
-	struct Matrix : detail::MatrixGeometry<T, R, C>
+	struct Matrix : detail::MatrixBase<T, R, C>
 	{
 		using value_type = Vector<T, C>;
 		using size_type = size_t;
@@ -60,7 +46,7 @@ namespace otm
 
 		constexpr Matrix(All, T x) noexcept
 		{
-			for (auto& v : varr) for (auto& c : v) c = x;
+			for (auto& v : arr) for (auto& c : v) c = x;
 		}
 
 		template <class T2, size_t R2, size_t C2>
@@ -104,7 +90,7 @@ namespace otm
 			auto it = list.begin();
 			for (size_t i=0; i<R && it != list.end(); ++i)
 				for (size_t j=0; j<C && it != list.end(); ++j)
-					varr[i][j] = *it++;
+					arr[i][j] = *it++;
 		}
 		
 		constexpr bool operator==(const Matrix& b) const noexcept
@@ -118,19 +104,19 @@ namespace otm
 			return true;
 		}
 
-		constexpr auto& operator[](size_t i) noexcept { assert(i < R); return varr[i]; }
-		constexpr auto& operator[](size_t i) const noexcept { assert(i < R); return varr[i]; }
+		constexpr auto& operator[](size_t i) noexcept { assert(i < R); return arr[i]; }
+		constexpr auto& operator[](size_t i) const noexcept { assert(i < R); return arr[i]; }
 		
 		[[nodiscard]] constexpr auto& Row(size_t i)
 		{
 			if (i >= R) OutOfRange();
-			return varr[i];
+			return arr[i];
 		}
 		
 		[[nodiscard]] constexpr auto& Row(size_t i) const
 		{
 			if (i >= R) OutOfRange();
-			return varr[i];
+			return arr[i];
 		}
 
 		[[nodiscard]] constexpr auto Col(size_t c) const
@@ -140,7 +126,7 @@ namespace otm
 			Vector<T, R> v;
 			
 			for (size_t r = 0; r < R; ++r)
-				v[r] = varr[r][c];
+				v[r] = arr[r][c];
 			
 			return v;
 		}
@@ -150,13 +136,13 @@ namespace otm
 			if (c >= C) OutOfRange();
 
 			for (size_t r = 0; r < R; ++r)
-				varr[r][c] = v[r];
+				arr[r][c] = v[r];
 		}
 
-		[[nodiscard]] constexpr auto& AsVectors() noexcept { return varr; }
-		[[nodiscard]] constexpr auto& AsVectors() const noexcept { return varr; }
-		[[nodiscard]] auto& AsFlatArr() noexcept { return reinterpret_cast<T(&)[R*C]>(varr); }
-		[[nodiscard]] auto& AsFlatArr() const noexcept { return reinterpret_cast<const T(&)[R*C]>(varr); }
+		[[nodiscard]] constexpr auto& AsVectors() noexcept { return arr; }
+		[[nodiscard]] constexpr auto& AsVectors() const noexcept { return arr; }
+		[[nodiscard]] auto& AsFlatArr() noexcept { return reinterpret_cast<T(&)[R*C]>(arr); }
+		[[nodiscard]] auto& AsFlatArr() const noexcept { return reinterpret_cast<const T(&)[R*C]>(arr); }
 
 		constexpr Matrix operator+(const Matrix& b) const noexcept
 		{
@@ -166,7 +152,7 @@ namespace otm
 
 		constexpr Matrix& operator+=(const Matrix& b) noexcept
 		{
-			for (auto i = 0; i < R; ++i) varr[i] += b[i];
+			for (auto i = 0; i < R; ++i) arr[i] += b[i];
 			return *this;
 		}
 
@@ -178,7 +164,7 @@ namespace otm
 
 		constexpr Matrix& operator-=(const Matrix& b) noexcept
 		{
-			for (auto i = 0; i < R; ++i) varr[i] -= b[i];
+			for (auto i = 0; i < R; ++i) arr[i] -= b[i];
 			return *this;
 		}
 
@@ -190,7 +176,7 @@ namespace otm
 
 		constexpr Matrix& operator*=(T f) noexcept
 		{
-			for (auto i = 0; i < R; ++i) varr[i] *= f;
+			for (auto i = 0; i < R; ++i) arr[i] *= f;
 			return *this;
 		}
 
@@ -202,7 +188,7 @@ namespace otm
 
 		constexpr Matrix& operator/=(T f) noexcept
 		{
-			for (auto i = 0; i < R; ++i) varr[i] /= f;
+			for (auto i = 0; i < R; ++i) arr[i] /= f;
 			return *this;
 		}
 
@@ -223,17 +209,17 @@ namespace otm
 			Matrix<T, C, R> t;
 			for (auto i = 0; i < R; ++i)
 				for (auto j = 0; j < C; ++j)
-					t[j][i] = varr[i][j];
+					t[j][i] = arr[i][j];
 			return t;
 		}
 
-		[[nodiscard]] constexpr iterator begin() noexcept { return varr; }
-		[[nodiscard]] constexpr const_iterator begin() const noexcept { return varr; }
-		[[nodiscard]] constexpr const_iterator cbegin() const noexcept { return varr; }
+		[[nodiscard]] constexpr iterator begin() noexcept { return arr; }
+		[[nodiscard]] constexpr const_iterator begin() const noexcept { return arr; }
+		[[nodiscard]] constexpr const_iterator cbegin() const noexcept { return arr; }
 
-		[[nodiscard]] constexpr iterator end() noexcept { return varr + R; }
-		[[nodiscard]] constexpr const_iterator end() const noexcept { return varr + R; }
-		[[nodiscard]] constexpr const_iterator cend() const noexcept { return varr + R; }
+		[[nodiscard]] constexpr iterator end() noexcept { return arr + R; }
+		[[nodiscard]] constexpr const_iterator end() const noexcept { return arr + R; }
+		[[nodiscard]] constexpr const_iterator cend() const noexcept { return arr + R; }
 		
 		[[nodiscard]] constexpr reverse_iterator rbegin() noexcept { return reverse_iterator{end()}; }
 		[[nodiscard]] constexpr const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator{end()}; }
@@ -249,7 +235,7 @@ namespace otm
 			throw std::out_of_range{"Matrix out of range"};
 		}
 		
-		Vector<T, C> varr[R];
+		Vector<T, C> arr[R];
 	};
 
 	template <class T, size_t R, size_t C, std::convertible_to<T> F>
@@ -287,70 +273,21 @@ namespace otm
 		}
 
 		template <class T, size_t L>
+		template <class T2, size_t L2>
+		constexpr Matrix<T, L, L> MatrixBase<T, L, L>::Identity(const Matrix<T2, L2, L2>& other) noexcept
+		{
+			Matrix<T, L, L> m{other};
+			for (auto i=L2; i<L; ++i) m[i][i] = 1;
+			return m;
+		}
+
+		template <class T, size_t L>
 		template <class T2, size_t R2, size_t C2>
 		constexpr Matrix<T, L, L> MatrixBase<T, L, L>::Identity(const Matrix<T2, R2, C2>& other, const Vector<ptrdiff_t, 2>& offset) noexcept
 		{
 			auto m = Identity();
 			m.Assign(other, offset);
 			return m;
-		}
-
-		template <std::floating_point T>
-		constexpr Matrix<T, 3, 3> MatrixGeometry<T, 3, 3>::SimpleViewProj(const Vector<T, 2>& scr) noexcept
-		{
-			Matrix<T, 3, 3> proj;
-			proj[0][0] = 2 / scr[0];
-			proj[1][1] = 2 / scr[1];
-			proj[2][2] = 1;
-			return proj;
-		}
-
-		template <std::floating_point T>
-		constexpr Matrix<T, 4, 4> MatrixGeometry<T, 4, 4>::Translation(const Vector<T, 3>& pos) noexcept
-		{
-			auto t = Mat4::Identity();
-			t[3] << pos[0] << pos[1] << pos[2];
-			return t;
-		}
-
-		template <std::floating_point T>
-		constexpr Matrix<T, 4, 4> MatrixGeometry<T, 4, 4>::Rotation(const Quaternion<T>& rot) noexcept
-		{
-			const auto& [x, y, z] = rot.v.data;
-			const auto& w = rot.s;
-			
-			return {
-				1 - 2*(y*y + z*z),	2*(x*y + w*z),		2*(x*z - w*y),		0,
-				2*(x*y - w*z),		1 - 2*(x*x + z*z),	2*(y*z + w*x),		0,
-				2*(x*z + w*y),		2*(y*z - w*x),		1 - 2*(x*x + y*y),	0,
-				0,					0,					0,					1
-			};
-		}
-
-		template <std::floating_point T>
-		constexpr Matrix<T, 4, 4> MatrixGeometry<T, 4, 4>::Scale(const Vector<T, 3>& scale) noexcept
-		{
-			auto s = Mat4::Identity();
-			s[0][0] = scale[0];
-			s[1][1] = scale[1];
-			s[2][2] = scale[2];
-			return s;
-		}
-
-		template <std::floating_point T>
-		Matrix<T, 4, 4> MatrixGeometry<T, 4, 4>::LookAt(const Vector<T, 3>& eye, const Vector<T, 3>& target, const Vector<T, 3>& up)
-		{
-			auto k = target - eye; k.Normalize();
-			auto i = up ^ k; i.Normalize();
-			auto j = k ^ i; j.Normalize();
-			Vec3 t{eye|i, eye|j, eye|k}; t.Negate();
-
-			return {
-				i[0], j[0], k[0], 0,
-				i[1], j[1], k[1], 0,
-				i[2], j[2], k[2], 0,
-				t[0], t[1], t[2], 1
-			};
 		}
 	}
 

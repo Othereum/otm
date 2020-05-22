@@ -1,5 +1,5 @@
 #pragma once
-#include "Matrix.hpp"
+#include "Geometry.hpp"
 
 namespace otm
 {
@@ -20,7 +20,7 @@ namespace otm
 
 		[[nodiscard]] constexpr Mat4 ToMatrix() const noexcept
 		{
-			return Mat4::Scale(scale) * Mat4::Rotation(rot) * Mat4::Translation(pos);
+			return Mat4::Identity(MakeScale(scale)) * Mat4::Identity(MakeRotation(rot)) * MakeTranslation(pos);
 		}
 	};
 }
