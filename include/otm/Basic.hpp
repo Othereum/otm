@@ -146,7 +146,7 @@ namespace otm
 	template <class T, size_t L, class V = CommonFloat<T>>
 	[[nodiscard]] constexpr bool IsNearlyZero(const Vector<T, L>& a, V tolerance = kSmallNumV<V>) noexcept
 	{
-		for (auto& x : a)
+		for (auto x : a)
 			if (!IsNearlyZero(x, tolerance))
 				return false;
 		return true;
