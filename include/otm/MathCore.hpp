@@ -63,10 +63,34 @@ namespace otm
 		return Abs(a - b) < tolerance;
 	}
 
+	template <class T, size_t L, class V = CommonFloat<T>>
+	[[nodiscard]] constexpr bool IsNearlyEqual(const Vector<T, L>& a, const Vector<T, L>& b, V tolerance = kSmallNumV<V>) noexcept
+	{
+		for (size_t i=0; i<L; ++i)
+			if (!IsNearlyEqual(a[i], b[i], tolerance))
+				return false;
+		return true;
+	}
+
+	template <std::floating_point T, class V = T>
+	[[nodiscard]] constexpr bool IsNearlyEqual(const Quaternion<T>& a, const Quaternion<T>& b, V tolerance = kSmallNumV<V>) noexcept
+	{
+		return IsNearlyEqual(a.v, b.v, tolerance) && IsNearlyEqual(a.s, b.s, tolerance);
+	}
+
 	template <class T, class U = CommonFloat<T>>
 	[[nodiscard]] constexpr bool IsNearlyZero(T a, U tolerance = kSmallNumV<U>) noexcept
 	{
 		return Abs(a) < tolerance;
+	}
+
+	template <class T, size_t L, class V = CommonFloat<T>>
+	[[nodiscard]] constexpr bool IsNearlyZero(const Vector<T, L>& a, V tolerance = kSmallNumV<V>) noexcept
+	{
+		for (auto& x : a)
+			if (!IsNearlyZero(x, tolerance))
+				return false;
+		return true;
 	}
 
 	template <class T, class U, class V>
