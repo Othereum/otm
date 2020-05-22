@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "otm/Quat.hpp"
+#include "otm/Transform.hpp"
 
 using namespace otm;
 
-TEST(QuatTest, Basic)
+TEST(Geometry, Quat)
 {
 	constexpr Quat q1;
 	EXPECT_TRUE(IsNearlyEqual(q1.v, Vec3{}));
@@ -19,4 +19,15 @@ TEST(QuatTest, Basic)
 	constexpr auto v1 = Vector<int, 3>::Forward();
 	const auto v1r = v1.RotatedBy(Quat{UVec3::Right(), 90_deg});
 	EXPECT_TRUE(IsNearlyEqual(v1r, Vec3::Down()));
+}
+
+TEST(Geometry, Transform)
+{
+	constexpr Transform t1;
+	EXPECT_TRUE(IsNearlyZero(t1.pos));
+	EXPECT_TRUE(IsNearlyEqual(t1.rot, Quat{}));
+	EXPECT_TRUE(IsNearlyEqual(t1.scale, Vec3::One()));
+
+	constexpr auto t1m = t1.ToMatrix();
+	EXPECT_TRUE(IsNearlyEqual(t1m, Mat4::Identity()));
 }
