@@ -39,7 +39,6 @@ namespace otm
 			static constexpr Matrix<T, 4, 4> Scale(const Vector<T, 3>& scale) noexcept;
 			static Matrix<T, 4, 4> LookAt(const Vector<T, 3>& eye, const Vector<T, 3>& target, const Vector<T, 3>& up);
 		};
-		
 	}
 
 	template <class T, size_t R, size_t C>
@@ -110,6 +109,9 @@ namespace otm
 		
 		constexpr bool operator==(const Matrix& b) const noexcept
 		{
+			static_assert(!std::is_floating_point_v<T>,
+				"Cannot compare between floating point types. Use IsNearlyEqual() instead.");
+			
 			for (size_t i=0; i<R; ++i)
 				if (Row(i) != b[i]) return false;
 
