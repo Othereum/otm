@@ -9,11 +9,14 @@ namespace otm
 	constexpr auto kPiV = static_cast<T>(PiRatio::num) / PiRatio::den;
 	constexpr auto kPi = kPiV<float>;
 	
-	template <std::floating_point T>
+	template <class T>
 	constexpr auto kSmallNumV = static_cast<T>(1e-6);
 	constexpr auto kSmallNum = kSmallNumV<float>;
 
 	inline thread_local std::default_random_engine random_engine{std::random_device{}()};
+
+	template <class T>
+	concept Arithmetic = std::is_arithmetic_v<T>;
 
 	// [min, max] for integral
 	// [min, max) for floating point
@@ -116,16 +119,25 @@ namespace otm
 		};
 	}
 
-	template <class T, class U, class V = CommonFloat<T>>
+	template <Arithmetic T, Arithmetic U, Arithmetic V = std::common_type_t<T, U>>
 	[[nodiscard]] constexpr bool IsNearlyEqual(T a, U b, V tolerance = kSmallNumV<V>) noexcept
 	{
 		return Abs(a - b) < tolerance;
 	}
 
-	template <class T, size_t L, class V = CommonFloat<T>>
+	template <class T, size_t L, class V = T>
 	[[nodiscard]] constexpr bool IsNearlyEqual(const Vector<T, L>& a, const Vector<T, L>& b, V tolerance = kSmallNumV<V>) noexcept
 	{
 		for (size_t i=0; i<L; ++i)
+			if (!IsNearlyEqual(a[i], b[i], tolerance))
+				return false;
+		return true;
+	}
+
+	template <class T, size_t R, size_t C, class V = T>
+	[[nodiscard]] constexpr bool IsNearlyEqual(const Matrix<T, R, C>& a, const Matrix<T, R, C>& b, V tolerance = kSmallNumV<V>) noexcept
+	{
+		for (size_t i=0; i<R; ++i)
 			if (!IsNearlyEqual(a[i], b[i], tolerance))
 				return false;
 		return true;
@@ -137,17 +149,26 @@ namespace otm
 		return IsNearlyEqual(a.v, b.v, tolerance) && IsNearlyEqual(a.s, b.s, tolerance);
 	}
 
-	template <class T, class U = CommonFloat<T>>
+	template <class T, class U = T>
 	[[nodiscard]] constexpr bool IsNearlyZero(T a, U tolerance = kSmallNumV<U>) noexcept
 	{
 		return Abs(a) < tolerance;
 	}
 
-	template <class T, size_t L, class V = CommonFloat<T>>
+	template <class T, size_t L, class V = T>
 	[[nodiscard]] constexpr bool IsNearlyZero(const Vector<T, L>& a, V tolerance = kSmallNumV<V>) noexcept
 	{
 		for (auto x : a)
 			if (!IsNearlyZero(x, tolerance))
+				return false;
+		return true;
+	}
+
+	template <class T, size_t R, size_t C, class V = T>
+	[[nodiscard]] constexpr bool IsNearlyZero(const Matrix<T, R, C>& a, V tolerance = kSmallNumV<V>) noexcept
+	{
+		for (size_t i=0; i<R; ++i)
+			if (!IsNearlyZero(a[i], tolerance))
 				return false;
 		return true;
 	}
