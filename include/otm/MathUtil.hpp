@@ -6,19 +6,19 @@ namespace otm
 	template <class T>
 	CommonFloat<T> Cos(Angle<RadR, T> t) noexcept
 	{
-		return std::cos(ToFloat(t));
+		return std::cos(ToFloat(t.Get()));
 	}
 	
 	template <class T>
 	CommonFloat<T> Sin(Angle<RadR, T> t) noexcept
 	{
-		return std::sin(ToFloat(t));
+		return std::sin(ToFloat(t.Get()));
 	}
 	
 	template <class T>
 	CommonFloat<T> Tan(Angle<RadR, T> t) noexcept
 	{
-		return std::tan(ToFloat(t));
+		return std::tan(ToFloat(t.Get()));
 	}
 	
 	template <class T>
