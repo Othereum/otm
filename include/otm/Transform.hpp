@@ -7,14 +7,14 @@ namespace otm
 	{
 		Vec3 pos;
 		Quat rot;
-		Vec3 scale;
+		Vec3 scale = Vec3::One();
 
 		constexpr Transform() noexcept = default;
 		explicit constexpr Transform(const Vec3& pos) noexcept: Transform{pos, {}} {}
 		explicit constexpr Transform(const Quat& rot) noexcept: Transform{{}, rot} {}
 
-		constexpr Transform(const Vec3& pos, const Quat& rot, const Vec3& scale = Vec3::One()) noexcept:
-			pos{pos}, rot{rot}, scale{scale}
+		constexpr Transform(const Vec3& pos, const Quat& rot, const Vec3& scale = Vec3::One()) noexcept
+			:pos{pos}, rot{rot}, scale{scale}
 		{
 		}
 
