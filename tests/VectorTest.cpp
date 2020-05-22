@@ -13,6 +13,12 @@ TEST(VectorTest, Basic)
 
 	constexpr Vec4 v2{All{}, 1};
 	EXPECT_FALSE(IsNearlyEqual(v1, v2));
+	EXPECT_TRUE(IsNearlyEqual(v2, Vec4{1, 1, 1, 1}));
+
+	constexpr auto vone = Vec3::One();
+	EXPECT_EQ(vone[0], 1);
+	EXPECT_EQ(vone[1], 1);
+	EXPECT_EQ(vone[2], 1);
 
 	constexpr Vec4 v3{Vec3{v1}, 1};
 	EXPECT_TRUE(IsNearlyEqual(v2, v3));
