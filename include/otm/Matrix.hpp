@@ -1,5 +1,4 @@
 #pragma once
-#include "Vector.hpp"
 #include "Quat.hpp"
 
 namespace otm
@@ -86,17 +85,17 @@ namespace otm
 		template <class T2, size_t R2, size_t C2>
 		constexpr void Assign(const Matrix<T2, R2, C2>& other, const Vector<ptrdiff_t, 2>& offset = {}) noexcept
 		{
-			if (offset.y >= 0)
+			if (offset[1] >= 0)
 			{
-				const auto size = Min(R - Min(R, offset.y), R2);
+				const auto size = Min(R - Min(R, offset[1]), R2);
 				for (size_t i = 0; i < size; ++i)
-					(*this)[i + offset.y].Assign(other[i], offset.x);
+					(*this)[i + offset[1]].Assign(other[i], offset[0]);
 			}
 			else
 			{
-				const auto size = Min(R, R2 - Min(R2, -offset.y));
+				const auto size = Min(R, R2 - Min(R2, -offset[1]));
 				for (size_t i = 0; i < size; ++i)
-					(*this)[i].Assign(other[i - offset.y], offset.x);
+					(*this)[i].Assign(other[i - offset[1]], offset[0]);
 			}
 		}
 
@@ -298,8 +297,8 @@ namespace otm
 		constexpr Matrix<T, 3, 3> MatrixGeometry<T, 3, 3>::SimpleViewProj(const Vector<T, 2>& scr) noexcept
 		{
 			Matrix<T, 3, 3> proj;
-			proj[0][0] = 2 / scr.x;
-			proj[1][1] = 2 / scr.y;
+			proj[0][0] = 2 / scr[0];
+			proj[1][1] = 2 / scr[1];
 			proj[2][2] = 1;
 			return proj;
 		}
@@ -308,7 +307,7 @@ namespace otm
 		constexpr Matrix<T, 4, 4> MatrixGeometry<T, 4, 4>::Translation(const Vector<T, 3>& pos) noexcept
 		{
 			auto t = Mat4::Identity();
-			t[3] << pos.x << pos.y << pos.z;
+			t[3] << pos[0] << pos[1] << pos[2];
 			return t;
 		}
 
@@ -330,9 +329,9 @@ namespace otm
 		constexpr Matrix<T, 4, 4> MatrixGeometry<T, 4, 4>::Scale(const Vector<T, 3>& scale) noexcept
 		{
 			auto s = Mat4::Identity();
-			s[0][0] = scale.x;
-			s[1][1] = scale.y;
-			s[2][2] = scale.z;
+			s[0][0] = scale[0];
+			s[1][1] = scale[1];
+			s[2][2] = scale[2];
 			return s;
 		}
 
@@ -345,14 +344,14 @@ namespace otm
 			Vec3 t{eye|i, eye|j, eye|k}; t.Negate();
 
 			return {
-				i.x, j.x, k.x, 0,
-				i.y, j.y, k.y, 0,
-				i.z, j.z, k.z, 0,
-				t.x, t.y, t.z, 1
+				i[0], j[0], k[0], 0,
+				i[1], j[1], k[1], 0,
+				i[2], j[2], k[2], 0,
+				t[0], t[1], t[2], 1
 			};
 		}
 	}
-	
+
 	template <class T, size_t L>
 	constexpr Matrix<T, 1, L> Vector<T, L>::ToRowMatrix() const noexcept
 	{
