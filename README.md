@@ -52,8 +52,6 @@ std::cout << v8 << std::endl;
 v1.Len(); // sqrt(v1.LenSqr())
 v1.Dist(v2); // sqrt(v1.DistSqr(v2))
 
-v1.y = v2[1]; // x, y, z, w are only available for Vector<T, 1...4>
-
 v1 *= 3; // multiply 3 to all components
 v1 /= 2;
 
