@@ -19,6 +19,14 @@ TEST(Geometry, Quat)
 	constexpr auto v1 = Vector<int, 3>::Forward();
 	const auto v1r = v1.RotatedBy(Quat{UVec3::Right(), 90_deg});
 	EXPECT_TRUE(IsNearlyEqual(v1r, Vec3::Down()));
+	
+	constexpr auto q3m = MakeRotation(q3e);
+	constexpr Mat3 q3me{
+		0.8379809f, -0.4568417f, 0.2984691f,
+		0.3742011f, 0.8791586f, 0.2950486f,
+		-0.3971921f, -0.1355576f, 0.9076688f
+	};
+	EXPECT_TRUE(IsNearlyEqual(q3m, q3me));
 }
 
 TEST(Geometry, Transform)
@@ -30,4 +38,15 @@ TEST(Geometry, Transform)
 
 	constexpr auto t1m = t1.ToMatrix();
 	EXPECT_TRUE(IsNearlyEqual(t1m, Mat4::Identity()));
+
+	constexpr Quat q3e{0.1130857f, -0.1826944f, -0.2182483f, 0.9519464f};
+	constexpr Transform t2{{-65, 24, 80}, q3e, {1.2, 1.2, 1}};
+	constexpr auto t2m = t2.ToMatrix();
+	constexpr Mat4 t2me{
+		1.00557708f,	-0.54821004f,	0.35816292f,	0.f,
+		0.44904132f,	1.05499032f,	0.35405832f,	0.f,
+		-0.3971921f,	-0.1355576f,	0.9076688f,		0.f,
+		-65.f,			24.f,			80.f,			1.f
+	};
+	EXPECT_TRUE(IsNearlyEqual(t2m, t2me));
 }
