@@ -4,16 +4,6 @@
 
 namespace otm
 {
-	template <class T>
-	constexpr Matrix<CommonFloat<T>, 3, 3> MakeSimpleViewProj(const Vector<T, 2>& screen) noexcept
-	{
-		Matrix<CommonFloat<T>, 3, 3> proj;
-		proj[0][0] = 2 / ToFloat(screen[0]);
-		proj[1][1] = 2 / ToFloat(screen[1]);
-		proj[2][2] = 1;
-		return proj;
-	}
-
 	template <std::floating_point T>
 	constexpr Matrix<T, 3, 3> MakeRotation(const Quaternion<T>& rotation) noexcept
 	{
@@ -41,6 +31,16 @@ namespace otm
 	constexpr Matrix<T, 4, 4> MakeTranslation(const Vector<T, 3>& pos) noexcept
 	{
 		return Matrix<T, 4, 4>::Identity(pos.ToRowMatrix(), {0, 3});
+	}
+
+	template <class T>
+	constexpr Matrix<CommonFloat<T>, 3, 3> MakeSimpleViewProj(const Vector<T, 2>& screen) noexcept
+	{
+		Matrix<CommonFloat<T>, 3, 3> proj;
+		proj[0][0] = 2 / ToFloat(screen[0]);
+		proj[1][1] = 2 / ToFloat(screen[1]);
+		proj[2][2] = 1;
+		return proj;
 	}
 
 	template <std::floating_point T>

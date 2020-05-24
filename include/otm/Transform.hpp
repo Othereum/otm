@@ -18,6 +18,13 @@ namespace otm
 		{
 		}
 
+		explicit Transform(const Mat4& m) noexcept
+		{
+			pos = Vec3{m[3]};
+			scale = {m[0].Len(), m[1].Len(), m[2].Len()};
+			// TODO: Extract rotation
+		}
+
 		[[nodiscard]] constexpr Mat4 ToMatrix() const noexcept
 		{
 			return Mat4::Identity(MakeScale(scale)) * Mat4::Identity(MakeRotation(rot)) * MakeTranslation(pos);
