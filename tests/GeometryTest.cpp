@@ -50,3 +50,10 @@ TEST(Geometry, Transform)
 	};
 	EXPECT_TRUE(IsNearlyEqual(t2m, t2me));
 }
+
+TEST(Geometry, Angle)
+{
+	constexpr auto rad = 1.4_rad;
+	constexpr Deg deg = rad;
+	EXPECT_NEAR(deg.Get(), 80.21409132f, kSmallNum);
+}
