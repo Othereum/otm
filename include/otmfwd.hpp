@@ -2,12 +2,18 @@
 #include <concepts>
 #include <ratio>
 
+#ifndef OTM_DEFAULT_FLOAT
+	#define OTM_DEFAULT_FLOAT Float
+#endif
+
 namespace otm
 {
+	using Float = OTM_DEFAULT_FLOAT;
+	
 	template <std::floating_point T>
 	struct Quaternion;
 
-	using Quat = Quaternion<float>;
+	using Quat = Quaternion<Float>;
 
 	
 	template <class T, size_t L>
@@ -16,17 +22,17 @@ namespace otm
 	template <std::floating_point T, size_t L>
 	struct UnitVec;
 
-	using Vec2 = Vector<float, 2>;
-	using Vec3 = Vector<float, 3>;
-	using Vec4 = Vector<float, 4>;
+	using Vec2 = Vector<Float, 2>;
+	using Vec3 = Vector<Float, 3>;
+	using Vec4 = Vector<Float, 4>;
 	using Vec2u16 = Vector<uint16_t, 2>;
 	using Vec3u16 = Vector<uint16_t, 3>;
-	using UVec2 = UnitVec<float, 2>;
-	using UVec3 = UnitVec<float, 3>;
-	using UVec4 = UnitVec<float, 4>;
+	using UVec2 = UnitVec<Float, 2>;
+	using UVec3 = UnitVec<Float, 3>;
+	using UVec4 = UnitVec<Float, 4>;
 
 	
-	template <class Ratio, class T = float>
+	template <class Ratio, class T = Float>
 	struct Angle;
 	
 	using PiRatio = std::ratio<5419351, 1725033>;
@@ -41,11 +47,11 @@ namespace otm
 	template <class T, size_t R, size_t C = R>
 	struct Matrix;
 	
-	using Mat2 = Matrix<float, 2>;
-	using Mat3 = Matrix<float, 3>;
-	using Mat4 = Matrix<float, 4>;
+	using Mat2 = Matrix<Float, 2>;
+	using Mat3 = Matrix<Float, 3>;
+	using Mat4 = Matrix<Float, 4>;
 
 
 	template <class... T>
-	using CommonFloat = std::common_type_t<float, T...>;
+	using CommonFloat = std::common_type_t<Float, T...>;
 }

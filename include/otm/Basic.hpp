@@ -7,11 +7,11 @@ namespace otm
 {
 	template <std::floating_point T>
 	constexpr auto kPiV = static_cast<T>(PiRatio::num) / PiRatio::den;
-	constexpr auto kPi = kPiV<float>;
+	constexpr auto kPi = kPiV<Float>;
 	
 	template <class T>
 	constexpr auto kSmallNumV = static_cast<T>(1e-6);
-	constexpr auto kSmallNum = kSmallNumV<float>;
+	constexpr auto kSmallNum = kSmallNumV<Float>;
 
 	inline thread_local std::default_random_engine random_engine{std::random_device{}()};
 
@@ -20,7 +20,7 @@ namespace otm
 
 	// [min, max] for integral
 	// [min, max) for floating point
-	template <class T1 = float, class T2 = float, class T = std::common_type_t<T1, T2>>
+	template <class T1 = Float, class T2 = Float, class T = std::common_type_t<T1, T2>>
 	[[nodiscard]] T Rand(T1 min = 0, T2 max = std::is_integral_v<T> ? std::numeric_limits<T>::max() : 1) noexcept
 	{
 		using Distribution = std::conditional_t<std::is_integral_v<T>,
@@ -185,26 +185,26 @@ namespace otm
 		return a + alpha * (b - a);
 	}
 	
-	template <class T, class U = float>
+	template <class T, class U = Float>
 	CommonFloat<T, U> GetRangePct(const Vector<U, 2>& range, T val) noexcept
 	{
 		return GetRangePct(range[0], range[1], val);
 	}
 
-	template <class T, class U = float>
+	template <class T, class U = Float>
 	std::common_type_t<T, U> GetRangeValue(const Vector<U, 2>& range, T pct) noexcept
 	{
 		return Lerp(range[0], range[1], pct);
 	}
 
-	template <class T, class U = float, class V = float>
+	template <class T, class U = Float, class V = Float>
 	std::common_type_t<T, U, V> MapRngClamp(const Vector<U, 2>& in_rng, const Vector<V, 2>& out_rng, T val) noexcept
 	{
 		const auto pct = Clamp(GetRangePct(in_rng, val), 0, 1);
 		return GetRangeValue(out_rng, pct);
 	}
 
-	template <class T, class U = float, class V = float>
+	template <class T, class U = Float, class V = Float>
 	std::common_type_t<T, U, V> MapRng(const Vector<U, 2>& in_rng, const Vector<V, 2>& out_rng, T val) noexcept
 	{
 		return GetRangeValue(out_rng, GetRangePct(in_rng, val));

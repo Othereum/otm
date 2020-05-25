@@ -58,11 +58,11 @@ namespace otm
 		T val = 0;
 	};
 
-	constexpr Rad operator""_rad(unsigned long long f) noexcept { return Rad{static_cast<float>(f)}; }
-	constexpr Rad operator""_rad(long double f) noexcept { return Rad{static_cast<float>(f)}; }
+	constexpr Rad operator""_rad(unsigned long long f) noexcept { return Rad{static_cast<Float>(f)}; }
+	constexpr Rad operator""_rad(long double f) noexcept { return Rad{static_cast<Float>(f)}; }
 
-	constexpr Deg operator""_deg(unsigned long long f) noexcept { return Deg{static_cast<float>(f)}; }
-	constexpr Deg operator""_deg(long double f) noexcept { return Deg{static_cast<float>(f)}; }
+	constexpr Deg operator""_deg(unsigned long long f) noexcept { return Deg{static_cast<Float>(f)}; }
+	constexpr Deg operator""_deg(long double f) noexcept { return Deg{static_cast<Float>(f)}; }
 	
 	template <class R, class F, class F2>
 	Angle<R, F> operator*(F2 f, const Angle<R, F>& r) noexcept

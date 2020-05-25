@@ -48,7 +48,7 @@ TEST(VectorTest, Operations)
 	constexpr Vec3 v2{1, 1, 1};
 	const Vec3 v3 = v2.Unit();
 	constexpr auto f = 0.5773502691896258f;
-	auto pred = [f](float x){ return IsNearlyEqual(x, f); };
+	auto pred = [f](Float x){ return IsNearlyEqual(x, f); };
 	EXPECT_TRUE(std::all_of(v3.begin(), v3.end(), pred));
 
 	EXPECT_NEAR(v2.LenSqr(), 3, kSmallNum);
@@ -71,13 +71,13 @@ TEST(VectorTest, Operations)
 TEST(VectorTest, Ext)
 {
 	const auto v1 = Vec3::Rand(0, 1);
-	auto pred = [](float f) { return f >= 0 && f < 1; };
+	auto pred = [](Float f) { return f >= 0 && f < 1; };
 	EXPECT_TRUE(std::all_of(v1.begin(), v1.end(), pred));
 	
 	auto v2 = UVec3::Rand();
 	EXPECT_NEAR(v2.Get().LenSqr(), 1, kSmallNum);
 
-	float f1, f2, f3;
+	Float f1, f2, f3;
 	v1 >> f1 >> f2 >> f3;
 	EXPECT_EQ(v1[0], f1);
 	EXPECT_EQ(v1[1], f2);
