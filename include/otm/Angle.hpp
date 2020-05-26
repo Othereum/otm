@@ -1,10 +1,11 @@
 #pragma once
 #include <compare>
+#include <type_traits>
 #include "Basic.hpp"
 
 namespace otm
 {
-	template <class Ratio, class T>
+	template <class Ratio, std::floating_point T>
 	struct Angle
 	{
 		static constexpr auto ratio = static_cast<T>(Ratio::num) / Ratio::den;
@@ -13,23 +14,26 @@ namespace otm
 		constexpr explicit Angle(T r) noexcept :val{r} {}
 		
 		template <class S>
-		constexpr Angle(const Angle<S>& r) noexcept { *this = r; }
+		constexpr Angle(const Angle<S, T>& r) noexcept
+			:val{ r.Get() / r.ratio * ratio }
+		{
+		}
 
 		template <class S>
-		constexpr Angle& operator=(const Angle<S>& r) noexcept { val = r.Get() / r.ratio * ratio; return *this; }
+		constexpr Angle& operator=(const Angle<S, T>& r) noexcept { val = r.Get() / r.ratio * ratio; return *this; }
 
 		template <class S>
-		constexpr Angle& operator+=(const Angle<S>& r) noexcept { return *this = *this + r; }
+		constexpr Angle& operator+=(const Angle<S, T>& r) noexcept { return *this = *this + r; }
 
 		template <class S>
-		constexpr Angle operator+(const Angle<S>& r) const noexcept { return *this + Angle{r}; }
+		constexpr Angle operator+(const Angle<S, T>& r) const noexcept { return *this + Angle{r}; }
 		constexpr Angle operator+(const Angle& r) const noexcept { return Angle{val + r.Get()}; }
 
 		template <class S>
-		constexpr Angle& operator-=(const Angle<S>& r) noexcept { return *this = *this - r; }
+		constexpr Angle& operator-=(const Angle<S, T>& r) noexcept { return *this = *this - r; }
 
 		template <class S>
-		constexpr Angle operator-(const Angle<S>& r) const noexcept { return *this - Angle{r}; }
+		constexpr Angle operator-(const Angle<S, T>& r) const noexcept { return *this - Angle{r}; }
 		constexpr Angle operator-(const Angle& r) const noexcept { return Angle{val - r.Get()}; }
 
 		constexpr Angle& operator*=(T f) noexcept { return *this = *this * f; }
@@ -41,7 +45,7 @@ namespace otm
 		constexpr Angle operator-() const noexcept { return Angle{-val}; }
 
 		template <class S>
-		constexpr auto operator<=>(const Angle<S>& r) const noexcept { return *this <=> Angle{r}; }
+		constexpr auto operator<=>(const Angle<S, T>& r) const noexcept { return *this <=> Angle{r}; }
 		constexpr auto operator<=>(const Angle&) const noexcept = default;
 
 		[[nodiscard]] constexpr T Get() const noexcept { return val; }

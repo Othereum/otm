@@ -591,7 +591,7 @@ namespace otm
 		constexpr operator const Vector<T, L>&() const noexcept { return v; }
 
 	private:
-		template <class, class>
+		template <class, std::floating_point>
 		friend struct Angle;
 		friend Vector<T, L>;
 		friend detail::UnitVecBase<T, L>;
@@ -619,7 +619,7 @@ namespace otm
 		return UnitVec{*this / std::sqrt(lensqr)};
 	}
 
-	template <class Ratio, class T>
+	template <class Ratio, std::floating_point T>
 	UnitVec<CommonFloat<T>, 2> Angle<Ratio, T>::ToVector() const noexcept
 	{
 		return {{Cos(*this), Sin(*this)}};

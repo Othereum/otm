@@ -3,12 +3,13 @@
 #include <ratio>
 
 #ifndef OTM_DEFAULT_FLOAT
-	#define OTM_DEFAULT_FLOAT Float
+	#define OTM_DEFAULT_FLOAT float
 #endif
 
 namespace otm
 {
 	using Float = OTM_DEFAULT_FLOAT;
+	static_assert(std::is_floating_point_v<Float>);
 	
 	template <std::floating_point T>
 	struct Quaternion;
@@ -32,7 +33,7 @@ namespace otm
 	using UVec4 = UnitVec<Float, 4>;
 
 	
-	template <class Ratio, class T = Float>
+	template <class Ratio, std::floating_point T = Float>
 	struct Angle;
 	
 	using PiRatio = std::ratio<5419351, 1725033>;

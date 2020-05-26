@@ -81,22 +81,22 @@ namespace otm
 		return x >= 0 ? x : -x;
 	}
 
-	template <class T>
-	CommonFloat<T> Cos(Angle<RadR, T> t) noexcept
+	template <class Ratio, std::floating_point T>
+	T Cos(Angle<Ratio, T> t) noexcept
 	{
-		return std::cos(ToFloat(t.Get()));
+		return std::cos(Angle<RadR, T>{t}.Get());
 	}
 	
-	template <class T>
-	CommonFloat<T> Sin(Angle<RadR, T> t) noexcept
+	template <class Ratio, std::floating_point T>
+	T Sin(Angle<Ratio, T> t) noexcept
 	{
-		return std::sin(ToFloat(t.Get()));
+		return std::sin(Angle<RadR, T>{t}.Get());
 	}
 	
-	template <class T>
-	CommonFloat<T> Tan(Angle<RadR, T> t) noexcept
+	template <class Ratio, std::floating_point T>
+	T Tan(Angle<Ratio, T> t) noexcept
 	{
-		return std::tan(ToFloat(t.Get()));
+		return std::tan(Angle<RadR, T>{t}.Get());
 	}
 	
 	template <class T>

@@ -69,11 +69,11 @@ namespace otm
 		return m;
 	}
 
-	template <std::floating_point T = Float>
-	constexpr Matrix<T, 4> MakePerspective(const Vector<T, 2>& screen, T near, T far, Angle<RadR, T> hfov) noexcept
+	template <class Ratio, std::floating_point T = Float>
+	constexpr Matrix<T, 4> MakePerspective(const Vector<T, 2>& screen, T near, T far, Angle<Ratio, T> hfov) noexcept
 	{
 		const auto y_scale = 1/Tan(hfov/2);
-		const auto x_scale = y_scale * (screen.y / screen.x);
+		const auto x_scale = y_scale * (screen[1] / screen[0]);
 
 		return {
 			x_scale, 0, 0, 0,
