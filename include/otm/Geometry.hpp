@@ -61,6 +61,29 @@ namespace otm
 	}
 
 	template <std::floating_point T = Float>
+	constexpr Matrix<T, 4> MakeOrtho(const Vector<T, 2>& screen, T near, T far) noexcept
+	{
+		auto m = MakeSimpleViewProj<4>(screen);
+		m[2][2] = 1/(far-near);
+		m[3][2] = near/(near-far);
+		return m;
+	}
+
+	template <std::floating_point T = Float>
+	constexpr Matrix<T, 4> MakePerspective(const Vector<T, 2>& screen, T near, T far, Angle<RadR, T> hfov) noexcept
+	{
+		const auto y_scale = 1/Tan(hfov/2);
+		const auto x_scale = y_scale * (screen.y / screen.x);
+
+		return {
+			x_scale, 0, 0, 0,
+			0, y_scale, 0, 0,
+			0, 0, far/(far-near), 1,
+			0, 0, (-near*far)/(far-near), 0
+		};
+	}
+
+	template <std::floating_point T = Float>
 	static Matrix<T, 4> MakeLookAt(const Vector<T, 3>& eye, const Vector<T, 3>& target, const Vector<T, 3>& up)
 	{
 		auto k = target - eye; k.Normalize();
