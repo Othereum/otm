@@ -6,6 +6,10 @@ namespace otm
 	template <std::floating_point T>
 	struct Quaternion
 	{
+		static const Quaternion identity;
+
+		[[nodiscard]] static constexpr Quaternion Identity() noexcept { return {}; }
+		
 		Vector<T, 3> v;
 		T s = 1;
 
@@ -45,4 +49,7 @@ namespace otm
 		static_assert(std::is_same_v<std::remove_cvref_t<decltype(this->RotatedBy())>, std::remove_cvref_t<decltype(*this)>>);
 		*this = this->RotatedBy();
 	}
+
+	template <std::floating_point T>
+	inline const Quaternion<T> Quaternion<T>::identity = Identity();
 }

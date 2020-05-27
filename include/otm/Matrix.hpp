@@ -11,6 +11,8 @@ namespace otm
 		template <class T, size_t L>
 		struct MatrixBase<T, L, L>
 		{
+			static const Matrix<T, L, L> identity;
+			
 			constexpr void Transpose() noexcept;
 			
 			// Matrix with ones on the main diagonal and zeros elsewhere
@@ -41,6 +43,10 @@ namespace otm
 		using const_iterator = const Vector<T, C>*;
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+		static const Matrix zero;
+
+		[[nodiscard]] static constexpr Matrix Zero() noexcept { return {}; }
 		
 		constexpr Matrix() noexcept = default;
 
@@ -306,4 +312,10 @@ namespace otm
 		for (size_t i=0; i<L; ++i) m[i][0] = (*this)[i];
 		return m;
 	}
+
+	template <class T, size_t L>
+	inline const Matrix<T, L, L> detail::MatrixBase<T, L, L>::identity = Identity();
+
+	template <class T, size_t R, size_t C>
+	inline const Matrix<T, R, C> Matrix<T, R, C>::zero = Zero();
 }

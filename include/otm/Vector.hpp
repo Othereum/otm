@@ -37,14 +37,14 @@ namespace otm
 		struct VecBase : VecBase0<T, L>
 		{
 			template <class... Args>
-			constexpr VecBase(Args... args) noexcept :VecBase0{args...} {}
+			constexpr VecBase(Args... args) noexcept :VecBase0<T, L>{args...} {}
 		};
 
 		template <class T>
 		struct VecBase<T, 2> : VecBase0<T, 2>
 		{
 			template <class... Args>
-			constexpr VecBase(Args... args) noexcept :VecBase0{args...} {}
+			constexpr VecBase(Args... args) noexcept :VecBase0<T, 2>{args...} {}
 			
 			[[nodiscard]] Angle<RadR, CommonFloat<T>> ToAngle() const noexcept
 			{
@@ -56,6 +56,13 @@ namespace otm
 		template <class T>
 		struct VecBase<T, 3> : VecBase0<T, 3>
 		{
+			static const Vector<T, 3> forward;
+			static const Vector<T, 3> backward;
+			static const Vector<T, 3> right;
+			static const Vector<T, 3> left;
+			static const Vector<T, 3> up;
+			static const Vector<T, 3> down;
+
 			constexpr static Vector<T, 3> Forward() noexcept { return {1, 0, 0}; }
 			constexpr static Vector<T, 3> Backward() noexcept { return -Forward(); }
 			constexpr static Vector<T, 3> Right() noexcept { return {0, 1, 0}; }
@@ -64,7 +71,7 @@ namespace otm
 			constexpr static Vector<T, 3> Down() noexcept { return -Up(); }
 			
 			template <class... Args>
-			constexpr VecBase(Args... args) noexcept :VecBase0{args...} {}
+			constexpr VecBase(Args... args) noexcept :VecBase0<T, 3>{args...} {}
 			
 			template <class U>
 			constexpr auto operator^(const Vector<U, 3>& b) const noexcept
@@ -87,14 +94,14 @@ namespace otm
 		struct VecBase2 : VecBase<T, L>
 		{
 			template <class... Args>
-			constexpr VecBase2(Args... args) noexcept :VecBase{args...} {}
+			constexpr VecBase2(Args... args) noexcept :VecBase<T, L>{args...} {}
 		};
 
 		template <std::floating_point T>
 		struct VecBase2<T, 3> : VecBase<T, 3>
 		{
 			template <class... Args>
-			constexpr VecBase2(Args... args) noexcept :VecBase{args...} {}
+			constexpr VecBase2(Args... args) noexcept :VecBase<T, 3>{args...} {}
 			
 			template <std::floating_point F>
 			void RotateBy(const Quaternion<F>& q) noexcept;
@@ -106,6 +113,13 @@ namespace otm
 		template <std::floating_point T>
 		struct UnitVecBase<T, 3>
 		{
+			static const UnitVec<T, 3> forward;
+			static const UnitVec<T, 3> backward;
+			static const UnitVec<T, 3> right;
+			static const UnitVec<T, 3> left;
+			static const UnitVec<T, 3> up;
+			static const UnitVec<T, 3> down;
+
 			constexpr static UnitVec<T, 3> Forward() noexcept { return {1, 0, 0}; }
 			constexpr static UnitVec<T, 3> Backward() noexcept { return {-1, 0, 0}; }
 			constexpr static UnitVec<T, 3> Right() noexcept { return {0, 1, 0}; }
@@ -139,6 +153,9 @@ namespace otm
 		struct const_iterator;
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+		static const Vector zero;
+		static const Vector one;
 
 		constexpr static Vector Zero() noexcept { return {}; }
 		constexpr static Vector One() noexcept { return {All{}, 1}; }
@@ -624,4 +641,46 @@ namespace otm
 	{
 		return {{Cos(*this), Sin(*this)}};
 	}
+
+	template <class T, size_t L>
+	inline const Vector<T, L> Vector<T, L>::zero = Zero();
+
+	template <class T, size_t L>
+	inline const Vector<T, L> Vector<T, L>::one = One();
+
+	template <class T>
+	inline const Vector<T, 3> detail::VecBase<T, 3>::forward = Forward();
+
+	template <class T>
+	inline const Vector<T, 3> detail::VecBase<T, 3>::backward = Backward();
+
+	template <class T>
+	inline const Vector<T, 3> detail::VecBase<T, 3>::right = Right();
+
+	template <class T>
+	inline const Vector<T, 3> detail::VecBase<T, 3>::left = Left();
+
+	template <class T>
+	inline const Vector<T, 3> detail::VecBase<T, 3>::up = Up();
+
+	template <class T>
+	inline const Vector<T, 3> detail::VecBase<T, 3>::down = Down();
+
+	template <std::floating_point T>
+	inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::forward = Forward();
+
+	template <std::floating_point T>
+	inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::backward = Backward();
+
+	template <std::floating_point T>
+	inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::right = Right();
+
+	template <std::floating_point T>
+	inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::left = Left();
+
+	template <std::floating_point T>
+	inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::up = Up();
+
+	template <std::floating_point T>
+	inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::down = Down();
 }

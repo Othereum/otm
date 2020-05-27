@@ -5,6 +5,8 @@ namespace otm
 {
 	struct Transform
 	{
+		static const Transform identity;
+		
 		Vec3 pos;
 		Quat rot;
 		Vec3 scale = Vec3::One();
@@ -23,4 +25,6 @@ namespace otm
 			return Mat4::Identity(MakeScale(scale)) * Mat4::Identity(MakeRotation(rot)) * MakeTranslation(pos);
 		}
 	};
+
+	inline const Transform Transform::identity;
 }
