@@ -18,6 +18,21 @@ namespace otm
 	template <class T>
 	concept Arithmetic = std::is_arithmetic_v<T>;
 
+	template <std::integral T>
+	constexpr T PadToPowerOf2(T x) noexcept
+	{
+		T cnt = 0;
+		auto carry = false;
+
+		for (T result; (result = x/2) > 0; ++cnt)
+		{
+			carry = carry | x%2;
+			x = result;
+		}
+
+		return 1 << (cnt + carry);
+	}
+
 	// [min, max] for integral
 	// [min, max) for floating point
 	template <class T1 = Float, class T2 = Float, class T = std::common_type_t<T1, T2>>
