@@ -30,7 +30,7 @@ namespace otm
 	constexpr T Log2Ceil(T x) noexcept
 	{
 		T cnt = 0;
-		auto remain = false;
+		T remain = 0;
 
 		for (T result{}; (result = x/2) > 0; ++cnt)
 		{
