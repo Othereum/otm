@@ -18,23 +18,23 @@ namespace otm
 	template <class T>
 	concept Arithmetic = std::is_arithmetic_v<T>;
 
-	template <std::integral T>
-	constexpr T Log2(T x) noexcept
+	template <std::integral T1, std::integral T2>
+	constexpr T1 Log(T1 x, T2 base) noexcept
 	{
-		T cnt = 0;
-		while ((x /= 2) > 0) ++cnt;
+		T1 cnt = 0;
+		while ((x /= base) > 0) ++cnt;
 		return cnt;
 	}
 
-	template <std::integral T>
-	constexpr T Log2Ceil(T x) noexcept
+	template <std::integral T1, std::integral T2>
+	constexpr T1 LogCeil(T1 x, T2 base) noexcept
 	{
-		T cnt = 0;
-		T remain = 0;
+		T1 cnt = 0;
+		auto remain = false;
 
-		for (T result{}; (result = x/2) > 0; ++cnt)
+		for (T1 result{}; (result = x/base) > 0; ++cnt)
 		{
-			remain = remain | x%2;
+			remain = remain || x%base;
 			x = result;
 		}
 
@@ -44,7 +44,7 @@ namespace otm
 	template <std::integral T>
 	constexpr T PadToPowerOf2(T x) noexcept
 	{
-		return 1 << Log2Ceil(x);
+		return 1 << LogCeil(x, 2);
 	}
 
 	// [min, max] for integral
