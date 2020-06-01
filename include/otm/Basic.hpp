@@ -19,7 +19,7 @@ namespace otm
 	concept Arithmetic = std::is_arithmetic_v<T>;
 
 	template <std::integral T1, std::integral T2>
-	constexpr T1 Log(T1 x, T2 base) noexcept
+	[[nodiscard]] constexpr T1 Log(T1 x, T2 base) noexcept
 	{
 		T1 cnt = 0;
 		while ((x /= base) > 0) ++cnt;
@@ -27,7 +27,7 @@ namespace otm
 	}
 
 	template <std::integral T1, std::integral T2>
-	constexpr T1 LogCeil(T1 x, T2 base) noexcept
+	[[nodiscard]] constexpr T1 LogCeil(T1 x, T2 base) noexcept
 	{
 		T1 cnt = 0;
 		auto remain = false;
@@ -42,7 +42,7 @@ namespace otm
 	}
 
 	template <std::integral T>
-	constexpr T PadToPowerOf2(T x) noexcept
+	[[nodiscard]] constexpr T PadToPowerOf2(T x) noexcept
 	{
 		return 1 << LogCeil(x, 2);
 	}
