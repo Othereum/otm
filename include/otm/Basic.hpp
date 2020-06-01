@@ -75,8 +75,7 @@ namespace otm
 	template <class T1, class T2>
 	[[nodiscard]] constexpr auto Min(T1 a, T2 b) noexcept
 	{
-		using T = std::common_type_t<T1, T2>;
-		return static_cast<T>(a) < static_cast<T>(b) ? a : b;
+		return a < b ? a : b;
 	}
 
 	template <class T1, class T2, class T3, class... Ts>
@@ -88,8 +87,7 @@ namespace otm
 	template <class T1, class T2>
 	[[nodiscard]] constexpr auto Max(T1 a, T2 b) noexcept
 	{
-		using T = std::common_type_t<T1, T2>;
-		return static_cast<T>(a) > static_cast<T>(b) ? a : b;
+		return a > b ? a : b;
 	}
 
 	template <class T1, class T2, class T3, class... Ts>
