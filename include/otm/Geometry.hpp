@@ -4,7 +4,7 @@
 
 namespace otm
 {
-	template <size_t L = 3, std::floating_point T = Float>
+	template <size_t L = 3, class T = Float>
 	constexpr Matrix<T, L> MakeRotation(const Quaternion<T>& rotation) noexcept
 	{
 		static_assert(L >= 3);
@@ -60,7 +60,7 @@ namespace otm
 		return proj;
 	}
 
-	template <std::floating_point T = Float>
+	template <class T = Float>
 	constexpr Matrix<T, 4> MakeOrtho(const Vector<T, 2>& screen, T near, T far) noexcept
 	{
 		auto m = MakeSimpleViewProj<4>(screen);
@@ -69,7 +69,7 @@ namespace otm
 		return m;
 	}
 
-	template <class Ratio, std::floating_point T = Float>
+	template <class Ratio, class T = Float>
 	constexpr Matrix<T, 4> MakePerspective(const Vector<T, 2>& screen, T near, T far, Angle<Ratio, T> hfov) noexcept
 	{
 		const auto y_scale = 1/Tan(hfov/2);
@@ -83,7 +83,7 @@ namespace otm
 		};
 	}
 
-	template <std::floating_point T = Float>
+	template <class T = Float>
 	static Matrix<T, 4> MakeLookAt(const Vector<T, 3>& eye, const Vector<T, 3>& target, const Vector<T, 3>& up)
 	{
 		auto k = target - eye; k.Normalize();

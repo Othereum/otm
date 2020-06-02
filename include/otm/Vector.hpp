@@ -1,6 +1,5 @@
 #pragma once
 #include <cassert>
-#include <compare>
 #include <functional>
 #include <ostream>
 #include <optional>
@@ -151,7 +150,7 @@ namespace otm
 		{
 		}
 
-		template <class Fn, std::enable_if_t<std::is_invocable<Fn>, int> = 0>
+		template <class Fn, std::enable_if_t<std::is_invocable_v<Fn>, int> = 0>
 		explicit constexpr Vector(Fn&& fn) noexcept
 		{
 			Transform([&fn](T) { return fn(); });
@@ -430,7 +429,7 @@ namespace otm
 
 		struct const_iterator
 		{
-			using iterator_category = std::contiguous_iterator_tag;
+			using iterator_category = std::random_access_iterator_tag;
 			using value_type = T;
 			using difference_type = ptrdiff_t;
 			using pointer = const T*;
@@ -503,7 +502,7 @@ namespace otm
 
 		struct iterator : const_iterator
 		{
-			using iterator_category = std::contiguous_iterator_tag;
+			using iterator_category = std::random_access_iterator_tag;
 			using value_type = T;
 			using difference_type = ptrdiff_t;
 			using pointer = T*;
@@ -625,7 +624,7 @@ namespace otm
 		constexpr operator const Vector<T, L>&() const noexcept { return v; }
 
 	private:
-		template <class, std::floating_point>
+		template <class, class>
 		friend struct Angle;
 		friend Vector<T, L>;
 		friend detail::UnitVecBase<T, L>;

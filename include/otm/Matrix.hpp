@@ -56,17 +56,27 @@ namespace otm
 		}
 
 		template <class T2, size_t R2, size_t C2>
-		explicit constexpr Matrix(const Matrix<T2, R2, C2>& other, const Vector<ptrdiff_t, 2>& offset = {})
+		explicit constexpr Matrix(const Matrix<T2, R2, C2>& other)
 		{
 			Assign(other);
 		}
 
-		template <class... Args>
-		explicit(sizeof...(Args) == 0)
-		constexpr Matrix(T x, Args... args) noexcept
+		template <class T2, size_t R2, size_t C2>
+		constexpr Matrix(const Matrix<T2, R2, C2>& other, const Vector<ptrdiff_t, 2>& offset)
 		{
-			static_assert(sizeof...(Args) < R*C, "Too many arguments");
-			Assign({x, static_cast<T>(args)...});
+			Assign(other, offset);
+		}
+
+		explicit constexpr Matrix(T x) noexcept
+		{
+			Assign({x});
+		}
+
+		template <class... Args>
+		constexpr Matrix(T x, T y, Args... args) noexcept
+		{
+			static_assert(sizeof...(Args) + 2 <= R*C, "Too many arguments");
+			Assign({x, y, static_cast<T>(args)...});
 		}
 
 		/**
@@ -90,7 +100,9 @@ namespace otm
 			}
 		}
 
-		// Assign elements from initializer list. The value of the unassigned elements does not change.
+		/**
+		 * \brief Assign elements from initializer list. The value of the unassigned elements does not change.
+		 */
 		constexpr void Assign(std::initializer_list<T> list) noexcept
 		{
 			auto it = list.begin();
@@ -102,13 +114,15 @@ namespace otm
 		constexpr bool operator==(const Matrix& b) const noexcept
 		{
 			static_assert(!std::is_floating_point_v<T>,
-				"Cannot compare between floating point types. Use IsNearlyEqual() instead.");
+				"Can't compare equality between floating point types. Use IsNearlyEqual() instead.");
 			
 			for (size_t i=0; i<R; ++i)
 				if (Row(i) != b[i]) return false;
 
 			return true;
 		}
+
+		constexpr bool operator!=(const Matrix& b) const noexcept { return !(*this == b); }
 
 		constexpr auto& operator[](size_t i) noexcept { assert(i < R); return arr[i]; }
 		constexpr auto& operator[](size_t i) const noexcept { assert(i < R); return arr[i]; }
@@ -244,7 +258,7 @@ namespace otm
 		Vector<T, C> arr[R];
 	};
 
-	template <class T, size_t R, size_t C, std::convertible_to<T> F>
+	template <class T, size_t R, size_t C, class F, std::enable_if_t<std::is_convertible_v<F, T>, int> = 0>
 	constexpr auto operator*(F f, const Matrix<T, R, C>& m) noexcept { return m * f; }
 
 	template <class T, size_t R, size_t C>
