@@ -17,19 +17,6 @@ namespace otm
 			template <class... Args>
 			constexpr VecBase0(Args... args) noexcept :data{static_cast<T>(args)...} {}
 
-			constexpr bool operator==(const VecBase0&) const noexcept = default;
-			
-			T data[L]{};
-		};
-		
-		template <std::floating_point T, size_t L>
-		struct VecBase0<T, L>
-		{
-			template <class... Args>
-			constexpr VecBase0(Args... args) noexcept :data{static_cast<T>(args)...} {}
-
-			constexpr bool operator==(const VecBase0&) const noexcept = delete;
-			
 			T data[L]{};
 		};
 		
@@ -86,31 +73,17 @@ namespace otm
 				return static_cast<Vector<T, 3>&>(*this);
 			}
 
-			template <std::floating_point F>
+			template <class F>
 			[[nodiscard]] Vector<std::common_type_t<T, F>, 3> RotatedBy(const Quaternion<F>& q) const noexcept;
+			
+			template <class F>
+			void RotateBy(const Quaternion<F>& q) noexcept;
 		};
 		
 		template <class T, size_t L>
-		struct VecBase2 : VecBase<T, L>
-		{
-			template <class... Args>
-			constexpr VecBase2(Args... args) noexcept :VecBase<T, L>{args...} {}
-		};
-
-		template <std::floating_point T>
-		struct VecBase2<T, 3> : VecBase<T, 3>
-		{
-			template <class... Args>
-			constexpr VecBase2(Args... args) noexcept :VecBase<T, 3>{args...} {}
-			
-			template <std::floating_point F>
-			void RotateBy(const Quaternion<F>& q) noexcept;
-		};
-
-		template <std::floating_point T, size_t L>
 		struct UnitVecBase {};
 
-		template <std::floating_point T>
+		template <class T>
 		struct UnitVecBase<T, 3>
 		{
 			static const UnitVec<T, 3> forward;
@@ -140,7 +113,7 @@ namespace otm
 	};
 
 	template <class T, size_t L>
-	struct Vector : detail::VecBase2<T, L>
+	struct Vector : detail::VecBase<T, L>
 	{
 		using value_type = T;
 		using size_type = size_t;
@@ -178,25 +151,41 @@ namespace otm
 		{
 		}
 
-		template <std::invocable Fn>
-		explicit constexpr Vector(Fn&& fn) noexcept  // NOLINT(bugprone-forwarding-reference-overload)
+		template <class Fn, std::enable_if_t<std::is_invocable<Fn>, int> = 0>
+		explicit constexpr Vector(Fn&& fn) noexcept
 		{
-			Transform([&fn](auto&&...) { return fn(); });
+			Transform([&fn](T) { return fn(); });
 		}
 
-		template <std::convertible_to<T>... Args>
-		explicit(sizeof...(Args) == 1)
-		constexpr Vector(Args... args) noexcept
-			:detail::VecBase2<T, L>{args...}
+		constexpr Vector() noexcept
+			:detail::VecBase<T, L>{}
 		{
 		}
 
-		template <std::convertible_to<T> U, size_t M, std::convertible_to<T>... Args>
-		explicit(sizeof...(Args) == 0 && (L != M || !std::is_same_v<T, std::common_type_t<T, U>>))
-		constexpr Vector(const Vector<U, M>& v, Args... args) noexcept
+		explicit constexpr Vector(T x) noexcept
+			:detail::VecBase<T, L>{x}
 		{
-			static_assert(sizeof...(Args) <= Max(static_cast<ptrdiff_t>(L - M), 0), "Too many arguments");
-			(Assign(v) << ... << static_cast<T>(args));
+		}
+
+		template <class... Args>
+		constexpr Vector(T x, T y, Args... args) noexcept
+			:detail::VecBase<T, L>{x, y, args...}
+		{
+		}
+
+		constexpr Vector(const Vector&) noexcept = default;
+
+		template <class T2, size_t L2>
+		explicit constexpr Vector(const Vector<T2, L2>& r) noexcept
+		{
+			Assign(r);
+		}
+
+		template <class T2, size_t L2, class... Args>
+		constexpr Vector(const Vector<T2, L2>& v, T x, Args... args) noexcept
+		{
+			static_assert(sizeof...(Args) + L2 < L, "Too many arguments");
+			((Assign(v) << x) << ... << static_cast<T>(args));
 		}
 
 		/**
@@ -226,6 +215,28 @@ namespace otm
 			return begin() + size;
 		}
 
+		template <class T2>
+		constexpr bool operator==(const Vector<T2, L>& r) const noexcept
+		{
+			static_assert(std::is_integral_v<T> && std::is_integral_v<T2>,
+				"Can't compare equality between floating point types. Use IsNearlyEqual() instead.");
+			
+			for (size_t i=0; i<L; ++i) if ((*this)[i] != r[i]) return false;
+			return true;
+		}
+		
+		template <class T2>
+		constexpr bool operator!=(const Vector<T2, L>& r) const noexcept
+		{
+			return !(*this == r);
+		}
+			
+		template <class T2, size_t L2>
+		constexpr bool operator==(const Vector<T2, L2>& r) const noexcept { return false; }
+		
+		template <class T2, size_t L2>
+		constexpr bool operator!=(const Vector<T2, L2>& r) const noexcept { return true; }
+			
 		[[nodiscard]] constexpr T LenSqr() const noexcept { return *this | *this; }
 		[[nodiscard]] CommonFloat<T> Len() const noexcept { return std::sqrt(ToFloat(LenSqr())); }
 
@@ -296,7 +307,7 @@ namespace otm
 			return this->data[i];
 		}
 
-		template <std::invocable<T> Fn>
+		template <class Fn>
 		constexpr Vector& Transform(const Vector& other, Fn&& fn) noexcept(std::is_nothrow_invocable_v<Fn, T, T>)
 		{
 			for (size_t i = 0; i < L; ++i)
@@ -305,7 +316,7 @@ namespace otm
 			return *this;
 		}
 
-		template <std::invocable<T> Fn>
+		template <class Fn>
 		constexpr Vector& Transform(Fn&& fn) noexcept(std::is_nothrow_invocable_v<Fn, T>)
 		{
 			for (size_t i = 0; i < L; ++i)
@@ -475,9 +486,15 @@ namespace otm
 
 			constexpr const_iterator operator-(ptrdiff_t n) const noexcept { return const_iterator{ptr - n}; }
 			constexpr ptrdiff_t operator-(const const_iterator& rhs) const noexcept { return ptr - rhs.ptr; }
-			constexpr auto operator<=>(const const_iterator& it) const noexcept = default;
 			constexpr const_iterator& operator>>(T& v) noexcept { v = **this; return ++*this; }
 
+			constexpr bool operator==(const const_iterator& it) const noexcept { return ptr == it.ptr; }
+			constexpr bool operator!=(const const_iterator& it) const noexcept { return ptr != it.ptr; }
+			constexpr bool operator<(const const_iterator& it) const noexcept { return ptr < it.ptr; }
+			constexpr bool operator>(const const_iterator& it) const noexcept { return ptr > it.ptr; }
+			constexpr bool operator<=(const const_iterator& it) const noexcept { return ptr <= it.ptr; }
+			constexpr bool operator>=(const const_iterator& it) const noexcept { return ptr >= it.ptr; }
+			
 		protected:
 			friend Vector;
 			constexpr const_iterator(const T* data) noexcept: ptr{const_cast<T*>(data)} {}
@@ -542,11 +559,9 @@ namespace otm
 
 			constexpr iterator operator-(ptrdiff_t n) const noexcept { return iterator{this->ptr - n}; }
 			constexpr ptrdiff_t operator-(const iterator& rhs) const noexcept { return this->ptr - rhs.ptr; }
-			constexpr auto operator<=>(const iterator& it) const noexcept = default;
-
 			constexpr iterator& operator<<(T v) noexcept { **this = v; return ++*this; }
 			constexpr iterator& operator>>(T& v) noexcept { v = **this; return ++*this; }
-
+			
 		protected:
 			friend Vector;
 			constexpr iterator(pointer data) noexcept: const_iterator{data} {}
@@ -587,9 +602,11 @@ namespace otm
 		return is;
 	}
 
-	template <std::floating_point T, size_t L>
+	template <class T, size_t L>
 	struct UnitVec : detail::UnitVecBase<T, L>
 	{
+		static_assert(std::is_floating_point_v<T>);
+		
 		[[nodiscard]] static UnitVec Rand() noexcept
 		{
 			Vector<T, L> v;
@@ -636,7 +653,7 @@ namespace otm
 		return UnitVec{*this / std::sqrt(lensqr)};
 	}
 
-	template <class Ratio, std::floating_point T>
+	template <class Ratio, class T>
 	UnitVec<CommonFloat<T>, 2> Angle<Ratio, T>::ToVector() const noexcept
 	{
 		return {{Cos(*this), Sin(*this)}};
@@ -666,21 +683,21 @@ namespace otm
 	template <class T>
 	inline const Vector<T, 3> detail::VecBase<T, 3>::down = Down();
 
-	template <std::floating_point T>
+	template <class T>
 	inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::forward = Forward();
 
-	template <std::floating_point T>
+	template <class T>
 	inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::backward = Backward();
 
-	template <std::floating_point T>
+	template <class T>
 	inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::right = Right();
 
-	template <std::floating_point T>
+	template <class T>
 	inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::left = Left();
 
-	template <std::floating_point T>
+	template <class T>
 	inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::up = Up();
 
-	template <std::floating_point T>
+	template <class T>
 	inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::down = Down();
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include <concepts>
+#include <type_traits>
 #include <ratio>
 
 namespace otm
@@ -7,7 +7,7 @@ namespace otm
 	using Float = OTM_DEFAULT_FLOAT;
 	static_assert(std::is_floating_point_v<Float>);
 	
-	template <std::floating_point T>
+	template <class T>
 	struct Quaternion;
 
 	using Quat = Quaternion<Float>;
@@ -16,7 +16,7 @@ namespace otm
 	template <class T, size_t L>
 	struct Vector;
 
-	template <std::floating_point T, size_t L>
+	template <class T, size_t L>
 	struct UnitVec;
 
 	using Vec2 = Vector<Float, 2>;
@@ -29,7 +29,7 @@ namespace otm
 	using UVec4 = UnitVec<Float, 4>;
 
 	
-	template <class Ratio, std::floating_point T = Float>
+	template <class Ratio, class T = Float>
 	struct Angle;
 	
 	using PiRatio = std::ratio<5419351, 1725033>;

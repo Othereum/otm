@@ -3,9 +3,11 @@
 
 namespace otm
 {
-	template <std::floating_point T>
+	template <class T>
 	struct Quaternion
 	{
+		static_assert(std::is_floating_point_v<T>);
+		
 		static const Quaternion identity;
 
 		[[nodiscard]] static constexpr Quaternion Identity() noexcept { return {}; }
@@ -34,7 +36,7 @@ namespace otm
 	};
 
 	template <class T>
-	template <std::floating_point F>
+	template <class F>
 	Vector<std::common_type_t<T, F>, 3> detail::VecBase<T, 3>::RotatedBy(const Quaternion<F>& q) const noexcept
 	{
 		using TF = std::common_type_t<T, F>;
@@ -42,14 +44,14 @@ namespace otm
 		return (q * Quaternion<TF>{v, 0} * ~q).v;
 	}
 
-	template <std::floating_point T>
-	template <std::floating_point F>
+	template <class T>
+	template <class F>
 	void detail::VecBase2<T, 3>::RotateBy(const Quaternion<F>& q) noexcept
 	{
 		static_assert(std::is_same_v<std::remove_cvref_t<decltype(this->RotatedBy())>, std::remove_cvref_t<decltype(*this)>>);
 		*this = this->RotatedBy();
 	}
 
-	template <std::floating_point T>
+	template <class T>
 	inline const Quaternion<T> Quaternion<T>::identity = Identity();
 }

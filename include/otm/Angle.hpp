@@ -1,13 +1,13 @@
 #pragma once
-#include <compare>
-#include <type_traits>
 #include "Basic.hpp"
 
 namespace otm
 {
-	template <class Ratio, std::floating_point T>
+	template <class Ratio, class T>
 	struct Angle
 	{
+		static_assert(std::is_floating_point_v<T>);
+		
 		static constexpr auto ratio = static_cast<T>(Ratio::num) / Ratio::den;
 
 		constexpr Angle() noexcept = default;
@@ -16,6 +16,12 @@ namespace otm
 		template <class S>
 		constexpr Angle(const Angle<S, T>& r) noexcept
 			:val{ r.Get() / r.ratio * ratio }
+		{
+		}
+
+		template <class S, class T2>
+		explicit constexpr Angle(const Angle<S, T2>& r) noexcept
+			:val{ static_cast<T>(r.Get() / r.ratio) * ratio }
 		{
 		}
 
@@ -43,10 +49,23 @@ namespace otm
 		constexpr Angle operator/(T f) const noexcept { return Angle{val / f}; }
 
 		constexpr Angle operator-() const noexcept { return Angle{-val}; }
-
-		template <class S>
-		constexpr auto operator<=>(const Angle<S, T>& r) const noexcept { return *this <=> Angle{r}; }
-		constexpr auto operator<=>(const Angle&) const noexcept = default;
+		
+		constexpr bool operator<(const Angle& r) const noexcept { return val < r.val; }
+		constexpr bool operator>(const Angle& r) const noexcept { return val > r.val; }
+		constexpr bool operator<=(const Angle& r) const noexcept { return val <= r.val; }
+		constexpr bool operator>=(const Angle& r) const noexcept { return val >= r.val; }
+		
+		template <class R2, class T2>
+		constexpr bool operator<(const Angle<R2, T2>& r) const noexcept { return *this < Angle{r}; }
+		
+		template <class R2, class T2>
+		constexpr bool operator>(const Angle<R2, T2>& r) const noexcept { return *this > Angle{r}; }
+		
+		template <class R2, class T2>
+		constexpr bool operator<=(const Angle<R2, T2>& r) const noexcept { return *this <= Angle{r}; }
+		
+		template <class R2, class T2>
+		constexpr bool operator>=(const Angle<R2, T2>& r) const noexcept { return *this >= Angle{r}; }
 
 		[[nodiscard]] constexpr T Get() const noexcept { return val; }
 		explicit constexpr operator T() const noexcept { return val; }

@@ -5,7 +5,7 @@
 
 namespace otm
 {
-	template <std::floating_point T>
+	template <class T>
 	constexpr auto kPiV = static_cast<T>(PiRatio::num) / PiRatio::den;
 	constexpr auto kPi = kPiV<Float>;
 	
@@ -15,10 +15,7 @@ namespace otm
 
 	inline thread_local std::default_random_engine random_engine{std::random_device{}()};
 
-	template <class T>
-	concept Arithmetic = std::is_arithmetic_v<T>;
-
-	template <std::integral T1, std::integral T2>
+	template <class T1, class T2>
 	[[nodiscard]] constexpr T1 Log(T1 x, T2 base) noexcept
 	{
 		T1 cnt = 0;
@@ -26,7 +23,7 @@ namespace otm
 		return cnt;
 	}
 
-	template <std::integral T1, std::integral T2>
+	template <class T1, class T2>
 	[[nodiscard]] constexpr T1 LogCeil(T1 x, T2 base) noexcept
 	{
 		T1 cnt = 0;
@@ -41,7 +38,7 @@ namespace otm
 		return cnt + remain;
 	}
 
-	template <std::integral T>
+	template <class T>
 	[[nodiscard]] constexpr T PadToPowerOf2(T x) noexcept
 	{
 		return 1 << LogCeil(x, 2);
@@ -108,19 +105,19 @@ namespace otm
 		return x >= 0 ? x : -x;
 	}
 
-	template <class Ratio, std::floating_point T>
+	template <class Ratio, class T>
 	T Cos(Angle<Ratio, T> t) noexcept
 	{
 		return std::cos(Angle<RadR, T>{t}.Get());
 	}
 	
-	template <class Ratio, std::floating_point T>
+	template <class Ratio, class T>
 	T Sin(Angle<Ratio, T> t) noexcept
 	{
 		return std::sin(Angle<RadR, T>{t}.Get());
 	}
 	
-	template <class Ratio, std::floating_point T>
+	template <class Ratio, class T>
 	T Tan(Angle<Ratio, T> t) noexcept
 	{
 		return std::tan(Angle<RadR, T>{t}.Get());
@@ -146,7 +143,7 @@ namespace otm
 		};
 	}
 
-	template <Arithmetic T, Arithmetic U, Arithmetic V = std::common_type_t<T, U>>
+	template <class T, class U, class V = std::common_type_t<T, U>>
 	[[nodiscard]] constexpr bool IsNearlyEqual(T a, U b, V tolerance = kSmallNumV<V>) noexcept
 	{
 		return Abs(a - b) < tolerance;
@@ -170,7 +167,7 @@ namespace otm
 		return true;
 	}
 
-	template <std::floating_point T, class V = T>
+	template <class T, class V = T>
 	[[nodiscard]] constexpr bool IsNearlyEqual(const Quaternion<T>& a, const Quaternion<T>& b, V tolerance = kSmallNumV<V>) noexcept
 	{
 		return IsNearlyEqual(a.v, b.v, tolerance) && IsNearlyEqual(a.s, b.s, tolerance);
