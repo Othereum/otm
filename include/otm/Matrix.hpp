@@ -110,10 +110,11 @@ namespace otm
 				for (size_t j=0; j<C && it != list.end(); ++j)
 					arr[i][j] = *it++;
 		}
-		
-		constexpr bool operator==(const Matrix& b) const noexcept
+
+		template <class T2>
+		constexpr bool operator==(const Matrix<T2, R, C>& b) const noexcept
 		{
-			static_assert(!std::is_floating_point_v<T>,
+			static_assert(!(std::is_floating_point_v<T> || std::is_floating_point_v<T2>),
 				"Can't compare equality between floating point types. Use IsNearlyEqual() instead.");
 			
 			for (size_t i=0; i<R; ++i)
@@ -122,7 +123,14 @@ namespace otm
 			return true;
 		}
 
-		constexpr bool operator!=(const Matrix& b) const noexcept { return !(*this == b); }
+		template <class T2>
+		constexpr bool operator!=(const Matrix<T2, R, C>& b) const noexcept { return !(*this == b); }
+
+		template <class T2, size_t R2, size_t C2>
+		constexpr bool operator==(const Matrix<T2, R2, C2>&) const noexcept { return false; }
+
+		template <class T2, size_t R2, size_t C2>
+		constexpr bool operator!=(const Matrix<T2, R2, C2>&) const noexcept { return true; }
 
 		constexpr auto& operator[](size_t i) noexcept { assert(i < R); return arr[i]; }
 		constexpr auto& operator[](size_t i) const noexcept { assert(i < R); return arr[i]; }
