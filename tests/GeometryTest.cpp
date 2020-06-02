@@ -12,7 +12,7 @@ TEST(Geometry, Quat)
 	constexpr auto q2 = q1 * Quat{};
 	EXPECT_TRUE(IsNearlyEqual(q1, q2));
 
-	Quat q3{Vec3{0.369242f, -0.596525f, -0.712614f}.Unit(), 0.622533_rad};
+	const Quat q3{Vec3{0.369242f, -0.596525f, -0.712614f}.Unit(), 0.622533_rad};
 	constexpr Quat q3e{0.1130857f, -0.1826944f, -0.2182483f, 0.9519464f};
 	EXPECT_TRUE(IsNearlyEqual(q3, q3e));
 
