@@ -6,7 +6,7 @@
 namespace otm
 {
 	template <class T>
-	constexpr auto kPiV = static_cast<T>(PiRatio::num) / PiRatio::den;
+	constexpr auto kPiV = static_cast<T>(PiRatio::num) / static_cast<T>(PiRatio::den);
 	constexpr auto kPi = kPiV<Float>;
 	
 	template <class T>

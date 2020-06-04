@@ -36,7 +36,7 @@ namespace otm
 	template <class Ratio, class T = Float>
 	struct Angle;
 	
-	using PiRatio = std::ratio<5419351, 1725033>;
+	using PiRatio = std::ratio<66627445592888887, 21208174623389167>;
 	
 	using RadR = std::ratio<PiRatio::num, PiRatio::den * 180>;
 	using DegR = std::ratio<1>;
