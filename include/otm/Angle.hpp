@@ -8,7 +8,7 @@ namespace otm
 	{
 		static_assert(std::is_floating_point_v<T>);
 		
-		static constexpr auto ratio = static_cast<T>(Ratio::num) / Ratio::den;
+		static constexpr auto ratio = static_cast<T>(Ratio::num) / static_cast<T>(Ratio::den);
 
 		constexpr Angle() noexcept = default;
 		constexpr explicit Angle(T r) noexcept :val{r} {}
