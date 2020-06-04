@@ -6,6 +6,10 @@ namespace otm
 {
 	using Float = OTM_DEFAULT_FLOAT;
 	static_assert(std::is_floating_point_v<Float>);
+
+	constexpr Float operator""_f(unsigned long long f) noexcept { return static_cast<Float>(f); }
+	constexpr Float operator""_f(long double f) noexcept { return static_cast<Float>(f); }
+	
 	
 	template <class T>
 	struct Quaternion;
