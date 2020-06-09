@@ -11,7 +11,8 @@ namespace otm
 		static const Quaternion identity;
 
 		[[nodiscard]] static constexpr Quaternion Identity() noexcept { return {}; }
-		
+		[[nodiscard]] static Quaternion Rand() noexcept { return {UVec3::Rand(), Rad::Rand()}; }
+
 		Vector<T, 3> v;
 		T s = 1;
 
