@@ -57,3 +57,30 @@ TEST(Geometry, Angle)
 	constexpr Deg deg = rad;
 	EXPECT_NEAR(deg.Get(), 80.21409132f, kSmallNum);
 }
+
+TEST(Geometry, QuatFromMat)
+{
+	for (auto i=0; i<100; ++i)
+	{
+		const auto q1 = Quat::Rand();
+		const Quat q2{MakeRotation(q1)};
+		ASSERT_TRUE(IsEquivalent(q1, q2));
+	}
+}
+
+TEST(Geometry, DecompMatToTrsf)
+{
+	for (auto i=0; i<100; ++i)
+	{
+		const Transform trsf1{
+			Vec3::Rand(-1000, 1000),
+			Quat::Rand(),
+			Vec3::Rand(0.1, 10)
+		};
+		const Transform trsf2{trsf1.ToMatrix()};
+		
+		ASSERT_TRUE(IsNearlyEqual(trsf1.pos, trsf2.pos));
+		ASSERT_TRUE(IsEquivalent(trsf1.rot, trsf2.rot));
+		ASSERT_TRUE(IsNearlyEqual(trsf1.scale, trsf2.scale));
+	}
+}
