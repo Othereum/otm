@@ -79,6 +79,12 @@ namespace otm
 		constexpr Quaternion operator~() const noexcept { return {-v, s}; }
 	};
 
+	template <class T, class V = T>
+	[[nodiscard]] bool IsEquivalent(const Quaternion<T>& a, const Quaternion<T>& b, V tolerance = kSmallNumV<V>) noexcept
+	{
+		return IsNearlyEqual(Vec3::one.RotatedBy(a), Vec3::one.RotatedBy(b), tolerance);
+	}
+
 	template <class T>
 	template <class F>
 	Vector<std::common_type_t<T, F>, 3> detail::VecBase<T, 3>::RotatedBy(const Quaternion<F>& q) const noexcept
