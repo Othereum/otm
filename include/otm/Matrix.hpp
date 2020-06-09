@@ -147,11 +147,19 @@ namespace otm
 			return arr[i];
 		}
 
+		template <size_t L>
+		[[nodiscard]] constexpr Vector<T, L> Row(size_t i) const
+		{
+			if (i >= R) OutOfRange();
+			return Vector<T, L>{arr[i]};
+		}
+
+		template <size_t L = R>
 		[[nodiscard]] constexpr auto Col(size_t c) const
 		{
 			if (c >= C) OutOfRange();
-			Vector<T, R> v;
-			for (size_t r=0; r<R; ++r) v[r] = arr[r][c];
+			Vector<T, L> v;
+			for (size_t r=0; r<Min(L, R); ++r) v[r] = arr[r][c];
 			return v;
 		}
 
@@ -164,9 +172,8 @@ namespace otm
 		template <size_t L = Min(R, C)>
 		[[nodiscard]] constexpr Vector<T, L> Diag() const noexcept
 		{
-			static_assert(L <= Min(R, C));
 			Vector<T, L> v;
-			for (size_t i=0; i<L; ++i) v[i] = arr[i][i];
+			for (size_t i=0; i<Min(L, R, C); ++i) v[i] = arr[i][i];
 			return v;
 		}
 
