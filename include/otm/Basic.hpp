@@ -10,7 +10,7 @@ namespace otm
 	constexpr auto kPi = kPiV<Float>;
 	
 	template <class T>
-	constexpr auto kSmallNumV = static_cast<T>(1e-6);
+	constexpr auto kSmallNumV = static_cast<T>(1e-5);
 	constexpr auto kSmallNum = kSmallNumV<Float>;
 
 	inline thread_local std::default_random_engine random_engine{std::random_device{}()};
