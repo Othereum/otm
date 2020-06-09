@@ -1,5 +1,5 @@
 #pragma once
-#include "Vector.hpp"
+#include "Matrix.hpp"
 
 namespace otm
 {
@@ -23,6 +23,49 @@ namespace otm
 		Quaternion(const UnitVec<T, 3>& axis, Angle<RadR, T> angle) noexcept
 			:Quaternion{axis.Get() * Sin(angle / 2), Cos(angle / 2)}
 		{
+		}
+
+		template <size_t L>
+		explicit Quaternion(const Matrix<T, L>& m) noexcept
+		{
+			static_assert(L >= 3);
+			
+			const auto trace = m[0][0] + m[1][1] + m[2][2];
+			if (trace > 0)
+			{
+				const auto t = 0.5_f / sqrt(trace + 1);
+				s = 0.25_f / t;
+				v.x = (m[2][1] - m[1][2]) * t;
+				v.y = (m[0][2] - m[2][0]) * t;
+				v.z = (m[1][0] - m[0][1]) * t;
+			}
+			else
+			{
+				if (m[0][0] > m[1][1] && m[0][0] > m[2][2])
+				{
+					const auto t = 2 * sqrt(1 + m[0][0] - m[1][1] - m[2][2]);
+					s = (m[2][1] - m[1][2]) / t;
+					v.x = 0.25_f * t;
+					v.y = (m[0][1] + m[1][0]) / t;
+					v.z = (m[0][2] + m[2][0]) / t;
+				}
+				else if (m[1][1] > m[2][2])
+				{
+					const auto t = 2 * sqrt(1 + m[1][1] - m[0][0] - m[2][2]);
+					s = (m[0][2] - m[2][0]) / t;
+					v.x = (m[0][1] + m[1][0]) / t;
+					v.y = 0.25_f * t;
+					v.z = (m[1][2] + m[2][1] ) / t;
+				}
+				else
+				{
+					const auto t = 2 * sqrt(1 + m[2][2] - m[0][0] - m[1][1]);
+					s = (m[1][0] - m[0][1]) / t;
+					v.x = (m[0][2] + m[2][0]) / t;
+					v.y = (m[1][2] + m[2][1]) / t;
+					v.z = 0.25_f * t;
+				}
+			}
 		}
 
 		constexpr Quaternion& operator*=(const Quaternion& q) noexcept { return *this = *this * q; }
