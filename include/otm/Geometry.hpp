@@ -84,7 +84,7 @@ namespace otm
 	}
 
 	template <class T = Float>
-	static Matrix<T, 4> MakeLookAt(const Vector<T, 3>& eye, const Vector<T, 3>& target, const Vector<T, 3>& up)
+	static Matrix<T, 4> MakeLookAt(const Vector<T, 3>& eye, const Vector<T, 3>& target, const Vector<T, 3>& up) noexcept
 	{
 		auto k = target - eye; k.Normalize();
 		auto i = up ^ k; i.Normalize();
