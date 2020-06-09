@@ -150,21 +150,24 @@ namespace otm
 		[[nodiscard]] constexpr auto Col(size_t c) const
 		{
 			if (c >= C) OutOfRange();
-
 			Vector<T, R> v;
-			
-			for (size_t r = 0; r < R; ++r)
-				v[r] = arr[r][c];
-			
+			for (size_t r=0; r<R; ++r) v[r] = arr[r][c];
 			return v;
 		}
 
 		constexpr void ColAssign(size_t c, const Vector<T, R>& v)
 		{
 			if (c >= C) OutOfRange();
+			for (size_t r=0; r<R; ++r) arr[r][c] = v[r];
+		}
 
-			for (size_t r = 0; r < R; ++r)
-				arr[r][c] = v[r];
+		template <size_t L = Min(R, C)>
+		[[nodiscard]] constexpr Vector<T, L> Diag() const noexcept
+		{
+			static_assert(L <= Min(R, C));
+			Vector<T, L> v;
+			for (size_t i=0; i<L; ++i) v[i] = arr[i][i];
+			return v;
 		}
 
 		[[nodiscard]] constexpr auto& AsVectors() noexcept { return arr; }
