@@ -237,16 +237,12 @@ namespace otm
 			return t;
 		}
 
-		[[nodiscard]] constexpr T Determinant() const noexcept
+		[[nodiscard]] constexpr T Det() const noexcept
 		{
 			static_assert(R == C);
 			if constexpr (R == 1)
 			{
 				return arr[0][0];
-			}
-			else if constexpr (R == 2)
-			{
-				return arr[0][0]*arr[1][1] - arr[0][1]*arr[1][0];
 			}
 			else
 			{
@@ -254,16 +250,31 @@ namespace otm
 				T det = 0;
 				for (size_t i=0; i<R; ++i)
 				{
-					Matrix<T, R-1> m; size_t j = 0;
-					for (; j<i; ++j) m[j] = Vector<T, R-1>{arr[j]};
-					for (++j; j<R; ++j) m[j-1] = Vector<T, R-1>{arr[j]};
-					
-					const auto x = arr[i][R-1] * m.Determinant();
+					const auto x = arr[i][R-1] * Slice(i, R-1).Det();
 					if (plus) det += x; else det -= x;
 					plus = !plus;
 				}
 				return det;
 			}
+		}
+
+		[[nodiscard]] constexpr Matrix<T, R-1, C-1> Slice(const size_t y, const size_t x) const noexcept
+		{
+			Matrix<T, R-1, C-1> m;
+			size_t i = 0;
+			for (; i < y; ++i)
+			{
+				size_t j = 0;
+				for (; j < x; ++j) m[i][j] = arr[i][j];
+				for (++j; j < C; ++j) m[i][j-1] = arr[i][j];
+			}
+			for (++i; i < R; ++i)
+			{
+				size_t j = 0;
+				for (; j < x; ++j) m[i-1][j] = arr[i][j];
+				for (++j; j < C; ++j) m[i-1][j-1] = arr[i][j];
+			}
+			return m;
 		}
 
 		[[nodiscard]] constexpr iterator begin() noexcept { return arr; }
