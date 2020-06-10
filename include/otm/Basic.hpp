@@ -146,7 +146,7 @@ namespace otm
 	template <class T, class U, class V = std::common_type_t<T, U>, std::enable_if_t<std::is_arithmetic_v<V>, int> = 0>
 	[[nodiscard]] constexpr bool IsNearlyEqual(T a, U b, V tolerance = kSmallNumV<V>) noexcept
 	{
-		return Abs(a - b) < tolerance;
+		return Abs(a - b) <= tolerance;
 	}
 
 	template <class T, size_t L, class V = T>
@@ -176,7 +176,7 @@ namespace otm
 	template <class T, class U = T>
 	[[nodiscard]] constexpr bool IsNearlyZero(T a, U tolerance = kSmallNumV<U>) noexcept
 	{
-		return Abs(a) < tolerance;
+		return Abs(a) <= tolerance;
 	}
 
 	template <class T, size_t L, class V = T>
