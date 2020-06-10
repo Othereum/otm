@@ -255,7 +255,7 @@ namespace otm
 		{
 			static_assert(std::is_same_v<T, CommonFloat<T>>, "Can't use Normalize() for this type. Use Unit() instead.");
 			const auto lensqr = LenSqr();
-			if (IsNearlyZero(lensqr)) return false;
+			if (lensqr <= kSmallNum) return false;
 			*this /= std::sqrt(lensqr);
 			return true;
 		}
@@ -659,7 +659,7 @@ namespace otm
 	UnitVec<CommonFloat<T>, L> Vector<T, L>::Unit() const
 	{
 		const auto lensqr = LenSqr();
-		if (IsNearlyZero(lensqr)) throw DivByZero{};
+		if (lensqr <= kSmallNum) throw DivByZero{};
 		return *this / std::sqrt(lensqr);
 	}
 	
@@ -667,7 +667,7 @@ namespace otm
 	std::optional<UnitVec<CommonFloat<T>, L>> Vector<T, L>::Unit(std::nothrow_t) const
 	{
 		const auto lensqr = LenSqr();
-		if (IsNearlyZero(lensqr)) return {};
+		if (lensqr <= kSmallNum) return {};
 		return UnitVec{*this / std::sqrt(lensqr)};
 	}
 
