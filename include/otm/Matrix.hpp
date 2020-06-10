@@ -240,6 +240,7 @@ namespace otm
 		[[nodiscard]] constexpr T Det() const noexcept
 		{
 			static_assert(R == C);
+			
 			if constexpr (R == 1)
 			{
 				return arr[0][0];
@@ -256,6 +257,26 @@ namespace otm
 				}
 				return det;
 			}
+		}
+
+		[[nodiscard]] constexpr std::optional<Matrix> Inv() const noexcept
+		{
+			static_assert(R == C);
+			static_assert(std::is_floating_point_v<T>);
+			
+			const auto det = Det();
+			if (IsNearlyZero(det)) return {};
+			
+			Matrix inv;
+			for (size_t i=0; i<R; ++i)
+			{
+				for (size_t j=0; j<C; ++j)
+				{
+					inv[i][j] = Slice(j, i).Det() / det;
+					if ((i+j)%2 == 0) inv[i][j] = -inv[i][j];
+				}
+			}
+			return inv;
 		}
 
 		[[nodiscard]] constexpr Matrix<T, R-1, C-1> Slice(const size_t y, const size_t x) const noexcept
