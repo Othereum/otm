@@ -32,26 +32,7 @@ namespace otm
 
 		[[nodiscard]] constexpr Mat4 ToMatrix() const noexcept
 		{
-			return Mat4::Identity(MakeScale(scale)) * Mat4::Identity(MakeRotation(rot)) * MakeTranslation(pos);
-		}
-
-		Transform operator*(const Transform& r) const noexcept
-		{
-			Transform out;
-			out.rot = r.rot * rot;
-
-			const auto scaled_pos_l = pos * r.scale;
-			const auto rotated_pos = scaled_pos_l.RotatedBy(r.rot);
-			out.pos = rotated_pos + r.pos;
-
-			out.scale = scale * r.scale;
-
-			return out;
-		}
-
-		Transform& operator*=(const Transform& r) noexcept
-		{
-			return *this = *this * r;
+			return MakeScale<4>(scale) * MakeRotation<4>(rot) * MakeTranslation(pos);
 		}
 	};
 

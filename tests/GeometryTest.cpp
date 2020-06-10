@@ -72,11 +72,7 @@ TEST(Geometry, DecompMatToTrsf)
 {
 	for (auto i=0; i<100; ++i)
 	{
-		const Transform trsf1{
-			Vec3::Rand(-1000, 1000),
-			Quat::Rand(),
-			Vec3::Rand(0.1, 10)
-		};
+		const Transform trsf1{Vec3::Rand(-100, 100), Quat::Rand(), Vec3::Rand(0.1, 10)};
 		const Transform trsf2{trsf1.ToMatrix()};
 		
 		ASSERT_TRUE(IsNearlyEqual(trsf1.pos, trsf2.pos));

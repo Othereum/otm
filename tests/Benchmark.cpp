@@ -2,7 +2,7 @@
 #include "otm/Matrix.hpp"
 
 using namespace otm;
-constexpr auto kCnt = 10'000'000;
+constexpr auto kCnt = 1'000'000;
 
 TEST(Benchmark, Float)
 {
