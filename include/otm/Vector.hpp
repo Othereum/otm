@@ -619,9 +619,28 @@ namespace otm
 				return Rand();
 			}
 		}
+
+		void RotateBy(const Quaternion<T>& q) noexcept
+		{
+			static_assert(L == 3);
+			reinterpret_cast<Vector<T, 3>&>(*this).RotateBy(q);
+		}
+
+		[[nodiscard]] UnitVec RotatedBy(const Quaternion<T>& q) const noexcept
+		{
+			static_assert(L == 3);
+			return reinterpret_cast<const UnitVec&>(
+				reinterpret_cast<const Vector<T, 3>&>(*this).RotatedBy(q)
+			);
+		}
+
+		[[nodiscard]] constexpr T Len() const noexcept { return 1; }
+		[[nodiscard]] constexpr T LenSqr() const noexcept { return 1; }
 		
 		[[nodiscard]] constexpr const Vector<T, L>& Get() const noexcept { return v; }
 		constexpr operator const Vector<T, L>&() const noexcept { return v; }
+		constexpr const Vector<T, L>* operator->() const noexcept { return &v; }
+		constexpr const Vector<T, L>& operator*() const noexcept { return v; }
 
 	private:
 		template <class, class>
@@ -633,7 +652,7 @@ namespace otm
 		constexpr UnitVec(Args... args) noexcept: v{static_cast<T>(args)...} {}
 		constexpr UnitVec(const Vector<T, L>& v) noexcept: v{v} {}
 		
-		const Vector<T, L> v{};
+		Vector<T, L> v{};
 	};
 
 	template <class T, size_t L>
