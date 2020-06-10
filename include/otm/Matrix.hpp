@@ -163,20 +163,6 @@ namespace otm
 			return v;
 		}
 
-		constexpr void ColAssign(size_t c, const Vector<T, R>& v)
-		{
-			if (c >= C) OutOfRange();
-			for (size_t r=0; r<R; ++r) arr[r][c] = v[r];
-		}
-
-		template <size_t L = Min(R, C)>
-		[[nodiscard]] constexpr Vector<T, L> Diag() const noexcept
-		{
-			Vector<T, L> v;
-			for (size_t i=0; i<Min(L, R, C); ++i) v[i] = arr[i][i];
-			return v;
-		}
-
 		[[nodiscard]] constexpr auto& AsVectors() noexcept { return arr; }
 		[[nodiscard]] constexpr auto& AsVectors() const noexcept { return arr; }
 		[[nodiscard]] auto& AsFlatArr() noexcept { return reinterpret_cast<T(&)[R*C]>(arr); }
