@@ -237,6 +237,35 @@ namespace otm
 			return t;
 		}
 
+		[[nodiscard]] constexpr T Determinant() const noexcept
+		{
+			static_assert(R == C);
+			if constexpr (R == 1)
+			{
+				return arr[0][0];
+			}
+			else if constexpr (R == 2)
+			{
+				return arr[0][0]*arr[1][1] - arr[0][1]*arr[1][0];
+			}
+			else
+			{
+				auto plus = true;
+				T det = 0;
+				for (size_t i=0; i<R; ++i)
+				{
+					Matrix<T, R-1> m; size_t j = 0;
+					for (; j<i; ++j) m[j] = Vector<T, R-1>{arr[j]};
+					for (++j; j<R; ++j) m[j-1] = Vector<T, R-1>{arr[j]};
+					
+					const auto x = arr[i][R-1] * m.Determinant();
+					if (plus) det += x; else det -= x;
+					plus = !plus;
+				}
+				return det;
+			}
+		}
+
 		[[nodiscard]] constexpr iterator begin() noexcept { return arr; }
 		[[nodiscard]] constexpr const_iterator begin() const noexcept { return arr; }
 		[[nodiscard]] constexpr const_iterator cbegin() const noexcept { return arr; }
