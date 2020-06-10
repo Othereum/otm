@@ -46,13 +46,13 @@ namespace otm
 
 	// [min, max] for integral
 	// [min, max) for floating point
-	template <class T1 = Float, class T2 = Float, class T = std::common_type_t<T1, T2>>
-	[[nodiscard]] T Rand(T1 min = 0, T2 max = std::is_integral_v<T> ? std::numeric_limits<T>::max() : 1) noexcept
+	template <class T1 = Float, class T2 = T1, class T = std::common_type_t<T1, T2>>
+	[[nodiscard]] T Rand(T1 min = 0, T2 max = std::is_integral_v<T1> ? std::numeric_limits<T1>::max() : T1(1)) noexcept
 	{
 		using Distribution = std::conditional_t<std::is_integral_v<T>,
 			std::uniform_int_distribution<T>, std::uniform_real_distribution<T>>;
 		
-		return Distribution{min, max}(random_engine);
+		return Distribution{T(min), T(max)}(random_engine);
 	}
 
 	template <class T, class U>
