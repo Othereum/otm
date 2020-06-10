@@ -4,6 +4,10 @@
 
 namespace otm
 {
+	/**
+	 * \brief Make rotation matrix from quaternion
+	 * \tparam L Size of matrix to make
+	 */
 	template <size_t L = 3, class T = Float>
 	constexpr Matrix<T, L> MakeRotation(const Quaternion<T>& rotation) noexcept
 	{
@@ -23,6 +27,10 @@ namespace otm
 		return m;
 	}
 
+	/**
+	 * \brief Make scale matrix
+	 * \tparam L Size of matrix to make
+	 */
 	template <size_t L = 3, class T = Float>
 	constexpr Matrix<T, L> MakeScale(const Vector<T, 3>& scale) noexcept
 	{
@@ -39,12 +47,20 @@ namespace otm
 		return s;
 	}
 	
+	/**
+	 * \brief Make translation matrix
+	 */
 	template <class T = Float>
 	constexpr Matrix<T, 4> MakeTranslation(const Vector<T, 3>& pos) noexcept
 	{
 		return Matrix<T, 4>::Identity(pos.ToRowMatrix(), {0, 3});
 	}
 
+	/**
+	 * \brief Make simple projection matrix.
+	 * \tparam L Size of matrix to make. Must be 2 or greater.
+	 * \param screen Screen size. Must not be zero.
+	 */
 	template <size_t L = 2, class T = Float>
 	constexpr Matrix<CommonFloat<T>, L> MakeSimpleViewProj(const Vector<T, 2>& screen) noexcept
 	{
@@ -60,6 +76,12 @@ namespace otm
 		return proj;
 	}
 
+	/**
+	 * \brief Make orthographic projection matrix.
+	 * \param screen Screen size. Must not be zero.
+	 * \param near Near plane distance.
+	 * \param far Far plane distance. Must be greater than near.
+	 */
 	template <class T = Float>
 	constexpr Matrix<T, 4> MakeOrtho(const Vector<T, 2>& screen, T near, T far) noexcept
 	{
@@ -69,6 +91,13 @@ namespace otm
 		return m;
 	}
 
+	/**
+	 * \brief Make perspective projection matrix
+	 * \param screen Screen size. Must not be zero.
+	 * \param near Near plane distance.
+	 * \param far Far plane distance. Must be greater than near.
+	 * \param hfov Horizontal viewing angle. Must be greater than zero.
+	 */
 	template <class Ratio, class T = Float>
 	constexpr Matrix<T, 4> MakePerspective(const Vector<T, 2>& screen, T near, T far, Angle<Ratio, T> hfov) noexcept
 	{
@@ -83,6 +112,13 @@ namespace otm
 		};
 	}
 
+	/**
+	 * \brief Make look-at view matrix
+	 * \param eye Eye location
+	 * \param target Look-at location. The distance from the eye must be greater than zero.
+	 * \param up World up direction. Must never be parallel to (target-eye).
+	 * \throws DivByZero If passed arguments violates conditions
+	 */
 	template <class T = Float>
 	static Matrix<T, 4> MakeLookAt(const Vector<T, 3>& eye, const Vector<T, 3>& target, const Vector<T, 3>& up)
 	{
