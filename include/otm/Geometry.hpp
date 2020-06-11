@@ -96,12 +96,12 @@ namespace otm
 	 * \param screen Screen size. Must not be zero.
 	 * \param near Near plane distance.
 	 * \param far Far plane distance. Must be greater than near.
-	 * \param hfov Horizontal viewing angle. Must be greater than zero.
+	 * \param vfov Vertical viewing angle. Must be greater than zero.
 	 */
 	template <class Ratio, class T = Float>
-	constexpr Matrix<T, 4> MakePerspective(const Vector<T, 2>& screen, T near, T far, Angle<Ratio, T> hfov) noexcept
+	constexpr Matrix<T, 4> MakePerspective(const Vector<T, 2>& screen, T near, T far, Angle<Ratio, T> vfov) noexcept
 	{
-		const auto y_scale = 1/Tan(hfov/2);
+		const auto y_scale = 1/Tan(vfov/2);
 		const auto x_scale = y_scale * (screen[1] / screen[0]);
 
 		return {
