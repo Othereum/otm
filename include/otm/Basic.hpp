@@ -209,6 +209,12 @@ namespace otm
 		return a + alpha * (b - a);
 	}
 	
+	template <size_t L, class T, class U, class V> 
+	[[nodiscard]] constexpr auto Lerp(const Vector<T, L>& a, const Vector<U, L>& b, V alpha) noexcept
+	{
+		return a + alpha * (b - a);
+	}
+	
 	template <class T, class U = Float>
 	CommonFloat<T, U> GetRangePct(const Vector<U, 2>& range, T val) noexcept
 	{
