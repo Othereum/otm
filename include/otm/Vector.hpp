@@ -248,25 +248,23 @@ namespace otm
 		 */
 		void Normalize()
 		{
-			if (!Normalize(std::nothrow)) throw DivByZero{};
+			if (!TryNormalize()) throw DivByZero{};
 		}
 
-		bool Normalize(std::nothrow_t) noexcept
+		bool TryNormalize() noexcept
 		{
 			static_assert(std::is_same_v<T, CommonFloat<T>>, "Can't use Normalize() for this type. Use Unit() instead.");
 			const auto lensqr = LenSqr();
-			if (lensqr <= kSmallNum) return false;
-			*this /= std::sqrt(lensqr);
+			if (lensqr <= kSmallNumV<T>) return false;
+			*this /= std::sqrt(ToFloat(lensqr));
 			return true;
 		}
 
 		/**
 		 * \brief Get normalized vector
-		 * \return Normalized vector
-		 * \throws DivByZero if IsNearlyZero(LenSqr())
+		 * \return Normalized vector or nullopt if length is zero
 		 */
-		[[nodiscard]] UnitVec<CommonFloat<T>, L> Unit() const;
-		[[nodiscard]] std::optional<UnitVec<CommonFloat<T>, L>> Unit(std::nothrow_t) const;
+		[[nodiscard]] std::optional<UnitVec<CommonFloat<T>, L>> Unit() const noexcept;
 
 		[[nodiscard]] Matrix<T, 1, L>& AsRowMatrix() noexcept
 		{
@@ -610,14 +608,8 @@ namespace otm
 		{
 			Vector<T, L> v;
 			v.Transform([](auto&&...) { return Gauss<T, T>(0, 1); });
-			try
-			{
-				return v.Unit();
-			}
-			catch (const DivByZero&)
-			{
-				return Rand();
-			}
+			if (auto u = v.Unit()) return *u;
+			return Rand();
 		}
 
 		void RotateBy(const Quaternion<T>& q) noexcept
@@ -658,19 +650,11 @@ namespace otm
 	};
 
 	template <class T, size_t L>
-	UnitVec<CommonFloat<T>, L> Vector<T, L>::Unit() const
+	std::optional<UnitVec<CommonFloat<T>, L>> Vector<T, L>::Unit() const noexcept
 	{
 		const auto lensqr = LenSqr();
-		if (lensqr <= kSmallNum) throw DivByZero{};
-		return *this / std::sqrt(lensqr);
-	}
-	
-	template <class T, size_t L>
-	std::optional<UnitVec<CommonFloat<T>, L>> Vector<T, L>::Unit(std::nothrow_t) const
-	{
-		const auto lensqr = LenSqr();
-		if (lensqr <= kSmallNum) return {};
-		return UnitVec{*this / std::sqrt(lensqr)};
+		if (lensqr <= kSmallNumV<T>) return {};
+		return UnitVec{*this / std::sqrt(ToFloat(lensqr))};
 	}
 
 	template <class Ratio, class T>

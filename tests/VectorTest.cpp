@@ -41,12 +41,11 @@ namespace otm
 	{
 		Vec4 v1;
 		EXPECT_THROW(v1.Normalize(), DivByZero);
-		EXPECT_THROW((void)v1.Unit(), DivByZero);
-		EXPECT_FALSE(v1.Normalize(std::nothrow));
-		EXPECT_FALSE(v1.Unit(std::nothrow).has_value());
+		EXPECT_FALSE(v1.TryNormalize());
+		EXPECT_FALSE(v1.Unit().has_value());
 		
 		constexpr Vec3 v2{1, 1, 1};
-		const Vec3 v3 = v2.Unit();
+		const Vec3 v3 = *v2.Unit();
 		constexpr auto f = 0.5773502691896258f;
 		auto pred = [f](Float x){ return IsNearlyEqual(x, f); };
 		EXPECT_TRUE(std::all_of(v3.begin(), v3.end(), pred));
