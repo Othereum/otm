@@ -4,6 +4,18 @@
 
 namespace otm
 {
+	struct Sphere
+	{
+		Vec3 pos;
+		Float radius;
+	};
+	
+	constexpr bool IsOverlapped(const Sphere& a, const Sphere& b) noexcept
+	{
+		const auto max_dist = a.radius + b.radius;
+		return a.pos.DistSqr(b.pos) < max_dist*max_dist;
+	}
+	
 	/**
 	 * \brief Make rotation matrix from quaternion
 	 * \tparam L Size of matrix to make
