@@ -81,6 +81,14 @@ namespace otm
 		return Min(Min(x1, x2), x3, xs...);
 	}
 
+	template <class T, size_t L>
+	[[nodiscard]] constexpr T Min(const Vector<T, L>& v) noexcept
+	{
+		auto m = v[0];
+		for (size_t i=1; i<L; ++i) m = Min(m, v[i]);
+		return m;
+	}
+
 	template <class T1, class T2>
 	[[nodiscard]] constexpr auto Max(T1 a, T2 b) noexcept
 	{
@@ -91,6 +99,14 @@ namespace otm
 	[[nodiscard]] constexpr auto Max(T1 x1, T2 x2, T3 x3, Ts... xs) noexcept
 	{
 		return Max(Max(x1, x2), x3, xs...);
+	}
+
+	template <class T, size_t L>
+	[[nodiscard]] constexpr T Max(const Vector<T, L>& v) noexcept
+	{
+		auto m = v[0];
+		for (size_t i=1; i<L; ++i) m = Max(m, v[i]);
+		return m;
 	}
 
 	template <class T, class U, class V>
