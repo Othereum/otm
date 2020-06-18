@@ -9,7 +9,12 @@ namespace otm
 
 	constexpr Float operator""_f(unsigned long long f) noexcept { return static_cast<Float>(f); }
 	constexpr Float operator""_f(long double f) noexcept { return static_cast<Float>(f); }
+
+	template <class... T>
+	using CommonFloat = std::common_type_t<Float, T...>;
+
 	
+	struct Transform;
 	
 	template <class T>
 	struct Quaternion;
@@ -51,8 +56,4 @@ namespace otm
 	using Mat2 = Matrix<Float, 2>;
 	using Mat3 = Matrix<Float, 3>;
 	using Mat4 = Matrix<Float, 4>;
-
-
-	template <class... T>
-	using CommonFloat = std::common_type_t<Float, T...>;
 }
