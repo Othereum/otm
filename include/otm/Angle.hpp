@@ -92,4 +92,16 @@ namespace otm
 	{
 		return r * f;
 	}
+
+	template <class T>
+	Angle<RadR, T> V2HFov(Angle<RadR, T> vfov, Vector<T, 2> scr)
+	{
+		return 2 * Atan(Tan(vfov/2) * (scr[0]/scr[1]));
+	}
+
+	template <class T>
+	Angle<RadR, T> H2VFov(Angle<RadR, T> hfov, Vector<T, 2> scr)
+	{
+		return 2 * Atan(Tan(hfov/2) * (scr[1]/scr[0]));
+	}
 }
