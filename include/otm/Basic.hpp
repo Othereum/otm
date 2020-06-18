@@ -142,13 +142,19 @@ namespace otm
 	template <class T>
 	Angle<RadR, CommonFloat<T>> Acos(T x) noexcept
 	{
-		return Angle<RadR, CommonFloat<T>>{std::acos(x)};
+		return Angle<RadR, CommonFloat<T>>{std::acos(ToFloat(x))};
 	}
 	
 	template <class T>
 	Angle<RadR, CommonFloat<T>> Asin(T y) noexcept
 	{
-		return Angle<RadR, CommonFloat<T>>{std::asin(y)};
+		return Angle<RadR, CommonFloat<T>>{std::asin(ToFloat(y))};
+	}
+	
+	template <class T>
+	Angle<RadR, CommonFloat<T>> Atan(T x) noexcept
+	{
+		return Angle<RadR, CommonFloat<T>>{std::atan(ToFloat(x))};
 	}
 	
 	template <class T, class U>
