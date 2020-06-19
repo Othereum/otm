@@ -118,7 +118,7 @@ namespace otm
 	template <class T>
 	[[nodiscard]] constexpr T Abs(T x) noexcept
 	{
-		return x >= 0 ? x : -x;
+		return x >= T(0) ? x : -x;
 	}
 
 	template <class Ratio, class T>
