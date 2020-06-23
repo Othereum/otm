@@ -621,7 +621,7 @@ namespace otm
 		[[nodiscard]] UnitVec RotatedBy(const Quaternion<T>& q) const noexcept
 		{
 			static_assert(L == 3);
-			return reinterpret_cast<const UnitVec&>(
+			return static_cast<UnitVec>(
 				reinterpret_cast<const Vector<T, 3>&>(*this).RotatedBy(q)
 			);
 		}
