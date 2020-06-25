@@ -172,7 +172,11 @@ namespace otm
 		{
 		}
 
+		~Vector() = default;
 		constexpr Vector(const Vector&) noexcept = default;
+		constexpr Vector(Vector&&) noexcept = default;
+		constexpr Vector& operator=(const Vector&) noexcept = default;
+		constexpr Vector& operator=(Vector&&) noexcept = default;
 
 		template <class T2, size_t L2>
 		explicit constexpr Vector(const Vector<T2, L2>& r) noexcept
