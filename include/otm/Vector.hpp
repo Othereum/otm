@@ -235,10 +235,10 @@ namespace otm
 		}
 			
 		template <class T2, size_t L2>
-		constexpr bool operator==(const Vector<T2, L2>& r) const noexcept { return false; }
+		constexpr bool operator==(const Vector<T2, L2>&) const noexcept { return false; }
 		
 		template <class T2, size_t L2>
-		constexpr bool operator!=(const Vector<T2, L2>& r) const noexcept { return true; }
+		constexpr bool operator!=(const Vector<T2, L2>&) const noexcept { return true; }
 			
 		[[nodiscard]] constexpr T LenSqr() const noexcept { return *this | *this; }
 		[[nodiscard]] CommonFloat<T> Len() const noexcept { return std::sqrt(ToFloat(LenSqr())); }
