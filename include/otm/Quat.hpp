@@ -92,7 +92,7 @@ namespace otm
 	void detail::VecBase<T, 3>::RotateBy(const Quaternion<F>& q) noexcept
 	{
 		static_assert(std::is_same_v<std::remove_cvref_t<decltype(this->RotatedBy())>, std::remove_cvref_t<decltype(*this)>>);
-		*this = this->RotatedBy();
+		*this = this->RotatedBy(q);
 	}
 
 	template <class T>
