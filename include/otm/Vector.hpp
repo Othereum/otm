@@ -204,13 +204,13 @@ namespace otm
 
 			if (offset >= 0)
 			{
-				size = Min(L - Min(L, offset), L2);
+				size = Min(L - Min(L, static_cast<size_t>(offset)), L2);
 				for (size_t i = 0; i < size; ++i)
 					(*this)[i + offset] = static_cast<T>(other[i]);
 			}
 			else
 			{
-				size = Min(L, L2 - Min(L2, -offset));
+				size = Min(L, L2 - Min(L2, static_cast<size_t>(-offset)));
 				for (size_t i = 0; i < size; ++i)
 					(*this)[i] = static_cast<T>(other[i - offset]);
 			}

@@ -94,13 +94,13 @@ namespace otm
 		{
 			if (offset[1] >= 0)
 			{
-				const auto size = Min(R - Min(R, offset[1]), R2);
+				const auto size = Min(R - Min(R, static_cast<size_t>(offset[1])), R2);
 				for (size_t i = 0; i < size; ++i)
 					(*this)[i + offset[1]].Assign(other[i], offset[0]);
 			}
 			else
 			{
-				const auto size = Min(R, R2 - Min(R2, -offset[1]));
+				const auto size = Min(R, R2 - Min(R2, static_cast<size_t>(-offset[1])));
 				for (size_t i = 0; i < size; ++i)
 					(*this)[i].Assign(other[i - offset[1]], offset[0]);
 			}
