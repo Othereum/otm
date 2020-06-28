@@ -79,7 +79,7 @@ namespace otm
 			Assign({x, y, static_cast<T>(args)...});
 		}
 
-		template <class Fn, std::enable_if_t<std::is_invocable_v<Fn>, int> = 0>
+		template <class Fn, std::enable_if_t<std::is_invocable_r_v<T, Fn>, int> = 0>
 		explicit constexpr Matrix(Fn fn) noexcept(std::is_nothrow_invocable_v<Fn>)
 		{
 			for (auto& v : arr) v.Transform([&](auto&&...){return fn();});
