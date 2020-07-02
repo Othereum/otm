@@ -107,8 +107,8 @@ namespace otm
 	{
 	public:
 		DivByZero() :logic_error{"Division by zero"} {}
-		DivByZero(const std::string& s) :logic_error{s} {}
-		DivByZero(const char* s) :logic_error{s} {}
+		explicit DivByZero(const std::string& s) :logic_error{s} {}
+		explicit DivByZero(const char* s) :logic_error{s} {}
 	};
 
 	template <class T, size_t L>
