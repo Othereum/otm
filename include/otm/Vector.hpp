@@ -630,9 +630,6 @@ namespace otm
 			);
 		}
 
-		[[nodiscard]] constexpr T Len() const noexcept { return 1; }
-		[[nodiscard]] constexpr T LenSqr() const noexcept { return 1; }
-
 		constexpr T operator[](size_t i) const noexcept { return v[i]; }
 		
 		[[nodiscard]] constexpr const Vector<T, L>& Get() const noexcept { return v; }
