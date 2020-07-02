@@ -127,22 +127,30 @@ namespace otm
 	/**
 	 * \brief Make look-at view matrix
 	 * \param eye Eye location
-	 * \param dir Look-at direction.
-	 * \param up World up direction. Must never be parallel to (target-eye).
-	 * \throws DivByZero If passed arguments violates conditions
+	 * \param dir Look-at direction. Must never be parallel to up
+	 * \param up World up direction. Must never be parallel to dir
+	 * \return look-at view matrix or nullopt if dir and up are parallel to each other
 	 */
 	template <class T = Float>
-	static Matrix<T, 4> MakeLookAt(const Vector<T, 3>& eye, const UnitVec<T, 3>& dir, const UnitVec<T, 3>& up)
+	static std::optional<Matrix<T, 4>> MakeLookAt(const Vector<T, 3>& eye,
+		const UnitVec<T, 3>& dir, const UnitVec<T, 3>& up) noexcept
 	{
-		auto i = *up ^ *dir; i.Normalize();
-		auto j = *dir ^ i; j.Normalize();
-		Vec3 t{eye|i, eye|j, eye|*dir}; t.Negate();
+		try
+		{
+			auto i = *up ^ *dir; i.Normalize();
+			auto j = *dir ^ i; j.Normalize();
+			Vec3 t{eye|i, eye|j, eye|*dir}; t.Negate();
 
-		return {
-			i[0], j[0], dir[0], 0,
-			i[1], j[1], dir[1], 0,
-			i[2], j[2], dir[2], 0,
-			t[0], t[1], t[2], 1
-		};
+			return Matrix<T, 4>{
+				i[0], j[0], dir[0], 0,
+				i[1], j[1], dir[1], 0,
+				i[2], j[2], dir[2], 0,
+				t[0], t[1], t[2], 1
+			};
+		}
+		catch (...)
+		{
+			return std::nullopt;
+		}
 	}
 }
