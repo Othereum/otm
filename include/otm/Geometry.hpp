@@ -127,22 +127,21 @@ namespace otm
 	/**
 	 * \brief Make look-at view matrix
 	 * \param eye Eye location
-	 * \param target Look-at location. The distance from the eye must be greater than zero.
+	 * \param dir Look-at direction.
 	 * \param up World up direction. Must never be parallel to (target-eye).
 	 * \throws DivByZero If passed arguments violates conditions
 	 */
 	template <class T = Float>
-	static Matrix<T, 4> MakeLookAt(const Vector<T, 3>& eye, const Vector<T, 3>& target, const Vector<T, 3>& up)
+	static Matrix<T, 4> MakeLookAt(const Vector<T, 3>& eye, const UnitVec<T, 3>& dir, const UnitVec<T, 3>& up)
 	{
-		auto k = target - eye; k.Normalize();
-		auto i = up ^ k; i.Normalize();
-		auto j = k ^ i; j.Normalize();
-		Vec3 t{eye|i, eye|j, eye|k}; t.Negate();
+		auto i = *up ^ *dir; i.Normalize();
+		auto j = *dir ^ i; j.Normalize();
+		Vec3 t{eye|i, eye|j, eye|*dir}; t.Negate();
 
 		return {
-			i[0], j[0], k[0], 0,
-			i[1], j[1], k[1], 0,
-			i[2], j[2], k[2], 0,
+			i[0], j[0], dir[0], 0,
+			i[1], j[1], dir[1], 0,
+			i[2], j[2], dir[2], 0,
 			t[0], t[1], t[2], 1
 		};
 	}
