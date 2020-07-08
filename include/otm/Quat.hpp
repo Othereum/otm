@@ -30,7 +30,7 @@ namespace otm
 		{
 			if (const auto trace = m[0][0] + m[1][1] + m[2][2]; trace > 0)
 			{
-				const auto t = 0.5_f / sqrt(trace + 1);
+				const auto t = 0.5_f / std::sqrt(trace + 1);
 				v[0] = (m[1][2] - m[2][1]) * t;
 				v[1] = (m[2][0] - m[0][2]) * t;
 				v[2] = (m[0][1] - m[1][0]) * t;
@@ -38,7 +38,7 @@ namespace otm
 			}
 			else if (m[0][0] > m[1][1] && m[0][0] > m[2][2])
 			{
-				const auto t = 2 * sqrt(1 + m[0][0] - m[1][1] - m[2][2]);
+				const auto t = 2 * std::sqrt(1 + m[0][0] - m[1][1] - m[2][2]);
 				v[0] = 0.25_f * t;
 				v[1] = (m[0][1] + m[1][0]) / t;
 				v[2] = (m[0][2] + m[2][0]) / t;
@@ -46,7 +46,7 @@ namespace otm
 			}
 			else if (m[1][1] > m[2][2])
 			{
-				const auto t = 2 * sqrt(1 + m[1][1] - m[0][0] - m[2][2]);
+				const auto t = 2 * std::sqrt(1 + m[1][1] - m[0][0] - m[2][2]);
 				v[0] = (m[0][1] + m[1][0]) / t;
 				v[1] = 0.25_f * t;
 				v[2] = (m[1][2] + m[2][1] ) / t;
@@ -54,7 +54,7 @@ namespace otm
 			}
 			else
 			{
-				const auto t = 2 * sqrt(1 + m[2][2] - m[0][0] - m[1][1]);
+				const auto t = 2 * std::sqrt(1 + m[2][2] - m[0][0] - m[1][1]);
 				v[0] = (m[0][2] + m[2][0]) / t;
 				v[1] = (m[1][2] + m[2][1]) / t;
 				v[2] = 0.25_f * t;
@@ -62,14 +62,24 @@ namespace otm
 			}
 		}
 
-		constexpr Quaternion& operator*=(const Quaternion& q) noexcept { return *this = *this * q; }
+		constexpr void Invert() noexcept { Conjugate(); *this /= LenSqr(); }
+		constexpr void Conjugate() noexcept { v.Negate(); }
+		
+		[[nodiscard]] T Len() const noexcept { return std::sqrt(LenSqr()); }
+		[[nodiscard]] constexpr T LenSqr() const noexcept { return s*s + v.LenSqr(); }
+		
+		constexpr Quaternion operator~() const noexcept { return **this / LenSqr(); }
+		constexpr Quaternion operator*() const noexcept { return {-v, s}; }
+		constexpr Quaternion operator*(T f) const noexcept { auto t = *this; t *= f; return t; }
+		constexpr Quaternion operator/(T f) const noexcept { auto t = *this; t /= f; return t; }
 		constexpr Quaternion operator*(const Quaternion& q) const noexcept
 		{
 			return {s*q.v + q.s*v + (v^q.v), s*q.s - (v|q.v)};
 		}
-
-		constexpr void Invert() noexcept { v.Negate(); }
-		constexpr Quaternion operator~() const noexcept { return {-v, s}; }
+		
+		constexpr Quaternion& operator*=(T f) noexcept { s *= f; v *= f; return *this; }
+		constexpr Quaternion& operator/=(T f) noexcept { s /= f; v /= f; return *this; }
+		constexpr Quaternion& operator*=(const Quaternion& q) noexcept { return *this = *this * q; }
 	};
 
 	template <class T, class V = T>
@@ -84,7 +94,8 @@ namespace otm
 	{
 		using Tf = std::common_type_t<T, F>;
 		auto& vr = static_cast<const Vector<T, 3>&>(*this);
-		return (q * Quaternion<Tf>{Vector<Tf, 3>{vr}, 0} * ~q).v;
+		const auto p = Quaternion<Tf>{Vector<Tf, 3>{vr}, 0};
+		return (q * p * ~q).v;
 	}
 
 	template <class T>
