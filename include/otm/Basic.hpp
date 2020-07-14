@@ -120,6 +120,12 @@ namespace otm
 		return x >= T(0) ? x : -x;
 	}
 
+	template <class T>
+	[[nodiscard]] constexpr T Sign(T x) noexcept
+	{
+		return x >= T(0) ? T(1) : T(-1);
+	}
+
 	template <class Ratio, class T>
 	T Cos(Angle<Ratio, T> t) noexcept
 	{
