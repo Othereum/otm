@@ -351,12 +351,12 @@ namespace otm
 
 		constexpr Vector& operator*=(T f) noexcept
 		{
-			return Transform([f](T v) { return v * f; });
+			return Transform([f](T v) -> T { return v * f; });
 		}
 
 		constexpr Vector& operator/=(T f) noexcept
 		{
-			return Transform([f](T v) { return v / f; });
+			return Transform([f](T v) -> T { return v / f; });
 		}
 
 		template <class U>
