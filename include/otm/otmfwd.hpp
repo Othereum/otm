@@ -33,11 +33,16 @@ namespace otm
 	using Vec3 = Vector<Float, 3>;
 	using Vec4 = Vector<Float, 4>;
 	
+	using Vec2i = Vector<int32_t, 2>;
+	using Vec2u = Vector<uint32_t, 2>;
+	using Vec3i = Vector<int32_t, 3>;
+	using Vec3u = Vector<uint32_t, 3>;
+	
 	using Vec2i16 = Vector<int16_t, 2>;
 	using Vec2u16 = Vector<uint16_t, 2>;
 	using Vec3i16 = Vector<int16_t, 3>;
 	using Vec3u16 = Vector<uint16_t, 3>;
-	
+
 	using UVec2 = UnitVec<Float, 2>;
 	using UVec3 = UnitVec<Float, 3>;
 	using UVec4 = UnitVec<Float, 4>;
