@@ -264,6 +264,11 @@ namespace otm
 			return true;
 		}
 
+		constexpr void Clamp(T min, T max) noexcept
+		{
+			Transform([&](T x) { return Clamp(x, min, max); });
+		}
+
 		/**
 		 * \brief Get normalized vector
 		 * \return Normalized vector or nullopt if length is zero
