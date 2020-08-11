@@ -15,16 +15,20 @@ namespace otm
 	inline thread_local std::default_random_engine random_engine{std::random_device{}()};
 
 	template <class T1, class T2>
-	[[nodiscard]] constexpr T1 Log(T1 x, T2 base) noexcept
+	[[nodiscard]] constexpr T1 IntLog(T1 x, T2 base) noexcept
 	{
+		static_assert(std::is_integral_v<T1> && std::is_integral_v<T2>);
+		
 		T1 cnt = 0;
 		while ((x /= base) > 0) ++cnt;
 		return cnt;
 	}
 
 	template <class T1, class T2>
-	[[nodiscard]] constexpr T1 LogCeil(T1 x, T2 base) noexcept
+	[[nodiscard]] constexpr T1 IntLogCeil(T1 x, T2 base) noexcept
 	{
+		static_assert(std::is_integral_v<T1> && std::is_integral_v<T2>);
+		
 		T1 cnt = 0;
 		auto remain = false;
 
