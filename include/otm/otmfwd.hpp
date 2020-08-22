@@ -1,7 +1,7 @@
 #pragma once
 #include <cstddef>
-#include <type_traits>
 #include <ratio>
+#include <type_traits>
 
 namespace otm
 {
@@ -37,11 +37,15 @@ namespace otm
 	using Vec2u = Vector<uint32_t, 2>;
 	using Vec3i = Vector<int32_t, 3>;
 	using Vec3u = Vector<uint32_t, 3>;
+	using Vec4i = Vector<int32_t, 4>;
+	using Vec4u = Vector<uint32_t, 4>;
 	
 	using Vec2i16 = Vector<int16_t, 2>;
 	using Vec2u16 = Vector<uint16_t, 2>;
 	using Vec3i16 = Vector<int16_t, 3>;
 	using Vec3u16 = Vector<uint16_t, 3>;
+	using Vec4i16 = Vector<int16_t, 4>;
+	using Vec4u16 = Vector<uint16_t, 4>;
 
 	using UVec2 = UnitVec<Float, 2>;
 	using UVec3 = UnitVec<Float, 3>;
