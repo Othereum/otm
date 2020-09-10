@@ -4,12 +4,10 @@
 
 namespace otm
 {
-template <class T>
-constexpr auto kPiV = static_cast<T>(PiRatio::num) / static_cast<T>(PiRatio::den);
+template <class T> constexpr auto kPiV = static_cast<T>(PiRatio::num) / static_cast<T>(PiRatio::den);
 constexpr auto kPi = kPiV<Float>;
 
-template <class T>
-constexpr auto kSmallNumV = static_cast<T>(1e-5);
+template <class T> constexpr auto kSmallNumV = static_cast<T>(1e-5);
 constexpr auto kSmallNum = kSmallNumV<Float>;
 
 inline thread_local std::default_random_engine random_engine{std::random_device{}()};
@@ -34,8 +32,8 @@ template <class To, class From>
             return true;
 
         else
-            return from <= static_cast<From>(std::numeric_limits<To>::max()) && from >= static_cast<From>(
-                       std::numeric_limits<To>::lowest());
+            return from <= static_cast<From>(std::numeric_limits<To>::max()) &&
+                   from >= static_cast<From>(std::numeric_limits<To>::lowest());
     }
 
     else if constexpr (std::is_signed_v<To>)
@@ -75,8 +73,7 @@ static_assert(IsSafelyConvertible<int16_t>(20000u));
 static_assert(!IsSafelyConvertible<uint16_t>(-20));
 static_assert(IsSafelyConvertible<uint16_t>(2062));
 
-template <class T1, class T2>
-[[nodiscard]] constexpr T1 IntLog(T1 x, T2 base) noexcept
+template <class T1, class T2>[[nodiscard]] constexpr T1 IntLog(T1 x, T2 base) noexcept
 {
     static_assert(std::is_integral_v<T1> && std::is_integral_v<T2>);
 
@@ -86,8 +83,7 @@ template <class T1, class T2>
     return cnt;
 }
 
-template <class T1, class T2>
-[[nodiscard]] constexpr T1 IntLogCeil(T1 x, T2 base) noexcept
+template <class T1, class T2>[[nodiscard]] constexpr T1 IntLogCeil(T1 x, T2 base) noexcept
 {
     static_assert(std::is_integral_v<T1> && std::is_integral_v<T2>);
 
@@ -103,8 +99,7 @@ template <class T1, class T2>
     return cnt + remain;
 }
 
-template <class T>
-[[nodiscard]] constexpr T PadToPowerOf2(T x) noexcept
+template <class T>[[nodiscard]] constexpr T PadToPowerOf2(T x) noexcept
 {
     return 1 << LogCeil(x, 2);
 }
@@ -114,40 +109,34 @@ template <class T>
 template <class T1 = Float, class T2 = T1, class T = std::common_type_t<T1, T2>>
 [[nodiscard]] T Rand(T1 min = 0, T2 max = std::is_integral_v<T1> ? std::numeric_limits<T1>::max() : T1(1)) noexcept
 {
-    using Distribution = std::conditional_t<std::is_integral_v<T>,
-                                            std::uniform_int_distribution<T>, std::uniform_real_distribution<T>>;
+    using Distribution =
+        std::conditional_t<std::is_integral_v<T>, std::uniform_int_distribution<T>, std::uniform_real_distribution<T>>;
 
     return Distribution{T(min), T(max)}(random_engine);
 }
 
-template <class T, class U>
-[[nodiscard]] CommonFloat<T, U> Gauss(T mean, U stddev) noexcept
+template <class T, class U>[[nodiscard]] CommonFloat<T, U> Gauss(T mean, U stddev) noexcept
 {
-    return std::normal_distribution<CommonFloat<T, U>>{
-        ToFloat<U>(mean), ToFloat<T>(stddev)
-    }(random_engine);
+    return std::normal_distribution<CommonFloat<T, U>>{ToFloat<U>(mean), ToFloat<T>(stddev)}(random_engine);
 }
 
-template <class T, class... Ts>
-[[nodiscard]] constexpr CommonFloat<T, Ts...> ToFloat(T x) noexcept
+template <class T, class... Ts>[[nodiscard]] constexpr CommonFloat<T, Ts...> ToFloat(T x) noexcept
 {
     return static_cast<CommonFloat<T, Ts...>>(x);
 }
 
-template <class T1, class T2>
-[[nodiscard]] constexpr auto Min(T1 a, T2 b) noexcept
+template <class T1, class T2>[[nodiscard]] constexpr auto Min(T1 a, T2 b) noexcept
 {
     return a < b ? a : b;
 }
 
 template <class T1, class T2, class T3, class... Ts>
-[[nodiscard]] constexpr auto Min(T1 x1, T2 x2, T3 x3, Ts ... xs) noexcept
+[[nodiscard]] constexpr auto Min(T1 x1, T2 x2, T3 x3, Ts... xs) noexcept
 {
     return Min(Min(x1, x2), x3, xs...);
 }
 
-template <class T, size_t L>
-[[nodiscard]] constexpr T Min(const Vector<T, L>& v) noexcept
+template <class T, size_t L>[[nodiscard]] constexpr T Min(const Vector<T, L>& v) noexcept
 {
     auto m = v[0];
     for (size_t i = 1; i < L; ++i)
@@ -155,20 +144,18 @@ template <class T, size_t L>
     return m;
 }
 
-template <class T1, class T2>
-[[nodiscard]] constexpr auto Max(T1 a, T2 b) noexcept
+template <class T1, class T2>[[nodiscard]] constexpr auto Max(T1 a, T2 b) noexcept
 {
     return a > b ? a : b;
 }
 
 template <class T1, class T2, class T3, class... Ts>
-[[nodiscard]] constexpr auto Max(T1 x1, T2 x2, T3 x3, Ts ... xs) noexcept
+[[nodiscard]] constexpr auto Max(T1 x1, T2 x2, T3 x3, Ts... xs) noexcept
 {
     return Max(Max(x1, x2), x3, xs...);
 }
 
-template <class T, size_t L>
-[[nodiscard]] constexpr T Max(const Vector<T, L>& v) noexcept
+template <class T, size_t L>[[nodiscard]] constexpr T Max(const Vector<T, L>& v) noexcept
 {
     auto m = v[0];
     for (size_t i = 1; i < L; ++i)
@@ -176,69 +163,57 @@ template <class T, size_t L>
     return m;
 }
 
-template <class T, class U, class V>
-[[nodiscard]] constexpr auto Clamp(T v, U min, V max) noexcept
+template <class T, class U, class V>[[nodiscard]] constexpr auto Clamp(T v, U min, V max) noexcept
 {
     return Max(Min(v, max), min);
 }
 
-template <class T>
-[[nodiscard]] constexpr T Abs(T x) noexcept
+template <class T>[[nodiscard]] constexpr T Abs(T x) noexcept
 {
     return x >= T(0) ? x : -x;
 }
 
-template <class T>
-[[nodiscard]] constexpr T Sign(T x) noexcept
+template <class T>[[nodiscard]] constexpr T Sign(T x) noexcept
 {
     return x >= T(0) ? T(1) : T(-1);
 }
 
-template <class Ratio, class T>
-T Cos(Angle<Ratio, T> t) noexcept
+template <class Ratio, class T> T Cos(Angle<Ratio, T> t) noexcept
 {
     return std::cos(Angle<RadR, T>{t}.Get());
 }
 
-template <class Ratio, class T>
-T Sin(Angle<Ratio, T> t) noexcept
+template <class Ratio, class T> T Sin(Angle<Ratio, T> t) noexcept
 {
     return std::sin(Angle<RadR, T>{t}.Get());
 }
 
-template <class Ratio, class T>
-T Tan(Angle<Ratio, T> t) noexcept
+template <class Ratio, class T> T Tan(Angle<Ratio, T> t) noexcept
 {
     return std::tan(Angle<RadR, T>{t}.Get());
 }
 
-template <class T>
-Angle<RadR, CommonFloat<T>> Acos(T x) noexcept
+template <class T> Angle<RadR, CommonFloat<T>> Acos(T x) noexcept
 {
     return Angle<RadR, CommonFloat<T>>{std::acos(ToFloat(x))};
 }
 
-template <class T>
-Angle<RadR, CommonFloat<T>> Asin(T y) noexcept
+template <class T> Angle<RadR, CommonFloat<T>> Asin(T y) noexcept
 {
     return Angle<RadR, CommonFloat<T>>{std::asin(ToFloat(y))};
 }
 
-template <class T>
-Angle<RadR, CommonFloat<T>> Atan(T x) noexcept
+template <class T> Angle<RadR, CommonFloat<T>> Atan(T x) noexcept
 {
     return Angle<RadR, CommonFloat<T>>{std::atan(ToFloat(x))};
 }
 
-template <class T, class U>
-Angle<RadR, CommonFloat<T, U>> Atan2(T y, U x) noexcept
+template <class T, class U> Angle<RadR, CommonFloat<T, U>> Atan2(T y, U x) noexcept
 {
-    return Angle<RadR, CommonFloat<T, U>>{
-        std::atan2(ToFloat<U>(y), ToFloat<T>(x))
-    };
+    return Angle<RadR, CommonFloat<T, U>>{std::atan2(ToFloat<U>(y), ToFloat<T>(x))};
 }
 
-template <class T, class U, class V = std::common_type_t<T, U>, std::enable_if_t<std::is_arithmetic_v<V>, int>  = 0>
+template <class T, class U, class V = std::common_type_t<T, U>, std::enable_if_t<std::is_arithmetic_v<V>, int> = 0>
 [[nodiscard]] constexpr bool IsNearlyEqual(T a, U b, V tolerance = kSmallNumV<V>) noexcept
 {
     return Abs(a - b) <= tolerance;
@@ -271,8 +246,7 @@ template <class T, class V = T>
     return IsNearlyEqual(a.v, b.v, tolerance) && IsNearlyEqual(a.s, b.s, tolerance);
 }
 
-template <class T, class U = T>
-[[nodiscard]] constexpr bool IsNearlyZero(T a, U tolerance = kSmallNumV<U>) noexcept
+template <class T, class U = T>[[nodiscard]] constexpr bool IsNearlyZero(T a, U tolerance = kSmallNumV<U>) noexcept
 {
     return Abs(a) <= tolerance;
 }
@@ -301,8 +275,7 @@ template <class T, class U, class V>
     return ToFloat<U>(val - min) / (max - min);
 }
 
-template <class T, class U, class V>
-[[nodiscard]] constexpr std::common_type_t<T, U, V> Lerp(T a, U b, V alpha) noexcept
+template <class T, class U, class V>[[nodiscard]] constexpr std::common_type_t<T, U, V> Lerp(T a, U b, V alpha) noexcept
 {
     return a + alpha * (b - a);
 }
@@ -339,4 +312,4 @@ template <class T, class U = Float, class V = Float>
 {
     return GetRangeValue(out_rng, GetRangePct(in_rng, val));
 }
-}
+} // namespace otm
