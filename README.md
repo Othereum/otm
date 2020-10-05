@@ -5,7 +5,7 @@ Math library for game programming
 ## Key features
 
 * Lightweight, Header-only
-* Modern (C++17)
+* Modern (C++20)
 * Generic
 * constexpr
 
