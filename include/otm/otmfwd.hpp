@@ -3,6 +3,10 @@
 #include <ratio>
 #include <type_traits>
 
+#ifndef OTM_DEFAULT_FLOAT
+#define OTM_DEFAULT_FLOAT float
+#endif
+
 namespace otm
 {
 using Float = OTM_DEFAULT_FLOAT;

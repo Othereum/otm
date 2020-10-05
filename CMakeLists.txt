@@ -4,9 +4,6 @@ project("otm")
 add_library(otm INTERFACE)
 target_include_directories(otm INTERFACE "include")
 
-set(OTM_DEFAULT_FLOAT "float" CACHE STRING "Default floating point type")
-target_compile_definitions(otm INTERFACE "OTM_DEFAULT_FLOAT=${OTM_DEFAULT_FLOAT}")
-
 set(OTM_BUILD_TESTS FALSE CACHE BOOL "Whether to build a test")
 if(OTM_BUILD_TESTS)
 	file(GLOB_RECURSE TEST_SRC_FILES "tests/*.cpp")
