@@ -12,13 +12,14 @@ using Float = OTM_DEFAULT_FLOAT;
 static_assert(std::is_floating_point_v<Float>);
 
 template <class... T>
-using CommonFloat = std::common_type_t<Float, T...>;
+using CommonFloat = std::conditional_t<std::is_floating_point_v<std::common_type_t<T...>>, std::common_type_t<T...>,
+                                       std::enable_if_t<std::is_integral_v<std::common_type_t<T...>>, Float>>;
 
 template <class T>
 concept Arithmetic = std::is_arithmetic_v<T>;
 
 template <class T, class... Ts>
-[[nodiscard]] constexpr CommonFloat<T, Ts...> ToFloat(T x) noexcept
+[[nodiscard]] constexpr auto ToFloat(T x) noexcept
 {
     return static_cast<CommonFloat<T, Ts...>>(x);
 }
