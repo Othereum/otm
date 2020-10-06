@@ -1,163 +1,147 @@
 #pragma once
 #include "Basic.hpp"
+#include <ratio>
 
 namespace otm
 {
-template <class Ratio, class T>
+template <class Ratio>
 struct Angle
 {
-    static_assert(std::is_floating_point_v<T>);
-
-    static constexpr auto ratio = static_cast<T>(Ratio::num) / static_cast<T>(Ratio::den);
+    static constexpr auto ratio = static_cast<Float>(Ratio::num) / static_cast<Float>(Ratio::den);
 
     constexpr Angle() noexcept = default;
 
-    constexpr explicit Angle(T r) noexcept
-        : val{r}
+    constexpr explicit Angle(Float r) noexcept : val_{r}
     {
     }
 
-    template <class S>
-    constexpr Angle(const Angle<S, T>& r) noexcept
-        : val{r.Get() / r.ratio * ratio}
+    template <class R>
+    constexpr Angle(const Angle<R>& r) noexcept : val_{r.get() / r.ratio * ratio}
     {
     }
 
-    template <class S, class T2>
-    explicit constexpr Angle(const Angle<S, T2>& r) noexcept
-        : val{static_cast<T>(r.Get() / r.ratio) * ratio}
+    template <class R>
+    constexpr Angle& operator=(const Angle<R>& r) noexcept
     {
-    }
-
-    template <class S>
-    constexpr Angle& operator=(const Angle<S, T>& r) noexcept
-    {
-        val = r.Get() / r.ratio * ratio;
+        val_ = r.get() / r.ratio * ratio;
         return *this;
     }
 
-    template <class S>
-    constexpr Angle& operator+=(const Angle<S, T>& r) noexcept
+    template <class R>
+    constexpr Angle& operator+=(const Angle<R>& r) noexcept
     {
         return *this = *this + r;
     }
 
-    template <class S>
-    constexpr Angle operator+(const Angle<S, T>& r) const noexcept
+    template <class R>
+    constexpr Angle operator+(const Angle<R>& r) const noexcept
     {
         return *this + Angle{r};
     }
 
     constexpr Angle operator+(const Angle& r) const noexcept
     {
-        return Angle{val + r.Get()};
+        return Angle{val_ + r.get()};
     }
 
-    template <class S>
-    constexpr Angle& operator-=(const Angle<S, T>& r) noexcept
+    template <class R>
+    constexpr Angle& operator-=(const Angle<R>& r) noexcept
     {
         return *this = *this - r;
     }
 
-    template <class S>
-    constexpr Angle operator-(const Angle<S, T>& r) const noexcept
+    template <class R>
+    constexpr Angle operator-(const Angle<R>& r) const noexcept
     {
         return *this - Angle{r};
     }
 
     constexpr Angle operator-(const Angle& r) const noexcept
     {
-        return Angle{val - r.Get()};
+        return Angle{val_ - r.get()};
     }
 
-    constexpr Angle& operator*=(T f) noexcept
+    constexpr Angle& operator*=(Float f) noexcept
     {
         return *this = *this * f;
     }
 
-    constexpr Angle operator*(T f) const noexcept
+    constexpr Angle operator*(Float f) const noexcept
     {
-        return Angle{val * f};
+        return Angle{val_ * f};
     }
 
-    constexpr Angle& operator/=(T f) noexcept
+    constexpr Angle& operator/=(Float f) noexcept
     {
         return *this = *this / f;
     }
 
-    constexpr Angle operator/(T f) const noexcept
+    constexpr Angle operator/(Float f) const noexcept
     {
-        return Angle{val / f};
+        return Angle{val_ / f};
     }
 
     constexpr Angle operator-() const noexcept
     {
-        return Angle{-val};
+        return Angle{-val_};
     }
 
     constexpr bool operator<(const Angle& r) const noexcept
     {
-        return val < r.val;
+        return val_ < r.val_;
     }
 
     constexpr bool operator>(const Angle& r) const noexcept
     {
-        return val > r.val;
+        return val_ > r.val_;
     }
 
     constexpr bool operator<=(const Angle& r) const noexcept
     {
-        return val <= r.val;
+        return val_ <= r.val_;
     }
 
     constexpr bool operator>=(const Angle& r) const noexcept
     {
-        return val >= r.val;
+        return val_ >= r.val_;
     }
 
-    template <class R2, class T2>
-    constexpr bool operator<(const Angle<R2, T2>& r) const noexcept
+    template <class R>
+    constexpr bool operator<(const Angle<R>& r) const noexcept
     {
         return *this < Angle{r};
     }
 
-    template <class R2, class T2>
-    constexpr bool operator>(const Angle<R2, T2>& r) const noexcept
+    template <class R>
+    constexpr bool operator>(const Angle<R>& r) const noexcept
     {
         return *this > Angle{r};
     }
 
-    template <class R2, class T2>
-    constexpr bool operator<=(const Angle<R2, T2>& r) const noexcept
+    template <class R>
+    constexpr bool operator<=(const Angle<R>& r) const noexcept
     {
         return *this <= Angle{r};
     }
 
-    template <class R2, class T2>
-    constexpr bool operator>=(const Angle<R2, T2>& r) const noexcept
+    template <class R>
+    constexpr bool operator>=(const Angle<R>& r) const noexcept
     {
         return *this >= Angle{r};
     }
 
-    [[nodiscard]] constexpr T Get() const noexcept
+    [[nodiscard]] constexpr Float get() const noexcept
     {
-        return val;
+        return val_;
     }
-
-    explicit constexpr operator T() const noexcept
-    {
-        return val;
-    }
-
-    [[nodiscard]] UnitVec<CommonFloat<T>, 2> ToVector() const noexcept;
 
     [[nodiscard]] static Angle Rand() noexcept
     {
         return Rad{otm::Rand(-kPi, kPi)};
     }
 
-private:
-    T val = 0;
+  private:
+    Float val_ = 0;
 };
 
 using Rad = Angle<std::ratio<66627445592888887, 21208174623389167 * 180>>;
@@ -183,63 +167,44 @@ constexpr Deg operator""_deg(long double f) noexcept
     return Deg{static_cast<Float>(f)};
 }
 
-template <class R, class F, class F2>
-Angle<R, F> operator*(F2 f, const Angle<R, F>& r) noexcept
+template <Arithmetic T, class Ratio>
+Rad operator*(T f, const Rad& r) noexcept
 {
     return r * f;
 }
 
-template <class T>
-Angle<RadR, T> V2HFov(Angle<RadR, T> vfov, Vector<T, 2> scr)
+[[nodiscard]] inline Float Cos(Rad t) noexcept
 {
-    return 2 * Atan(Tan(vfov / 2) * (scr[0] / scr[1]));
+    return std::cos(t.get());
 }
 
-template <class T>
-Angle<RadR, T> H2VFov(Angle<RadR, T> hfov, Vector<T, 2> scr)
+[[nodiscard]] inline Float Sin(Rad t) noexcept
 {
-    return 2 * Atan(Tan(hfov / 2) * (scr[1] / scr[0]));
-}
-template <class Ratio, class T>
-[[nodiscard]] T Cos(Angle<Ratio, T> t) noexcept
-{
-    return std::cos(Angle<RadR, T>{t}.Get());
+    return std::sin(t.get());
 }
 
-template <class Ratio, class T>
-[[nodiscard]] T Sin(Angle<Ratio, T> t) noexcept
+[[nodiscard]] inline Float Tan(Rad t) noexcept
 {
-    return std::sin(Angle<RadR, T>{t}.Get());
+    return std::tan(t.get());
 }
 
-template <class Ratio, class T>
-[[nodiscard]] T Tan(Angle<Ratio, T> t) noexcept
+[[nodiscard]] inline Rad Acos(Float x) noexcept
 {
-    return std::tan(Angle<RadR, T>{t}.Get());
+    return Rad{std::acos(x)};
 }
 
-template <class T>
-[[nodiscard]] Angle<RadR, CommonFloat<T>> Acos(T x) noexcept
+[[nodiscard]] inline Rad Asin(Float y) noexcept
 {
-    return Angle<RadR, CommonFloat<T>>{std::acos(ToFloat(x))};
+    return Rad{std::asin(y)};
 }
 
-template <class T>
-[[nodiscard]] Angle<RadR, CommonFloat<T>> Asin(T y) noexcept
+[[nodiscard]] inline Rad Atan(Float x) noexcept
 {
-    return Angle<RadR, CommonFloat<T>>{std::asin(ToFloat(y))};
+    return Rad{std::atan(x)};
 }
 
-template <class T>
-[[nodiscard]] Angle<RadR, CommonFloat<T>> Atan(T x) noexcept
+[[nodiscard]] inline Rad Atan2(Float y, Float x) noexcept
 {
-    return Angle<RadR, CommonFloat<T>>{std::atan(ToFloat(x))};
+    return Rad{std::atan2(y, x)};
 }
-
-template <class T, class U>
-[[nodiscard]] Angle<RadR, CommonFloat<T, U>> Atan2(T y, U x) noexcept
-{
-    return Angle<RadR, CommonFloat<T, U>>{std::atan2(ToFloat<U>(y), ToFloat<T>(x))};
-}
-
 } // namespace otm
