@@ -14,6 +14,9 @@ static_assert(std::is_floating_point_v<Float>);
 template <class... T>
 using CommonFloat = std::common_type_t<Float, T...>;
 
+template <class T>
+concept Arithmetic = std::is_arithmetic_v<T>;
+
 constexpr Float operator""_f(unsigned long long f) noexcept
 {
     return static_cast<Float>(f);
