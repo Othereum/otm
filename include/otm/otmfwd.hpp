@@ -25,19 +25,13 @@ constexpr Float operator""_f(long double f) noexcept
 template <class... T>
 using CommonFloat = std::common_type_t<Float, T...>;
 
-
 struct Transform;
-
-template <class T>
-struct Quaternion;
-
-using Quat = Quaternion<Float>;
-
+struct Quat;
 
 template <class T, size_t L>
 struct Vector;
 
-template <class T, size_t L>
+template <size_t L>
 struct UnitVec;
 
 using Vec2 = Vector<Float, 2>;
@@ -58,24 +52,17 @@ using Vec3u16 = Vector<uint16_t, 3>;
 using Vec4i16 = Vector<int16_t, 4>;
 using Vec4u16 = Vector<uint16_t, 4>;
 
-using UVec2 = UnitVec<Float, 2>;
-using UVec3 = UnitVec<Float, 3>;
-using UVec4 = UnitVec<Float, 4>;
+using UVec2 = UnitVec<2>;
+using UVec3 = UnitVec<3>;
+using UVec4 = UnitVec<4>;
 
-
-template <class Ratio, class T = Float>
+template <class Ratio>
 struct Angle;
 
-using PiRatio = std::ratio<66627445592888887, 21208174623389167>;
+using Rad = Angle<std::ratio<66627445592888887, 21208174623389167 * 180>>;
+using Deg = Angle<std::ratio<1>>;
 
-using RadR = std::ratio<PiRatio::num, PiRatio::den * 180>;
-using DegR = std::ratio<1>;
-
-using Rad = Angle<RadR>;
-using Deg = Angle<DegR>;
-
-
-template <class T, size_t R, size_t C = R>
+template <class T, size_t Row, size_t Col = Row>
 struct Matrix;
 
 using Mat2 = Matrix<Float, 2>;
