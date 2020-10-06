@@ -1,191 +1,148 @@
 #pragma once
-#include "Angle.hpp"
 #include "Basic.hpp"
 #include <cassert>
+#include <exception>
 #include <functional>
 #include <optional>
-#include <ostream>
 
 namespace otm
 {
-namespace detail
-{
 template <class T, size_t L>
-struct VecBase0
-{
-    template <class... Args>
-    constexpr VecBase0(Args ... args) noexcept
-        : data{static_cast<T>(args)...}
-    {
-    }
+struct Vector;
 
-    T data[L]{};
-};
+template <size_t L>
+struct UnitVec;
 
-template <class T, size_t L>
-struct VecBase : VecBase0<T, L>
-{
-    template <class... Args>
-    constexpr VecBase(Args ... args) noexcept
-        : VecBase0<T, L>{args...}
-    {
-    }
-};
+using Vec2 = Vector<Float, 2>;
+using Vec3 = Vector<Float, 3>;
+using Vec4 = Vector<Float, 4>;
 
-template <class T>
-struct VecBase<T, 2> : VecBase0<T, 2>
-{
-    template <class... Args>
-    constexpr VecBase(Args ... args) noexcept
-        : VecBase0<T, 2>{args...}
-    {
-    }
+using Vec2i = Vector<int32_t, 2>;
+using Vec2u = Vector<uint32_t, 2>;
+using Vec3i = Vector<int32_t, 3>;
+using Vec3u = Vector<uint32_t, 3>;
+using Vec4i = Vector<int32_t, 4>;
+using Vec4u = Vector<uint32_t, 4>;
 
-    [[nodiscard]] Angle<RadR, CommonFloat<T>> ToAngle() const noexcept
-    {
-        auto& v = static_cast<const Vector<T, 2>&>(*this);
-        return Atan2(v[1], v[0]);
-    }
-};
+using Vec2i16 = Vector<int16_t, 2>;
+using Vec2u16 = Vector<uint16_t, 2>;
+using Vec3i16 = Vector<int16_t, 3>;
+using Vec3u16 = Vector<uint16_t, 3>;
+using Vec4i16 = Vector<int16_t, 4>;
+using Vec4u16 = Vector<uint16_t, 4>;
 
-template <class T>
-struct VecBase<T, 3> : VecBase0<T, 3>
-{
-    static const Vector<T, 3> forward;
-    static const Vector<T, 3> backward;
-    static const Vector<T, 3> right;
-    static const Vector<T, 3> left;
-    static const Vector<T, 3> up;
-    static const Vector<T, 3> down;
-
-    constexpr static Vector<T, 3> Forward() noexcept
-    {
-        return {1, 0, 0};
-    }
-
-    constexpr static Vector<T, 3> Backward() noexcept
-    {
-        return -Forward();
-    }
-
-    constexpr static Vector<T, 3> Right() noexcept
-    {
-        return {0, 1, 0};
-    }
-
-    constexpr static Vector<T, 3> Left() noexcept
-    {
-        return -Right();
-    }
-
-    constexpr static Vector<T, 3> Up() noexcept
-    {
-        return {0, 0, 1};
-    }
-
-    constexpr static Vector<T, 3> Down() noexcept
-    {
-        return -Up();
-    }
-
-    template <class... Args>
-    constexpr VecBase(Args ... args) noexcept
-        : VecBase0<T, 3>{args...}
-    {
-    }
-
-    template <class U>
-    constexpr auto operator^(const Vector<U, 3>& b) const noexcept
-    {
-        auto& a = this->data;
-        return Vector{a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]};
-    }
-
-    constexpr Vector<T, 3>& operator^=(const Vector<T, 3>& b) noexcept
-    {
-        *this = *this ^ b;
-        return static_cast<Vector<T, 3>&>(*this);
-    }
-
-    template <class F>
-    [[nodiscard]] Vector<std::common_type_t<T, F>, 3> RotatedBy(const Quaternion<F>& q) const noexcept;
-
-    template <class F>
-    void RotateBy(const Quaternion<F>& q) noexcept;
-};
-
-template <class T, size_t L>
-struct UnitVecBase
-{
-};
-
-template <class T>
-struct UnitVecBase<T, 3>
-{
-    static const UnitVec<T, 3> forward;
-    static const UnitVec<T, 3> backward;
-    static const UnitVec<T, 3> right;
-    static const UnitVec<T, 3> left;
-    static const UnitVec<T, 3> up;
-    static const UnitVec<T, 3> down;
-
-    constexpr static UnitVec<T, 3> Forward() noexcept
-    {
-        return {1, 0, 0};
-    }
-
-    constexpr static UnitVec<T, 3> Backward() noexcept
-    {
-        return {-1, 0, 0};
-    }
-
-    constexpr static UnitVec<T, 3> Right() noexcept
-    {
-        return {0, 1, 0};
-    }
-
-    constexpr static UnitVec<T, 3> Left() noexcept
-    {
-        return {0, -1, 0};
-    }
-
-    constexpr static UnitVec<T, 3> Up() noexcept
-    {
-        return {0, 0, 1};
-    }
-
-    constexpr static UnitVec<T, 3> Down() noexcept
-    {
-        return {0, 0, -1};
-    }
-};
-}
+using UVec2 = UnitVec<2>;
+using UVec3 = UnitVec<3>;
+using UVec4 = UnitVec<4>;
 
 struct All
 {
 };
 
+struct NoInit
+{
+};
+
 class DivByZero final : public std::logic_error
 {
-public:
-    DivByZero()
-        : logic_error{"Division by zero"}
-    {
-    }
-
-    explicit DivByZero(const std::string& s)
-        : logic_error{s}
-    {
-    }
-
-    explicit DivByZero(const char* s)
-        : logic_error{s}
+  public:
+    DivByZero() : logic_error{"Division by zero"}
     {
     }
 };
 
 template <class T, size_t L>
-struct Vector : detail::VecBase<T, L>
+struct VecBase
+{
+    T data[L];
+
+    explicit VecBase(NoInit) noexcept
+    {
+    }
+
+    template <class... Args>
+    constexpr VecBase(Args... args) noexcept : data{args...}
+    {
+    }
+};
+
+template <class T>
+struct VecBase<T, 2>
+{
+    union {
+        struct
+        {
+            T x, y;
+        };
+        T data[2];
+    };
+
+    explicit VecBase(NoInit) noexcept
+    {
+    }
+
+    template <class... Args>
+    constexpr VecBase(Args... args) noexcept : data{args...}
+    {
+    }
+};
+
+template <class T>
+struct VecBase<T, 3>
+{
+    union {
+        struct
+        {
+            T x, y, z;
+        };
+        T data[3];
+    };
+
+    explicit VecBase(NoInit) noexcept
+    {
+    }
+
+    template <class... Args>
+    constexpr VecBase(Args... args) noexcept : data{args...}
+    {
+    }
+};
+
+template <class T>
+struct VecBase<T, 4>
+{
+    union {
+        struct
+        {
+            T x, y, z, w;
+        };
+        T data[4];
+    };
+
+    explicit VecBase(NoInit) noexcept
+    {
+    }
+
+    template <class... Args>
+    constexpr VecBase(Args... args) noexcept : data{args...}
+    {
+    }
+};
+
+template <size_t L>
+struct UnitVecBase
+{
+};
+
+struct UnitVecBase<3>
+{
+    [[nodiscard]] constexpr static UVec3 Forward() noexcept;
+    [[nodiscard]] constexpr static UVec3 Right() noexcept;
+    [[nodiscard]] constexpr static UVec3 Up() noexcept;
+};
+
+template <class T, size_t L>
+struct Vector : VecBase<T, L>
 {
     using value_type = T;
     using size_type = size_t;
@@ -199,22 +156,9 @@ struct Vector : detail::VecBase<T, L>
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-    static const Vector zero;
-    static const Vector one;
-
-    constexpr static Vector Zero() noexcept
-    {
-        return {};
-    }
-
-    constexpr static Vector One() noexcept
-    {
-        return {All{}, 1};
-    }
-
     [[nodiscard]] static Vector Rand(const Vector& min, const Vector& max) noexcept
     {
-        Vector v;
+        Vector v{NoInit{}};
         for (size_t i = 0; i < L; ++i)
             v[i] = otm::Rand(min[i], max[i]);
         return v;
@@ -222,50 +166,28 @@ struct Vector : detail::VecBase<T, L>
 
     [[nodiscard]] static Vector Rand(T min, T max) noexcept
     {
-        return Vector{[min, max]
-        {
-            return otm::Rand(min, max);
-        }};
+        return Vector{[&] { return otm::Rand(min, max); }};
     }
 
-    constexpr Vector(All, T x) noexcept
-        : Vector{[x]
-        {
-            return x;
-        }}
+    explicit Vector(NoInit tag) noexcept : VecBase<T, L>{tag}
     {
     }
 
-    template <class Fn, std::enable_if_t<std::is_invocable_v<Fn>, int>  = 0>
+    constexpr Vector(All, T x) noexcept : Vector{[&] { return x; }}
+    {
+    }
+
+    template <std::invocable Fn>
     explicit constexpr Vector(Fn&& fn) noexcept
     {
-        Transform([&fn](T)
-        {
-            return fn();
-        });
+        Transform([&](T) { return fn(); });
     }
 
-    constexpr Vector() noexcept
-        : detail::VecBase<T, L>{}
+    template <Arithmetic... Args>
+    requires(sizeof(Args) <= L) explicit(sizeof(Args) == 1) constexpr Vector(Args... args) noexcept
+        : VecBase<T, L>{args...}
     {
     }
-
-    explicit constexpr Vector(T x) noexcept
-        : detail::VecBase<T, L>{x}
-    {
-    }
-
-    template <class... Args>
-    constexpr Vector(T x, T y, Args ... args) noexcept
-        : detail::VecBase<T, L>{x, y, args...}
-    {
-    }
-
-    ~Vector() = default;
-    constexpr Vector(const Vector&) noexcept = default;
-    constexpr Vector(Vector&&) noexcept = default;
-    constexpr Vector& operator=(const Vector&) noexcept = default;
-    constexpr Vector& operator=(Vector&&) noexcept = default;
 
     template <class T2, size_t L2>
     explicit constexpr Vector(const Vector<T2, L2>& r) noexcept
@@ -274,7 +196,7 @@ struct Vector : detail::VecBase<T, L>
     }
 
     template <class T2, size_t L2, class... Args>
-    constexpr Vector(const Vector<T2, L2>& v, T x, Args ... args) noexcept
+    constexpr Vector(const Vector<T2, L2>& v, T x, Args... args) noexcept
     {
         static_assert(sizeof...(Args) + L2 < L, "Too many arguments");
         ((Assign(v) << x) << ... << static_cast<T>(args));
@@ -311,7 +233,7 @@ struct Vector : detail::VecBase<T, L>
     constexpr bool operator==(const Vector<T2, L>& r) const noexcept
     {
         static_assert(std::is_integral_v<T> && std::is_integral_v<T2>,
-            "Can't compare equality between floating point types. Use IsNearlyEqual() instead.");
+                      "Can't compare equality between floating point types. Use IsNearlyEqual() instead.");
 
         for (size_t i = 0; i < L; ++i)
             if ((*this)[i] != r[i])
@@ -379,10 +301,7 @@ struct Vector : detail::VecBase<T, L>
 
     constexpr void Clamp(T min, T max) noexcept
     {
-        Transform([&](T x)
-        {
-            return Clamp(x, min, max);
-        });
+        Transform([&](T x) { return Clamp(x, min, max); });
     }
 
     /**
@@ -487,18 +406,12 @@ struct Vector : detail::VecBase<T, L>
 
     constexpr Vector& operator*=(T f) noexcept
     {
-        return Transform([f](T v) -> T
-        {
-            return v * f;
-        });
+        return Transform([f](T v) -> T { return v * f; });
     }
 
     constexpr Vector& operator/=(T f) noexcept
     {
-        return Transform([f](T v) -> T
-        {
-            return v / f;
-        });
+        return Transform([f](T v) -> T { return v / f; });
     }
 
     template <class U>
@@ -749,11 +662,10 @@ struct Vector : detail::VecBase<T, L>
             return ptr >= it.ptr;
         }
 
-    protected:
+      protected:
         friend Vector;
 
-        constexpr const_iterator(const T* data) noexcept
-            : ptr{const_cast<T*>(data)}
+        constexpr const_iterator(const T* data) noexcept : ptr{const_cast<T*>(data)}
         {
         }
 
@@ -855,16 +767,15 @@ struct Vector : detail::VecBase<T, L>
             return ++*this;
         }
 
-    protected:
+      protected:
         friend Vector;
 
-        constexpr iterator(pointer data) noexcept
-            : const_iterator{data}
+        constexpr iterator(pointer data) noexcept : const_iterator{data}
         {
         }
     };
 
-private:
+  private:
     [[noreturn]] static void OutOfRange()
     {
         throw std::out_of_range{"Vector out of range"};
@@ -872,10 +783,10 @@ private:
 };
 
 template <class... Args>
-Vector(Args ...) -> Vector<std::common_type_t<Args...>, sizeof...(Args)>;
+Vector(Args...) -> Vector<std::common_type_t<Args...>, sizeof...(Args)>;
 
 template <class T, size_t L, class... Args>
-Vector(Vector<T, L>, Args ...) -> Vector<std::common_type_t<T, Args...>, L + sizeof...(Args)>;
+Vector(Vector<T, L>, Args...) -> Vector<std::common_type_t<T, Args...>, L + sizeof...(Args)>;
 
 template <class F, class T, size_t L>
 constexpr auto operator*(F f, const Vector<T, L>& v) noexcept
@@ -908,10 +819,7 @@ struct UnitVec : detail::UnitVecBase<T, L>
     [[nodiscard]] static UnitVec Rand() noexcept
     {
         Vector<T, L> v;
-        v.Transform([](auto&&...)
-        {
-            return Gauss<T, T>(0, 1);
-        });
+        v.Transform([](auto&&...) { return Gauss<T, T>(0, 1); });
         if (auto u = v.Unit())
             return *u;
         return Rand();
@@ -926,9 +834,7 @@ struct UnitVec : detail::UnitVecBase<T, L>
     [[nodiscard]] UnitVec RotatedBy(const Quaternion<T>& q) const noexcept
     {
         static_assert(L == 3);
-        return static_cast<UnitVec>(
-            reinterpret_cast<const Vector<T, 3>&>(*this).RotatedBy(q)
-        );
+        return static_cast<UnitVec>(reinterpret_cast<const Vector<T, 3>&>(*this).RotatedBy(q));
     }
 
     constexpr T operator[](size_t i) const noexcept
@@ -941,7 +847,7 @@ struct UnitVec : detail::UnitVecBase<T, L>
         return v;
     }
 
-    constexpr operator const Vector<T, L>&() const noexcept
+    constexpr operator const Vector<T, L> &() const noexcept
     {
         return v;
     }
@@ -956,47 +862,23 @@ struct UnitVec : detail::UnitVecBase<T, L>
         return v;
     }
 
-private:
+  private:
     template <class, class>
     friend struct Angle;
     friend Vector<T, L>;
     friend detail::UnitVecBase<T, L>;
 
     template <class... Args>
-    constexpr UnitVec(Args ... args) noexcept
-        : v{static_cast<T>(args)...}
+    constexpr UnitVec(Args... args) noexcept : v{static_cast<T>(args)...}
     {
     }
 
-    constexpr UnitVec(const Vector<T, L>& v) noexcept
-        : v{v}
+    constexpr UnitVec(const Vector<T, L>& v) noexcept : v{v}
     {
     }
 
     Vector<T, L> v{};
 };
-
-using Vec2 = Vector<Float, 2>;
-using Vec3 = Vector<Float, 3>;
-using Vec4 = Vector<Float, 4>;
-
-using Vec2i = Vector<int32_t, 2>;
-using Vec2u = Vector<uint32_t, 2>;
-using Vec3i = Vector<int32_t, 3>;
-using Vec3u = Vector<uint32_t, 3>;
-using Vec4i = Vector<int32_t, 4>;
-using Vec4u = Vector<uint32_t, 4>;
-
-using Vec2i16 = Vector<int16_t, 2>;
-using Vec2u16 = Vector<uint16_t, 2>;
-using Vec3i16 = Vector<int16_t, 3>;
-using Vec3u16 = Vector<uint16_t, 3>;
-using Vec4i16 = Vector<int16_t, 4>;
-using Vec4u16 = Vector<uint16_t, 4>;
-
-using UVec2 = UnitVec<2>;
-using UVec3 = UnitVec<3>;
-using UVec4 = UnitVec<4>;
 
 template <class T, size_t L>
 [[nodiscard]] constexpr T Min(const Vector<T, L>& v) noexcept
@@ -1039,6 +921,18 @@ template <size_t L, class T, class U, class V>
 [[nodiscard]] constexpr auto Lerp(const Vector<T, L>& a, const Vector<U, L>& b, V alpha) noexcept
 {
     return a + alpha * (b - a);
+}
+
+template <class T, class U>
+constexpr auto operator^(const Vector<T, 3>& a, const Vector<U, 3>& b) noexcept
+{
+    return Vector{a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
+}
+
+template <class T>
+constexpr Vector<T, 3>& operator^=(Vector<T, 3>& a, const Vector<T, 3>& b) noexcept
+{
+    return a = a ^ b;
 }
 
 template <class T, size_t L>
@@ -1097,4 +991,4 @@ inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::up = Up();
 
 template <class T>
 inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::down = Down();
-}
+} // namespace otm
