@@ -36,28 +36,33 @@ inline thread_local std::default_random_engine random_engine{std::random_device{
  * @param from Source integer value.
  * @return `true` if it is safely convertible.
  */
-template <class To, class From>
-[[nodiscard]] constexpr std::enable_if_t<std::is_integral_v<To> && std::is_integral_v<From>, bool> IsSafelyConvertible(
-    From from) noexcept
+template <std::integral To, std::integral From>
+[[nodiscard]] constexpr bool IsSafelyConvertible(From from) noexcept
 {
     if constexpr (sizeof(To) > sizeof(From))
+    {
         return true;
-
+    }
     else if constexpr (std::is_signed_v<To> == std::is_signed_v<From>)
     {
         if constexpr (sizeof(To) == sizeof(From))
+        {
             return true;
-
+        }
         else
+        {
             return from <= static_cast<From>(std::numeric_limits<To>::max()) &&
                    from >= static_cast<From>(std::numeric_limits<To>::lowest());
+        }
     }
-
     else if constexpr (std::is_signed_v<To>)
+    {
         return from <= static_cast<From>(std::numeric_limits<To>::max());
-
+    }
     else
+    {
         return from >= 0;
+    }
 }
 
 /**
@@ -68,8 +73,8 @@ template <class To, class From>
  * @return Converted value.
  * @throw std::domain_error If it is not safely convertible.
  */
-template <class To, class From>
-[[nodiscard]] constexpr std::enable_if_t<std::is_integral_v<To> && std::is_integral_v<From>, To> SafeCast(From from)
+template <std::integral To, std::integral From>
+[[nodiscard]] constexpr To SafeCast(From from)
 {
     if (IsSafelyConvertible<To>(from))
         return static_cast<To>(from);
@@ -90,20 +95,18 @@ static_assert(IsSafelyConvertible<int16_t>(20000u));
 static_assert(!IsSafelyConvertible<uint16_t>(-20));
 static_assert(IsSafelyConvertible<uint16_t>(2062));
 
-template <class T1, class T2>[[nodiscard]] constexpr T1 IntLog(T1 x, T2 base) noexcept
+template <std::integral T1, std::integral T2>
+[[nodiscard]] constexpr T1 IntLog(T1 x, T2 base) noexcept
 {
-    static_assert(std::is_integral_v<T1> && std::is_integral_v<T2>);
-
     T1 cnt = 0;
     while ((x /= base) > 0)
         ++cnt;
     return cnt;
 }
 
-template <class T1, class T2>[[nodiscard]] constexpr T1 IntLogCeil(T1 x, T2 base) noexcept
+template <std::integral T1, std::integral T2>
+[[nodiscard]] constexpr T1 IntLogCeil(T1 x, T2 base) noexcept
 {
-    static_assert(std::is_integral_v<T1> && std::is_integral_v<T2>);
-
     T1 cnt = 0;
     auto remain = false;
 
