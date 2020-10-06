@@ -1,14 +1,31 @@
 #pragma once
-#include "otmfwd.hpp"
+#include <concepts>
 #include <random>
+
+#ifndef OTM_DEFAULT_FLOAT
+#define OTM_DEFAULT_FLOAT float
+#endif
 
 namespace otm
 {
-template <class T> constexpr auto kPiV = static_cast<T>(PiRatio::num) / static_cast<T>(PiRatio::den);
-constexpr auto kPi = kPiV<Float>;
+using Float = OTM_DEFAULT_FLOAT;
+static_assert(std::is_floating_point_v<Float>);
 
-template <class T> constexpr auto kSmallNumV = static_cast<T>(1e-5);
-constexpr auto kSmallNum = kSmallNumV<Float>;
+template <class... T>
+using CommonFloat = std::common_type_t<Float, T...>;
+
+constexpr Float operator""_f(unsigned long long f) noexcept
+{
+    return static_cast<Float>(f);
+}
+
+constexpr Float operator""_f(long double f) noexcept
+{
+    return static_cast<Float>(f);
+}
+
+constexpr auto kPi = 3.1415926535897932384626433832795_f;
+constexpr auto kSmallNum = 1e-8_f;
 
 inline thread_local std::default_random_engine random_engine{std::random_device{}()};
 

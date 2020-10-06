@@ -160,6 +160,9 @@ private:
     T val = 0;
 };
 
+using Rad = Angle<std::ratio<66627445592888887, 21208174623389167 * 180>>;
+using Deg = Angle<std::ratio<1>>;
+
 constexpr Rad operator""_rad(unsigned long long f) noexcept
 {
     return Rad{static_cast<Float>(f)};

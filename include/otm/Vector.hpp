@@ -976,6 +976,28 @@ private:
     Vector<T, L> v{};
 };
 
+using Vec2 = Vector<Float, 2>;
+using Vec3 = Vector<Float, 3>;
+using Vec4 = Vector<Float, 4>;
+
+using Vec2i = Vector<int32_t, 2>;
+using Vec2u = Vector<uint32_t, 2>;
+using Vec3i = Vector<int32_t, 3>;
+using Vec3u = Vector<uint32_t, 3>;
+using Vec4i = Vector<int32_t, 4>;
+using Vec4u = Vector<uint32_t, 4>;
+
+using Vec2i16 = Vector<int16_t, 2>;
+using Vec2u16 = Vector<uint16_t, 2>;
+using Vec3i16 = Vector<int16_t, 3>;
+using Vec3u16 = Vector<uint16_t, 3>;
+using Vec4i16 = Vector<int16_t, 4>;
+using Vec4u16 = Vector<uint16_t, 4>;
+
+using UVec2 = UnitVec<2>;
+using UVec3 = UnitVec<3>;
+using UVec4 = UnitVec<4>;
+
 template <class T, size_t L>
 std::optional<UnitVec<CommonFloat<T>, L>> Vector<T, L>::Unit() const noexcept
 {
