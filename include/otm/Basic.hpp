@@ -27,8 +27,13 @@ constexpr Float operator""_f(long double f) noexcept
     return static_cast<Float>(f);
 }
 
-constexpr auto kPi = 3.1415926535897932384626433832795_f;
-constexpr auto kSmallNum = 1e-8_f;
+template <class T>
+constexpr auto kPiV = static_cast<T>(3.1415926535897932384626433832795l);
+constexpr auto kPi = kPiV<Float>;
+
+template <class T>
+constexpr auto kSmallNumV = static_cast<T>(1e-8l);
+constexpr auto kSmallNum = kSmallNumV<Float>;
 
 inline thread_local std::default_random_engine random_engine{std::random_device{}()};
 
