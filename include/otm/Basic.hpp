@@ -119,11 +119,6 @@ template <std::integral T1, std::integral T2>
     return cnt + remain;
 }
 
-template <class T>[[nodiscard]] constexpr T PadToPowerOf2(T x) noexcept
-{
-    return 1 << LogCeil(x, 2);
-}
-
 // [min, max] for integral
 // [min, max) for floating point
 template <class T1 = Float, class T2 = T1, class T = std::common_type_t<T1, T2>>
