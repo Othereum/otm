@@ -166,97 +166,46 @@ struct Vector : VecBase<T, L>
 
     [[nodiscard]] static Vector Rand(T min, T max) noexcept
     {
-        return Vector{[&] { return otm::Rand(min, max); }};
+        Vector v{NoInit{}};
+        std::generate(v.begin(), v.end(), [&] { return otm::Rand(min, max); });
+        return v;
     }
 
     explicit Vector(NoInit tag) noexcept : VecBase<T, L>{tag}
     {
     }
 
-    constexpr Vector(All, T x) noexcept : Vector{[&] { return x; }}
+    constexpr Vector(All, T x) noexcept : Vector{NoInit{}}
     {
-    }
-
-    template <std::invocable Fn>
-    explicit constexpr Vector(Fn&& fn) noexcept
-    {
-        Transform([&](T) { return fn(); });
+        std::fill(begin(), end(), x);
     }
 
     template <Arithmetic... Args>
-    requires(sizeof(Args) <= L) explicit(sizeof(Args) == 1) constexpr Vector(Args... args) noexcept
+    requires(sizeof...(Args) <= L) explicit(sizeof...(Args) == 1) constexpr Vector(Args... args) noexcept
         : VecBase<T, L>{args...}
     {
     }
 
-    template <class T2, size_t L2>
-    explicit constexpr Vector(const Vector<T2, L2>& r) noexcept
+    template <class T2, size_t L2, Arithmetic... Args>
+    requires(Min(L, L2) + sizeof...(Args) <= L) explicit(sizeof...(Args) == 0) constexpr Vector(const Vector<T2, L2>& r,
+                                                                                                Args... args) noexcept
+        : VecBase<T, L>{NoInit{}}
     {
-        Assign(r);
+        auto it = std::copy_n(r.begin(), Min(L, L2), begin());
+        (it << ... << args);
+        std::fill(it, end(), 0);
     }
 
-    template <class T2, size_t L2, class... Args>
-    constexpr Vector(const Vector<T2, L2>& v, T x, Args... args) noexcept
-    {
-        static_assert(sizeof...(Args) + L2 < L, "Too many arguments");
-        ((Assign(v) << x) << ... << static_cast<T>(args));
-    }
-
-    /**
-     * \brief Assign elements of other vector to this. The value of the unassigned elements does not change.
-     * \return Iterator pointing next to the last element assigned
-     * \note Does nothing if offset is out of range
-     */
-    template <class T2, size_t L2>
-    constexpr iterator Assign(const Vector<T2, L2>& other, ptrdiff_t offset = 0) noexcept
-    {
-        // ReSharper disable once CppInitializedValueIsAlwaysRewritten
-        size_t size = 0; // Initialization is required for constexpr
-
-        if (offset >= 0)
-        {
-            size = Min(L - Min(L, static_cast<size_t>(offset)), L2);
-            for (size_t i = 0; i < size; ++i)
-                (*this)[i + offset] = static_cast<T>(other[i]);
-        }
-        else
-        {
-            size = Min(L, L2 - Min(L2, static_cast<size_t>(-offset)));
-            for (size_t i = 0; i < size; ++i)
-                (*this)[i] = static_cast<T>(other[i - offset]);
-        }
-
-        return begin() + size;
-    }
-
-    template <class T2>
-    constexpr bool operator==(const Vector<T2, L>& r) const noexcept
-    {
-        static_assert(std::is_integral_v<T> && std::is_integral_v<T2>,
-                      "Can't compare equality between floating point types. Use IsNearlyEqual() instead.");
-
-        for (size_t i = 0; i < L; ++i)
-            if ((*this)[i] != r[i])
-                return false;
-        return true;
-    }
-
-    template <class T2>
-    constexpr bool operator!=(const Vector<T2, L>& r) const noexcept
-    {
-        return !(*this == r);
-    }
-
-    template <class T2, size_t L2>
-    constexpr bool operator==(const Vector<T2, L2>&) const noexcept
+    template <class T2, size_t L>
+    requires(L != L2) constexpr bool operator==(const Vector<T2, L2>& r) const noexcept
     {
         return false;
     }
 
-    template <class T2, size_t L2>
-    constexpr bool operator!=(const Vector<T2, L2>&) const noexcept
+    template <class T2>
+    requires std::integral<T>&& std::integral<T2> constexpr bool operator==(const Vector<T2, L>& r) const noexcept
     {
-        return true;
+        std::equal(begin(), end(), r.begin(), r.end());
     }
 
     [[nodiscard]] constexpr T LenSqr() const noexcept
@@ -264,9 +213,9 @@ struct Vector : VecBase<T, L>
         return *this | *this;
     }
 
-    [[nodiscard]] CommonFloat<T> Len() const noexcept
+    [[nodiscard]] auto Len() const noexcept
     {
-        return std::sqrt(ToFloat(LenSqr()));
+        return Sqrt(LenSqr());
     }
 
     [[nodiscard]] constexpr T DistSqr(const Vector& v) const noexcept
@@ -274,14 +223,14 @@ struct Vector : VecBase<T, L>
         return (*this - v).LenSqr();
     }
 
-    [[nodiscard]] CommonFloat<T> Dist(const Vector& v) const noexcept
+    [[nodiscard]] auto Dist(const Vector& v) const noexcept
     {
         return (*this - v).Len();
     }
 
     /**
-     * \brief Normalize this vector
-     * \throws DivByZero if IsNearlyZero(LenSqr())
+     * @brief Normalize this vector
+     * @throws DivByZero if IsNearlyZero(LenSqr())
      */
     void Normalize()
     {
@@ -289,9 +238,8 @@ struct Vector : VecBase<T, L>
             throw DivByZero{};
     }
 
-    bool TryNormalize() noexcept
+    bool TryNormalize() noexcept requires std::floating_point<T>
     {
-        static_assert(std::is_same_v<T, CommonFloat<T>>, "Can't use Normalize() for this type. Use Unit() instead.");
         const auto lensqr = LenSqr();
         if (lensqr <= kSmallNumV<T>)
             return false;
