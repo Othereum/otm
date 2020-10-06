@@ -208,6 +208,12 @@ template <class T>
     return x >= T(0) ? T(1) : T(-1);
 }
 
+template <class T>
+[[nodiscard]] auto Sqrt(T x) noexcept
+{
+    return std::sqrt(ToFloat(x));
+}
+
 template <Arithmetic T, Arithmetic U, class V = std::common_type_t<T, U>>
 [[nodiscard]] constexpr bool IsNearlyEqual(T a, U b, V tolerance = kSmallNumV<V>) noexcept
 {
