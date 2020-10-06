@@ -127,27 +127,36 @@ template <std::integral T1, std::integral T2>
     return cnt + remain;
 }
 
-// [min, max] for integral
-// [min, max) for floating point
-template <class T1 = Float, class T2 = T1, class T = std::common_type_t<T1, T2>>
-[[nodiscard]] T Rand(T1 min = 0, T2 max = std::is_integral_v<T1> ? std::numeric_limits<T1>::max() : T1(1)) noexcept
+/**
+ * @brief Returns random float in range [0, 1)
+ */
+[[nodiscard]] inline Float Rand() noexcept
 {
-    using Distribution =
-        std::conditional_t<std::is_integral_v<T>, std::uniform_int_distribution<T>, std::uniform_real_distribution<T>>;
+    return std::uniform_real_distribution<Float>{0, 1}(random_engine);
+}
 
-    return Distribution{T(min), T(max)}(random_engine);
+/**
+ * @brief Returns random int in range [min, max]
+ */
+template <class T, class U>
+[[nodiscard]] auto Rand(T min, U max) noexcept requires std::integral<std::common_type_t<T, U>>
+{
+    return std::uniform_int_distribution<std::common_type_t<T, U>>{min, max}(random_engine);
+}
+
+/**
+ * @brief Returns random float in range [min, max)
+ */
+template <class T, class U>
+[[nodiscard]] auto Rand(T min, U max) noexcept requires std::floating_point<std::common_type_t<T, U>>
+{
+    return std::uniform_real_distribution<std::common_type_t<T, U>>{min, max}(random_engine);
 }
 
 template <class T, class U>
-[[nodiscard]] CommonFloat<T, U> Gauss(T mean, U stddev) noexcept
+[[nodiscard]] auto Gauss(T mean, U stddev) noexcept
 {
     return std::normal_distribution<CommonFloat<T, U>>{ToFloat<U>(mean), ToFloat<T>(stddev)}(random_engine);
-}
-
-template <class T, class... Ts>
-[[nodiscard]] constexpr CommonFloat<T, Ts...> ToFloat(T x) noexcept
-{
-    return static_cast<CommonFloat<T, Ts...>>(x);
 }
 
 template <class T1, class T2>
