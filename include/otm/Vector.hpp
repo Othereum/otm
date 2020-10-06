@@ -25,14 +25,14 @@ class DivByZero final : public std::logic_error
 template <class T, size_t L>
 struct VecBase
 {
-    T data[L];
+    T arr[L];
 
     explicit VecBase(NoInit) noexcept
     {
     }
 
     template <class... Args>
-    constexpr VecBase(Args... args) noexcept : data{args...}
+    constexpr VecBase(Args... args) noexcept : arr{args...}
     {
     }
 };
@@ -45,7 +45,7 @@ struct VecBase<T, 2>
         {
             T x, y;
         };
-        T data[2];
+        T arr[2];
     };
 
     explicit VecBase(NoInit) noexcept
@@ -53,7 +53,7 @@ struct VecBase<T, 2>
     }
 
     template <class... Args>
-    constexpr VecBase(Args... args) noexcept : data{args...}
+    constexpr VecBase(Args... args) noexcept : arr{args...}
     {
     }
 };
@@ -66,7 +66,7 @@ struct VecBase<T, 3>
         {
             T x, y, z;
         };
-        T data[3];
+        T arr[3];
     };
 
     explicit VecBase(NoInit) noexcept
@@ -74,7 +74,7 @@ struct VecBase<T, 3>
     }
 
     template <class... Args>
-    constexpr VecBase(Args... args) noexcept : data{args...}
+    constexpr VecBase(Args... args) noexcept : arr{args...}
     {
     }
 };
@@ -87,7 +87,7 @@ struct VecBase<T, 4>
         {
             T x, y, z, w;
         };
-        T data[4];
+        T arr[4];
     };
 
     explicit VecBase(NoInit) noexcept
@@ -95,21 +95,9 @@ struct VecBase<T, 4>
     }
 
     template <class... Args>
-    constexpr VecBase(Args... args) noexcept : data{args...}
+    constexpr VecBase(Args... args) noexcept : arr{args...}
     {
     }
-};
-
-template <size_t L>
-struct UnitVecBase
-{
-};
-
-struct UnitVecBase<3>
-{
-    [[nodiscard]] constexpr static UVec3 Forward() noexcept;
-    [[nodiscard]] constexpr static UVec3 Right() noexcept;
-    [[nodiscard]] constexpr static UVec3 Up() noexcept;
 };
 
 template <class T, size_t L>
@@ -130,8 +118,7 @@ struct Vector : VecBase<T, L>
     [[nodiscard]] static Vector Rand(const Vector& min, const Vector& max) noexcept
     {
         Vector v{NoInit{}};
-        for (size_t i = 0; i < L; ++i)
-            v[i] = otm::Rand(min[i], max[i]);
+        std::transform(min.begin(), min.end(), max.begin(), v.begin(), [](T a, T b) { return otm::Rand(a, b); });
         return v;
     }
 
@@ -176,7 +163,7 @@ struct Vector : VecBase<T, L>
     template <class T2>
     requires std::integral<T>&& std::integral<T2> constexpr bool operator==(const Vector<T2, L>& r) const noexcept
     {
-        std::equal(begin(), end(), r.begin(), r.end());
+        std::equal(begin(), end(), r.begin());
     }
 
     [[nodiscard]] constexpr T LenSqr() const noexcept
@@ -203,7 +190,7 @@ struct Vector : VecBase<T, L>
      * @brief Normalize this vector
      * @throws DivByZero if IsNearlyZero(LenSqr())
      */
-    void Normalize()
+    void Normalize() requires std::floating_point<T>
     {
         if (!TryNormalize())
             throw DivByZero{};
@@ -214,18 +201,14 @@ struct Vector : VecBase<T, L>
         const auto lensqr = LenSqr();
         if (lensqr <= kSmallNumV<T>)
             return false;
-        *this /= std::sqrt(ToFloat(lensqr));
+
+        *this /= Sqrt(lensqr);
         return true;
     }
 
-    constexpr void Clamp(T min, T max) noexcept
-    {
-        Transform([&](T x) { return Clamp(x, min, max); });
-    }
-
     /**
-     * \brief Get normalized vector
-     * \return Normalized vector or nullopt if length is zero
+     * @brief Get normalized vector
+     * @return Normalized vector or nullopt if length is zero
      */
     [[nodiscard]] std::optional<UnitVec<CommonFloat<T>, L>> Unit() const noexcept;
 
@@ -249,56 +232,52 @@ struct Vector : VecBase<T, L>
         return reinterpret_cast<const Matrix<T, L, 1>&>(*this);
     }
 
-    [[nodiscard]] constexpr Matrix<T, 1, L> ToRowMatrix() const noexcept;
-    [[nodiscard]] constexpr Matrix<T, L, 1> ToColMatrix() const noexcept;
+    [[nodiscard]] constexpr T* data() noexcept
+    {
+        return this->arr;
+    }
+
+    [[nodiscard]] constexpr const T* data() const noexcept
+    {
+        return this->arr;
+    }
+
+    [[nodiscard]] constexpr size_t size() const noexcept
+    {
+        return L;
+    }
 
     constexpr T& operator[](size_t i) noexcept
     {
         assert(i < L);
-        return this->data[i];
+        return this->arr[i];
     }
 
-    constexpr T operator[](size_t i) const noexcept
+    constexpr const T& operator[](size_t i) const noexcept
     {
         assert(i < L);
-        return this->data[i];
+        return this->arr[i];
     }
 
     [[nodiscard]] constexpr T& at(size_t i)
     {
         if (i >= L)
             OutOfRange();
-        return this->data[i];
+
+        return this->arr[i];
     }
 
-    [[nodiscard]] constexpr T at(size_t i) const
+    [[nodiscard]] constexpr const T& at(size_t i) const
     {
         if (i >= L)
             OutOfRange();
-        return this->data[i];
-    }
 
-    template <class Fn>
-    constexpr Vector& Transform(const Vector& other, Fn&& fn) noexcept(std::is_nothrow_invocable_v<Fn, T, T>)
-    {
-        for (size_t i = 0; i < L; ++i)
-            (*this)[i] = fn((*this)[i], other[i]);
-
-        return *this;
-    }
-
-    template <class Fn>
-    constexpr Vector& Transform(Fn&& fn) noexcept(std::is_nothrow_invocable_v<Fn, T>)
-    {
-        for (size_t i = 0; i < L; ++i)
-            (*this)[i] = fn((*this)[i]);
-
-        return *this;
+        return this->arr[i];
     }
 
     constexpr void Negate() noexcept
     {
-        Transform(std::negate<>{});
+        std::transform(begin(), end(), begin(), std::negate<>{});
     }
 
     constexpr Vector operator-() const noexcept
@@ -310,27 +289,27 @@ struct Vector : VecBase<T, L>
 
     constexpr Vector& operator+=(const Vector& v) noexcept
     {
-        return Transform(v, std::plus<>{});
+        Transform(v, std::plus<>{});
     }
 
     constexpr Vector& operator-=(const Vector& v) noexcept
     {
-        return Transform(v, std::minus<>{});
+        Transform(v, std::minus<>{});
     }
 
     constexpr Vector& operator*=(const Vector& v) noexcept
     {
-        return Transform(v, std::multiplies<>{});
+        Transform(v, std::multiplies<>{});
     }
 
     constexpr Vector& operator*=(T f) noexcept
     {
-        return Transform([f](T v) -> T { return v * f; });
+        Transform([f](T v) -> T { return v * f; });
     }
 
     constexpr Vector& operator/=(T f) noexcept
     {
-        return Transform([f](T v) -> T { return v / f; });
+        Transform([f](T v) -> T { return v / f; });
     }
 
     template <class U>
@@ -730,10 +709,12 @@ std::istream& operator>>(std::istream& is, Vector<T, L>& v)
     return is;
 }
 
-template <class T, size_t L>
-struct UnitVec : detail::UnitVecBase<T, L>
+template <std::floating_point T, size_t L>
+struct UnitVec
 {
-    static_assert(std::is_floating_point_v<T>);
+    [[nodiscard]] constexpr static UVec3 Forward() noexcept;
+    [[nodiscard]] constexpr static UVec3 Right() noexcept;
+    [[nodiscard]] constexpr static UVec3 Up() noexcept;
 
     [[nodiscard]] static UnitVec Rand() noexcept
     {
