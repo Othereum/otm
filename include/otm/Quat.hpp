@@ -89,24 +89,6 @@ namespace otm
 	}
 
 	template <class T>
-	template <class F>
-	Vector<std::common_type_t<T, F>, 3> detail::VecBase<T, 3>::RotatedBy(const Quaternion<F>& q) const noexcept
-	{
-		using Tf = std::common_type_t<T, F>;
-		auto& vr = static_cast<const Vector<T, 3>&>(*this);
-		const auto p = Quaternion<Tf>{Vector<Tf, 3>{vr}, 0};
-		return (q * p * ~q).v;
-	}
-
-	template <class T>
-	template <class F>
-	void detail::VecBase<T, 3>::RotateBy(const Quaternion<F>& q) noexcept
-	{
-		static_assert(std::is_same_v<std::remove_cvref_t<decltype(this->RotatedBy())>, std::remove_cvref_t<decltype(*this)>>);
-		*this = this->RotatedBy(q);
-	}
-
-	template <class T>
 	inline const Quaternion<T> Quaternion<T>::identity = Identity();
     template <class T, class V = T>
     [[nodiscard]] constexpr bool IsNearlyEqual(const Quaternion<T>& a, const Quaternion<T>& b,
