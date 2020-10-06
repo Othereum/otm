@@ -999,6 +999,49 @@ using UVec3 = UnitVec<3>;
 using UVec4 = UnitVec<4>;
 
 template <class T, size_t L>
+[[nodiscard]] constexpr T Min(const Vector<T, L>& v) noexcept
+{
+    auto m = v[0];
+    for (size_t i = 1; i < L; ++i)
+        m = Min(m, v[i]);
+    return m;
+}
+
+template <class T, size_t L>
+[[nodiscard]] constexpr T Max(const Vector<T, L>& v) noexcept
+{
+    auto m = v[0];
+    for (size_t i = 1; i < L; ++i)
+        m = Max(m, v[i]);
+    return m;
+}
+
+template <class T, size_t L, class V = T>
+[[nodiscard]] constexpr bool IsNearlyEqual(const Vector<T, L>& a, const Vector<T, L>& b,
+                                           V tolerance = kSmallNumV<V>) noexcept
+{
+    for (size_t i = 0; i < L; ++i)
+        if (!IsNearlyEqual(a[i], b[i], tolerance))
+            return false;
+    return true;
+}
+
+template <class T, size_t L, class V = T>
+[[nodiscard]] constexpr bool IsNearlyZero(const Vector<T, L>& a, V tolerance = kSmallNumV<V>) noexcept
+{
+    for (auto x : a)
+        if (!IsNearlyZero(x, tolerance))
+            return false;
+    return true;
+}
+
+template <size_t L, class T, class U, class V>
+[[nodiscard]] constexpr auto Lerp(const Vector<T, L>& a, const Vector<U, L>& b, V alpha) noexcept
+{
+    return a + alpha * (b - a);
+}
+
+template <class T, size_t L>
 std::optional<UnitVec<CommonFloat<T>, L>> Vector<T, L>::Unit() const noexcept
 {
     const auto lensqr = LenSqr();

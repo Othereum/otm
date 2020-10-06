@@ -17,6 +17,12 @@ using CommonFloat = std::common_type_t<Float, T...>;
 template <class T>
 concept Arithmetic = std::is_arithmetic_v<T>;
 
+template <class T, class... Ts>
+[[nodiscard]] constexpr CommonFloat<T, Ts...> ToFloat(T x) noexcept
+{
+    return static_cast<CommonFloat<T, Ts...>>(x);
+}
+
 constexpr Float operator""_f(unsigned long long f) noexcept
 {
     return static_cast<Float>(f);
@@ -171,15 +177,6 @@ template <class T1, class T2, class T3, class... Ts>
     return Min(Min(x1, x2), x3, xs...);
 }
 
-template <class T, size_t L>
-[[nodiscard]] constexpr T Min(const Vector<T, L>& v) noexcept
-{
-    auto m = v[0];
-    for (size_t i = 1; i < L; ++i)
-        m = Min(m, v[i]);
-    return m;
-}
-
 template <class T1, class T2>
 [[nodiscard]] constexpr auto Max(T1 a, T2 b) noexcept
 {
@@ -190,15 +187,6 @@ template <class T1, class T2, class T3, class... Ts>
 [[nodiscard]] constexpr auto Max(T1 x1, T2 x2, T3 x3, Ts... xs) noexcept
 {
     return Max(Max(x1, x2), x3, xs...);
-}
-
-template <class T, size_t L>
-[[nodiscard]] constexpr T Max(const Vector<T, L>& v) noexcept
-{
-    auto m = v[0];
-    for (size_t i = 1; i < L; ++i)
-        m = Max(m, v[i]);
-    return m;
 }
 
 template <class T, class U, class V>
@@ -219,79 +207,10 @@ template <class T>
     return x >= T(0) ? T(1) : T(-1);
 }
 
-template <class Ratio, class T>
-T Cos(Angle<Ratio, T> t) noexcept
-{
-    return std::cos(Angle<RadR, T>{t}.Get());
-}
-
-template <class Ratio, class T>
-T Sin(Angle<Ratio, T> t) noexcept
-{
-    return std::sin(Angle<RadR, T>{t}.Get());
-}
-
-template <class Ratio, class T>
-T Tan(Angle<Ratio, T> t) noexcept
-{
-    return std::tan(Angle<RadR, T>{t}.Get());
-}
-
-template <class T>
-Angle<RadR, CommonFloat<T>> Acos(T x) noexcept
-{
-    return Angle<RadR, CommonFloat<T>>{std::acos(ToFloat(x))};
-}
-
-template <class T>
-Angle<RadR, CommonFloat<T>> Asin(T y) noexcept
-{
-    return Angle<RadR, CommonFloat<T>>{std::asin(ToFloat(y))};
-}
-
-template <class T>
-Angle<RadR, CommonFloat<T>> Atan(T x) noexcept
-{
-    return Angle<RadR, CommonFloat<T>>{std::atan(ToFloat(x))};
-}
-
-template <class T, class U>
-Angle<RadR, CommonFloat<T, U>> Atan2(T y, U x) noexcept
-{
-    return Angle<RadR, CommonFloat<T, U>>{std::atan2(ToFloat<U>(y), ToFloat<T>(x))};
-}
-
-template <class T, class U, class V = std::common_type_t<T, U>, std::enable_if_t<std::is_arithmetic_v<V>, int> = 0>
+template <Arithmetic T, Arithmetic U, class V = std::common_type_t<T, U>>
 [[nodiscard]] constexpr bool IsNearlyEqual(T a, U b, V tolerance = kSmallNumV<V>) noexcept
 {
     return Abs(a - b) <= tolerance;
-}
-
-template <class T, size_t L, class V = T>
-[[nodiscard]] constexpr bool IsNearlyEqual(const Vector<T, L>& a, const Vector<T, L>& b,
-                                           V tolerance = kSmallNumV<V>) noexcept
-{
-    for (size_t i = 0; i < L; ++i)
-        if (!IsNearlyEqual(a[i], b[i], tolerance))
-            return false;
-    return true;
-}
-
-template <class T, size_t R, size_t C, class V = T>
-[[nodiscard]] constexpr bool IsNearlyEqual(const Matrix<T, R, C>& a, const Matrix<T, R, C>& b,
-                                           V tolerance = kSmallNumV<V>) noexcept
-{
-    for (size_t i = 0; i < R; ++i)
-        if (!IsNearlyEqual(a[i], b[i], tolerance))
-            return false;
-    return true;
-}
-
-template <class T, class V = T>
-[[nodiscard]] constexpr bool IsNearlyEqual(const Quaternion<T>& a, const Quaternion<T>& b,
-                                           V tolerance = kSmallNumV<V>) noexcept
-{
-    return IsNearlyEqual(a.v, b.v, tolerance) && IsNearlyEqual(a.s, b.s, tolerance);
 }
 
 template <class T, class U = T>
@@ -300,66 +219,27 @@ template <class T, class U = T>
     return Abs(a) <= tolerance;
 }
 
-template <class T, size_t L, class V = T>
-[[nodiscard]] constexpr bool IsNearlyZero(const Vector<T, L>& a, V tolerance = kSmallNumV<V>) noexcept
-{
-    for (auto x : a)
-        if (!IsNearlyZero(x, tolerance))
-            return false;
-    return true;
-}
-
-template <class T, size_t R, size_t C, class V = T>
-[[nodiscard]] constexpr bool IsNearlyZero(const Matrix<T, R, C>& a, V tolerance = kSmallNumV<V>) noexcept
-{
-    for (size_t i = 0; i < R; ++i)
-        if (!IsNearlyZero(a[i], tolerance))
-            return false;
-    return true;
-}
-
 template <class T, class U, class V>
-[[nodiscard]] constexpr CommonFloat<T, U, V> GetRangePct(T min, U max, V val) noexcept
+[[nodiscard]] constexpr auto GetRangePct(T min, U max, V val) noexcept
 {
     return ToFloat<U>(val - min) / (max - min);
 }
 
 template <class T, class U, class V>
-[[nodiscard]] constexpr std::common_type_t<T, U, V> Lerp(T a, U b, V alpha) noexcept
+[[nodiscard]] constexpr auto Lerp(T a, U b, V alpha) noexcept
 {
     return a + alpha * (b - a);
 }
 
-template <size_t L, class T, class U, class V>
-[[nodiscard]] constexpr auto Lerp(const Vector<T, L>& a, const Vector<U, L>& b, V alpha) noexcept
+template <class T, class U, class V, class W, class X>
+[[nodiscard]] constexpr auto MapRngClamp(T in_min, U in_max, V out_min, W out_max, X val) noexcept
 {
-    return a + alpha * (b - a);
+    return Lerp(out_min, out_max, Clamp(GetRangePct(in_min, in_max, val), 0, 1));
 }
 
-template <class T, class U = Float>
-[[nodiscard]] constexpr CommonFloat<T, U> GetRangePct(const Vector<U, 2>& range, T val) noexcept
+template <class T, class U, class V, class W, class X>
+[[nodiscard]] constexpr auto MapRng(T in_min, U in_max, V out_min, W out_max, X val) noexcept
 {
-    return GetRangePct(range[0], range[1], val);
-}
-
-template <class T, class U = Float>
-[[nodiscard]] constexpr std::common_type_t<T, U> GetRangeValue(const Vector<U, 2>& range, T pct) noexcept
-{
-    return Lerp(range[0], range[1], pct);
-}
-
-template <class T, class U = Float, class V = Float>
-[[nodiscard]] constexpr std::common_type_t<T, U, V> MapRngClamp(const Vector<U, 2>& in_rng, const Vector<V, 2>& out_rng,
-                                                                T val) noexcept
-{
-    const auto pct = Clamp(GetRangePct(in_rng, val), 0, 1);
-    return GetRangeValue(out_rng, pct);
-}
-
-template <class T, class U = Float, class V = Float>
-[[nodiscard]] constexpr std::common_type_t<T, U, V> MapRng(const Vector<U, 2>& in_rng, const Vector<V, 2>& out_rng,
-                                                           T val) noexcept
-{
-    return GetRangeValue(out_rng, GetRangePct(in_rng, val));
+    return Lerp(out_min, out_max, GetRangePct(in_min, in_max, val));
 }
 } // namespace otm

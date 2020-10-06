@@ -108,4 +108,11 @@ namespace otm
 
 	template <class T>
 	inline const Quaternion<T> Quaternion<T>::identity = Identity();
-}
+    template <class T, class V = T>
+    [[nodiscard]] constexpr bool IsNearlyEqual(const Quaternion<T>& a, const Quaternion<T>& b,
+                                               V tolerance = kSmallNumV<V>) noexcept
+    {
+        return IsNearlyEqual(a.v, b.v, tolerance) && IsNearlyEqual(a.s, b.s, tolerance);
+    }
+
+    } // namespace otm

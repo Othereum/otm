@@ -449,6 +449,23 @@ using Mat3x2 = Matrix<Float, 3, 2>;
 using Mat3x4 = Matrix<Float, 3, 4>;
 using Mat4x2 = Matrix<Float, 4, 2>;
 using Mat4x3 = Matrix<Float, 4, 3>;
+template <class T, size_t R, size_t C, class V = T>
+[[nodiscard]] constexpr bool IsNearlyEqual(const Matrix<T, R, C>& a, const Matrix<T, R, C>& b,
+                                           V tolerance = kSmallNumV<V>) noexcept
+{
+    for (size_t i = 0; i < R; ++i)
+        if (!IsNearlyEqual(a[i], b[i], tolerance))
+            return false;
+    return true;
+}
+template <class T, size_t R, size_t C, class V = T>
+[[nodiscard]] constexpr bool IsNearlyZero(const Matrix<T, R, C>& a, V tolerance = kSmallNumV<V>) noexcept
+{
+    for (size_t i = 0; i < R; ++i)
+        if (!IsNearlyZero(a[i], tolerance))
+            return false;
+    return true;
+}
 
 template <class T, size_t R, size_t C, class F, std::enable_if_t<std::is_convertible_v<F, T>, int> = 0>
 constexpr auto operator*(F f, const Matrix<T, R, C>& m) noexcept

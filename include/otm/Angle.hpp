@@ -200,4 +200,46 @@ Angle<RadR, T> H2VFov(Angle<RadR, T> hfov, Vector<T, 2> scr)
 {
     return 2 * Atan(Tan(hfov / 2) * (scr[1] / scr[0]));
 }
+template <class Ratio, class T>
+[[nodiscard]] T Cos(Angle<Ratio, T> t) noexcept
+{
+    return std::cos(Angle<RadR, T>{t}.Get());
 }
+
+template <class Ratio, class T>
+[[nodiscard]] T Sin(Angle<Ratio, T> t) noexcept
+{
+    return std::sin(Angle<RadR, T>{t}.Get());
+}
+
+template <class Ratio, class T>
+[[nodiscard]] T Tan(Angle<Ratio, T> t) noexcept
+{
+    return std::tan(Angle<RadR, T>{t}.Get());
+}
+
+template <class T>
+[[nodiscard]] Angle<RadR, CommonFloat<T>> Acos(T x) noexcept
+{
+    return Angle<RadR, CommonFloat<T>>{std::acos(ToFloat(x))};
+}
+
+template <class T>
+[[nodiscard]] Angle<RadR, CommonFloat<T>> Asin(T y) noexcept
+{
+    return Angle<RadR, CommonFloat<T>>{std::asin(ToFloat(y))};
+}
+
+template <class T>
+[[nodiscard]] Angle<RadR, CommonFloat<T>> Atan(T x) noexcept
+{
+    return Angle<RadR, CommonFloat<T>>{std::atan(ToFloat(x))};
+}
+
+template <class T, class U>
+[[nodiscard]] Angle<RadR, CommonFloat<T, U>> Atan2(T y, U x) noexcept
+{
+    return Angle<RadR, CommonFloat<T, U>>{std::atan2(ToFloat<U>(y), ToFloat<T>(x))};
+}
+
+} // namespace otm
