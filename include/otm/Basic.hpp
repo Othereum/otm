@@ -1,16 +1,9 @@
 #pragma once
-#include <concepts>
+#include "otmfwd.hpp"
 #include <random>
-
-#ifndef OTM_DEFAULT_FLOAT
-#define OTM_DEFAULT_FLOAT float
-#endif
 
 namespace otm
 {
-using Float = OTM_DEFAULT_FLOAT;
-static_assert(std::is_floating_point_v<Float>);
-
 template <class T>
 concept Arithmetic = std::is_arithmetic_v<T>;
 

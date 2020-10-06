@@ -440,15 +440,6 @@ private:
     Vector<T, C> arr[R];
 };
 
-using Mat2 = Matrix<Float, 2>;
-using Mat3 = Matrix<Float, 3>;
-using Mat4 = Matrix<Float, 4>;
-using Mat2x3 = Matrix<Float, 2, 3>;
-using Mat2x4 = Matrix<Float, 2, 4>;
-using Mat3x2 = Matrix<Float, 3, 2>;
-using Mat3x4 = Matrix<Float, 3, 4>;
-using Mat4x2 = Matrix<Float, 4, 2>;
-using Mat4x3 = Matrix<Float, 4, 3>;
 template <class T, size_t R, size_t C, class V = T>
 [[nodiscard]] constexpr bool IsNearlyEqual(const Matrix<T, R, C>& a, const Matrix<T, R, C>& b,
                                            V tolerance = kSmallNumV<V>) noexcept
