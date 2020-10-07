@@ -123,9 +123,10 @@ struct Vector : VecBase<T, L>
     }
 
     template <class T2, size_t L2, Arithmetic... Args>
-    requires(Min(L, L2) + sizeof...(Args) <= L) explicit(sizeof...(Args) == 0) constexpr Vector(const Vector<T2, L2>& r,
-                                                                                                Args... args) noexcept
-        : VecBase<T, L>{NoInit{}}
+    requires(Min(L, L2) + sizeof...(Args) <=
+             L) explicit(sizeof...(Args) == 0 &&
+                         (L != L2 || !std::same_as<T, T2>)) constexpr Vector(const Vector<T2, L2>& r,
+                                                                             Args... args) noexcept
     {
         auto it = std::copy_n(r.begin(), Min(L, L2), begin());
         (it << ... << args);
