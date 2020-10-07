@@ -128,7 +128,7 @@ struct Vector : VecBase<T, L>
                          (L != L2 || !std::same_as<T, T2>)) constexpr Vector(const Vector<T2, L2>& r,
                                                                              Args... args) noexcept
     {
-        auto it = std::copy_n(r.begin(), Min(L, L2), begin());
+        auto it = std::transform(r.begin(), r.begin() + Min(L, L2), begin(), [](T2 x) { return static_cast<T>(x); });
         (it << ... << args);
         std::fill(it, end(), 0);
     }
