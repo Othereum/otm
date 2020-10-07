@@ -10,9 +10,7 @@ struct All
 {
 };
 
-struct NoInit
-{
-};
+constexpr All_T All;
 
 class DivByZero final : public std::logic_error
 {
@@ -26,10 +24,6 @@ template <class T, size_t L>
 struct VecBase
 {
     T arr[L];
-
-    explicit VecBase(NoInit) noexcept
-    {
-    }
 
     template <class... Args>
     constexpr VecBase(Args... args) noexcept : arr{args...}
@@ -48,10 +42,6 @@ struct VecBase<T, 2>
         T arr[2];
     };
 
-    explicit VecBase(NoInit) noexcept
-    {
-    }
-
     template <class... Args>
     constexpr VecBase(Args... args) noexcept : arr{args...}
     {
@@ -69,10 +59,6 @@ struct VecBase<T, 3>
         T arr[3];
     };
 
-    explicit VecBase(NoInit) noexcept
-    {
-    }
-
     template <class... Args>
     constexpr VecBase(Args... args) noexcept : arr{args...}
     {
@@ -89,10 +75,6 @@ struct VecBase<T, 4>
         };
         T arr[4];
     };
-
-    explicit VecBase(NoInit) noexcept
-    {
-    }
 
     template <class... Args>
     constexpr VecBase(Args... args) noexcept : arr{args...}
@@ -117,23 +99,19 @@ struct Vector : VecBase<T, L>
 
     [[nodiscard]] static Vector Rand(const Vector& min, const Vector& max) noexcept
     {
-        Vector v{NoInit{}};
+        Vector v;
         std::transform(min.begin(), min.end(), max.begin(), v.begin(), [](T a, T b) { return otm::Rand(a, b); });
         return v;
     }
 
     [[nodiscard]] static Vector Rand(T min, T max) noexcept
     {
-        Vector v{NoInit{}};
+        Vector v;
         std::generate(v.begin(), v.end(), [&] { return otm::Rand(min, max); });
         return v;
     }
 
-    explicit Vector(NoInit tag) noexcept : VecBase<T, L>{tag}
-    {
-    }
-
-    constexpr Vector(All, T x) noexcept : Vector{NoInit{}}
+    constexpr Vector(All_T, T x) noexcept
     {
         std::fill(begin(), end(), x);
     }
