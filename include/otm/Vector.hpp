@@ -118,7 +118,7 @@ struct Vector : VecBase<T, L>
 
     template <Arithmetic... Args>
     requires(sizeof...(Args) <= L) explicit(sizeof...(Args) == 1) constexpr Vector(Args... args) noexcept
-        : VecBase<T, L>{args...}
+        : VecBase<T, L>{static_cast<T>(args)...}
     {
     }
 
