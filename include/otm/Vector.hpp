@@ -132,6 +132,9 @@ struct Vector : VecBase<T, L>
         std::fill(it, end(), 0);
     }
 
+    constexpr Vector(const Vector&) noexcept = default;
+    constexpr Vector& operator=(const Vector&) noexcept = default;
+
     template <class T2, size_t L>
     requires(L != L2) constexpr bool operator==(const Vector<T2, L2>& r) const noexcept
     {
