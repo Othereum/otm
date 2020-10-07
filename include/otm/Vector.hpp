@@ -6,7 +6,7 @@
 
 namespace otm
 {
-struct All
+struct All_T
 {
 };
 
