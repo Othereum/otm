@@ -92,8 +92,8 @@ struct Vector : VecBase<T, L>
     using const_reference = const T&;
     using pointer = T*;
     using const_pointer = const T*;
-    struct iterator;
-    struct const_iterator;
+    using iterator = T*;
+    using const_iterator = const T*;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -122,28 +122,7 @@ struct Vector : VecBase<T, L>
     {
     }
 
-    template <class T2, size_t L2, Arithmetic... Args>
-    requires(Min(L, L2) + sizeof...(Args) <=
-             L) explicit(sizeof...(Args) == 0 &&
-                         (L != L2 || !std::same_as<T, T2>)) constexpr Vector(const Vector<T2, L2>& r,
-                                                                             Args... args) noexcept
-    {
-        auto it = std::transform(r.begin(), r.begin() + Min(L, L2), begin(), [](T2 x) { return static_cast<T>(x); });
-        (it << ... << args);
-        std::fill(it, end(), 0);
-    }
-
-    constexpr Vector(const Vector&) noexcept = default;
-    constexpr Vector& operator=(const Vector&) noexcept = default;
-
-    template <class T2, size_t L>
-    requires(L != L2) constexpr bool operator==(const Vector<T2, L2>& r) const noexcept
-    {
-        return false;
-    }
-
-    template <class T2>
-    requires std::integral<T>&& std::integral<T2> constexpr bool operator==(const Vector<T2, L>& r) const noexcept
+    constexpr bool operator==(const Vector& r) const noexcept requires std::integral<T>
     {
         std::equal(begin(), end(), r.begin());
     }
@@ -271,126 +250,102 @@ struct Vector : VecBase<T, L>
 
     constexpr Vector& operator+=(const Vector& v) noexcept
     {
-        Transform(v, std::plus<>{});
+        std::transform(begin(), end(), v.begin(), begin(), std::plus<>{});
+        return *this;
     }
 
-    constexpr Vector& operator-=(const Vector& v) noexcept
+    constexpr Vector& operator-=(const Vector<T2, L2>& v) noexcept
     {
-        Transform(v, std::minus<>{});
+        std::transform(begin(), end(), v.begin(), begin(), std::minus<>{});
+        return *this;
     }
 
-    constexpr Vector& operator*=(const Vector& v) noexcept
+    constexpr Vector& operator*=(const Vector<T2, L2>& v) noexcept
     {
-        Transform(v, std::multiplies<>{});
+        std::transform(begin(), end(), v.begin(), begin(), std::multiplies<>{});
+        return *this;
     }
 
     constexpr Vector& operator*=(T f) noexcept
     {
-        Transform([f](T v) -> T { return v * f; });
+        std::transform(begin(), end(), begin(), [&](T x) { return x * f; });
+        return *this;
     }
 
     constexpr Vector& operator/=(T f) noexcept
     {
-        Transform([f](T v) -> T { return v / f; });
+        std::transform(begin(), end(), begin(), [&](T x) { return x / f; });
+        return *this;
     }
 
-    template <class U>
-    constexpr auto operator+(const Vector<U, L>& v) const noexcept
+    constexpr Vector operator+(const Vector& v) const noexcept
     {
-        Vector<std::common_type_t<T, U>, L> r;
-        for (size_t i = 0; i < L; ++i)
-            r[i] = (*this)[i] + v[i];
-        return r;
+        auto ret = *this;
+        ret += v;
+        return ret;
     }
 
-    template <class U>
-    constexpr auto operator-(const Vector<U, L>& v) const noexcept
+    constexpr Vector operator-(const Vector& v) const noexcept
     {
-        Vector<std::common_type_t<T, U>, L> r;
-        for (size_t i = 0; i < L; ++i)
-            r[i] = (*this)[i] - v[i];
-        return r;
+        auto ret = *this;
+        ret -= v;
+        return ret;
     }
 
-    template <class U>
-    constexpr auto operator*(const Vector<U, L>& v) const noexcept
+    constexpr Vector operator*(const Vector& v) const noexcept
     {
-        Vector<std::common_type_t<T, U>, L> r;
-        for (size_t i = 0; i < L; ++i)
-            r[i] = (*this)[i] * v[i];
-        return r;
+        auto ret = *this;
+        ret *= v;
+        return ret;
     }
 
-    template <class U>
-    constexpr auto operator*(U f) const noexcept
+    constexpr Vector operator*(T f) const noexcept
     {
-        using V = std::common_type_t<T, U>;
-        Vector<V, L> v = *this;
-        v *= static_cast<V>(f);
-        return v;
+        auto ret = *this;
+        ret *= f;
+        return ret;
     }
 
-    template <class U>
-    constexpr auto operator/(U f) const noexcept
+    constexpr Vector operator/(T f) const noexcept
     {
-        using V = std::common_type_t<T, U>;
-        Vector<V, L> v = *this;
-        v /= static_cast<V>(f);
-        return v;
+        auto ret = *this;
+        ret /= f;
+        return ret;
     }
 
-    template <class T2>
-    constexpr std::common_type_t<T, T2> operator|(const Vector<T2, L>& v) const noexcept
+    constexpr T operator|(const Vector& v) const noexcept
     {
-        std::common_type_t<T, T2> t{};
-        for (size_t i = 0; i < L; ++i)
-            t += (*this)[i] * v[i];
-        return t;
-    }
-
-    constexpr iterator operator<<(T v) noexcept
-    {
-        return begin() << v;
-    }
-
-    constexpr iterator operator>>(T& v) noexcept
-    {
-        return begin() >> v;
-    }
-
-    constexpr const_iterator operator>>(T& v) const noexcept
-    {
-        return begin() >> v;
+        return std::inner_product(begin(), end(), v.begin(), T{});
     }
 
     [[nodiscard]] constexpr iterator begin() noexcept
     {
-        return this->data;
+        return this->arr;
     }
 
     [[nodiscard]] constexpr const_iterator begin() const noexcept
     {
-        return this->data;
+        return this->arr;
     }
 
     [[nodiscard]] constexpr const_iterator cbegin() const noexcept
     {
-        return this->data;
+        return this->arr;
     }
 
     [[nodiscard]] constexpr iterator end() noexcept
     {
-        return this->data + L;
+        return this->arr + L;
     }
 
     [[nodiscard]] constexpr const_iterator end() const noexcept
     {
-        return this->data + L;
+        return this->arr + L;
     }
 
     [[nodiscard]] constexpr const_iterator cend() const noexcept
     {
-        return this->data + L;
+        return this->arr + L;
     }
 
     [[nodiscard]] constexpr reverse_iterator rbegin() noexcept
@@ -422,238 +377,6 @@ struct Vector : VecBase<T, L>
     {
         return const_reverse_iterator{cbegin()};
     }
-
-    struct const_iterator
-    {
-        using iterator_category = std::random_access_iterator_tag;
-        using value_type = T;
-        using difference_type = ptrdiff_t;
-        using pointer = const T*;
-        using reference = const T&;
-
-        constexpr const_iterator() noexcept = default;
-
-        constexpr explicit operator const T*() const noexcept
-        {
-            return ptr;
-        }
-
-        constexpr T operator*() const noexcept
-        {
-            return *ptr;
-        }
-
-        constexpr T operator[](difference_type n) const noexcept
-        {
-            return ptr[n];
-        }
-
-        constexpr const T* operator->() const noexcept
-        {
-            return ptr;
-        }
-
-        constexpr const_iterator& operator++() noexcept
-        {
-            ++ptr;
-            return *this;
-        }
-
-        constexpr const_iterator operator++(int) noexcept
-        {
-            const_iterator it = *this;
-            ++ptr;
-            return it;
-        }
-
-        constexpr const_iterator& operator--() noexcept
-        {
-            --ptr;
-            return *this;
-        }
-
-        constexpr const_iterator operator--(int) noexcept
-        {
-            const_iterator it = *this;
-            --ptr;
-            return it;
-        }
-
-        constexpr const_iterator& operator+=(ptrdiff_t n) noexcept
-        {
-            ptr += n;
-            return *this;
-        }
-
-        constexpr const_iterator operator+(ptrdiff_t n) const noexcept
-        {
-            return const_iterator{ptr + n};
-        }
-
-        constexpr const_iterator& operator-=(ptrdiff_t n) noexcept
-        {
-            ptr -= n;
-            return *this;
-        }
-
-        constexpr const_iterator operator-(ptrdiff_t n) const noexcept
-        {
-            return const_iterator{ptr - n};
-        }
-
-        constexpr ptrdiff_t operator-(const const_iterator& rhs) const noexcept
-        {
-            return ptr - rhs.ptr;
-        }
-
-        constexpr const_iterator& operator>>(T& v) noexcept
-        {
-            v = **this;
-            return ++*this;
-        }
-
-        constexpr bool operator==(const const_iterator& it) const noexcept
-        {
-            return ptr == it.ptr;
-        }
-
-        constexpr bool operator!=(const const_iterator& it) const noexcept
-        {
-            return ptr != it.ptr;
-        }
-
-        constexpr bool operator<(const const_iterator& it) const noexcept
-        {
-            return ptr < it.ptr;
-        }
-
-        constexpr bool operator>(const const_iterator& it) const noexcept
-        {
-            return ptr > it.ptr;
-        }
-
-        constexpr bool operator<=(const const_iterator& it) const noexcept
-        {
-            return ptr <= it.ptr;
-        }
-
-        constexpr bool operator>=(const const_iterator& it) const noexcept
-        {
-            return ptr >= it.ptr;
-        }
-
-      protected:
-        friend Vector;
-
-        constexpr const_iterator(const T* data) noexcept : ptr{const_cast<T*>(data)}
-        {
-        }
-
-        T* ptr = nullptr;
-    };
-
-    struct iterator : const_iterator
-    {
-        using iterator_category = std::random_access_iterator_tag;
-        using value_type = T;
-        using difference_type = ptrdiff_t;
-        using pointer = T*;
-        using reference = T&;
-
-        constexpr iterator() noexcept = default;
-
-        constexpr explicit operator T*() const noexcept
-        {
-            return this->ptr;
-        }
-
-        constexpr T& operator*() const noexcept
-        {
-            return *this->ptr;
-        }
-
-        constexpr T& operator[](ptrdiff_t n) const noexcept
-        {
-            return this->ptr[n];
-        }
-
-        constexpr T* operator->() const noexcept
-        {
-            return this->ptr;
-        }
-
-        constexpr iterator& operator++() noexcept
-        {
-            ++this->ptr;
-            return *this;
-        }
-
-        constexpr iterator operator++(int) noexcept
-        {
-            iterator it = *this;
-            ++this->ptr;
-            return it;
-        }
-
-        constexpr iterator& operator--() noexcept
-        {
-            --this->ptr;
-            return *this;
-        }
-
-        constexpr iterator operator--(int) noexcept
-        {
-            iterator it = *this;
-            --this->ptr;
-            return it;
-        }
-
-        constexpr iterator& operator+=(ptrdiff_t n) noexcept
-        {
-            this->ptr += n;
-            return *this;
-        }
-
-        constexpr iterator operator+(ptrdiff_t n) const noexcept
-        {
-            return iterator{this->ptr + n};
-        }
-
-        constexpr iterator& operator-=(ptrdiff_t n) noexcept
-        {
-            this->ptr -= n;
-            return *this;
-        }
-
-        constexpr iterator operator-(ptrdiff_t n) const noexcept
-        {
-            return iterator{this->ptr - n};
-        }
-
-        constexpr ptrdiff_t operator-(const iterator& rhs) const noexcept
-        {
-            return this->ptr - rhs.ptr;
-        }
-
-        constexpr iterator& operator<<(T v) noexcept
-        {
-            **this = v;
-            return ++*this;
-        }
-
-        constexpr iterator& operator>>(T& v) noexcept
-        {
-            v = **this;
-            return ++*this;
-        }
-
-      protected:
-        friend Vector;
-
-        constexpr iterator(pointer data) noexcept : const_iterator{data}
-        {
-        }
-    };
 
   private:
     [[noreturn]] static void OutOfRange()
