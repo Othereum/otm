@@ -2,6 +2,7 @@
 #include "Basic.hpp"
 #include <cassert>
 #include <functional>
+#include <numeric>
 #include <optional>
 
 namespace otm
@@ -111,9 +112,9 @@ struct Vector : VecBase<T, L>
         return v;
     }
 
-    constexpr Vector(All_T, T x) noexcept
+    constexpr Vector(All_T, T val) noexcept
     {
-        std::fill(begin(), end(), x);
+        std::fill(begin(), end(), val);
     }
 
     template <Arithmetic... Args>
