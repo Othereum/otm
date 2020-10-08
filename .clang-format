@@ -1,6 +1,0 @@
-﻿---
-BasedOnStyle: Microsoft
-AlwaysBreakTemplateDeclarations: 'Yes'
-PointerAlignment: Left
-
-...

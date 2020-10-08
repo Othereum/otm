@@ -1,90 +1,191 @@
 #pragma once
+#include "Angle.hpp"
 #include "Basic.hpp"
 #include <cassert>
 #include <functional>
-#include <numeric>
 #include <optional>
+#include <ostream>
 
 namespace otm
 {
-struct All_T
+namespace detail
+{
+template <class T, size_t L>
+struct VecBase0
+{
+    template <class... Args>
+    constexpr VecBase0(Args ... args) noexcept
+        : data{static_cast<T>(args)...}
+    {
+    }
+
+    T data[L]{};
+};
+
+template <class T, size_t L>
+struct VecBase : VecBase0<T, L>
+{
+    template <class... Args>
+    constexpr VecBase(Args ... args) noexcept
+        : VecBase0<T, L>{args...}
+    {
+    }
+};
+
+template <class T>
+struct VecBase<T, 2> : VecBase0<T, 2>
+{
+    template <class... Args>
+    constexpr VecBase(Args ... args) noexcept
+        : VecBase0<T, 2>{args...}
+    {
+    }
+
+    [[nodiscard]] Angle<RadR, CommonFloat<T>> ToAngle() const noexcept
+    {
+        auto& v = static_cast<const Vector<T, 2>&>(*this);
+        return Atan2(v[1], v[0]);
+    }
+};
+
+template <class T>
+struct VecBase<T, 3> : VecBase0<T, 3>
+{
+    static const Vector<T, 3> forward;
+    static const Vector<T, 3> backward;
+    static const Vector<T, 3> right;
+    static const Vector<T, 3> left;
+    static const Vector<T, 3> up;
+    static const Vector<T, 3> down;
+
+    constexpr static Vector<T, 3> Forward() noexcept
+    {
+        return {1, 0, 0};
+    }
+
+    constexpr static Vector<T, 3> Backward() noexcept
+    {
+        return -Forward();
+    }
+
+    constexpr static Vector<T, 3> Right() noexcept
+    {
+        return {0, 1, 0};
+    }
+
+    constexpr static Vector<T, 3> Left() noexcept
+    {
+        return -Right();
+    }
+
+    constexpr static Vector<T, 3> Up() noexcept
+    {
+        return {0, 0, 1};
+    }
+
+    constexpr static Vector<T, 3> Down() noexcept
+    {
+        return -Up();
+    }
+
+    template <class... Args>
+    constexpr VecBase(Args ... args) noexcept
+        : VecBase0<T, 3>{args...}
+    {
+    }
+
+    template <class U>
+    constexpr auto operator^(const Vector<U, 3>& b) const noexcept
+    {
+        auto& a = this->data;
+        return Vector{a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]};
+    }
+
+    constexpr Vector<T, 3>& operator^=(const Vector<T, 3>& b) noexcept
+    {
+        *this = *this ^ b;
+        return static_cast<Vector<T, 3>&>(*this);
+    }
+
+    template <class F>
+    [[nodiscard]] Vector<std::common_type_t<T, F>, 3> RotatedBy(const Quaternion<F>& q) const noexcept;
+
+    template <class F>
+    void RotateBy(const Quaternion<F>& q) noexcept;
+};
+
+template <class T, size_t L>
+struct UnitVecBase
 {
 };
 
-constexpr All_T All;
+template <class T>
+struct UnitVecBase<T, 3>
+{
+    static const UnitVec<T, 3> forward;
+    static const UnitVec<T, 3> backward;
+    static const UnitVec<T, 3> right;
+    static const UnitVec<T, 3> left;
+    static const UnitVec<T, 3> up;
+    static const UnitVec<T, 3> down;
+
+    constexpr static UnitVec<T, 3> Forward() noexcept
+    {
+        return {1, 0, 0};
+    }
+
+    constexpr static UnitVec<T, 3> Backward() noexcept
+    {
+        return {-1, 0, 0};
+    }
+
+    constexpr static UnitVec<T, 3> Right() noexcept
+    {
+        return {0, 1, 0};
+    }
+
+    constexpr static UnitVec<T, 3> Left() noexcept
+    {
+        return {0, -1, 0};
+    }
+
+    constexpr static UnitVec<T, 3> Up() noexcept
+    {
+        return {0, 0, 1};
+    }
+
+    constexpr static UnitVec<T, 3> Down() noexcept
+    {
+        return {0, 0, -1};
+    }
+};
+}
+
+struct All
+{
+};
 
 class DivByZero final : public std::logic_error
 {
-  public:
-    DivByZero() : logic_error{"Division by zero"}
+public:
+    DivByZero()
+        : logic_error{"Division by zero"}
+    {
+    }
+
+    explicit DivByZero(const std::string& s)
+        : logic_error{s}
+    {
+    }
+
+    explicit DivByZero(const char* s)
+        : logic_error{s}
     {
     }
 };
 
 template <class T, size_t L>
-struct VecBase
-{
-    T arr[L];
-
-    template <class... Args>
-    constexpr VecBase(Args... args) noexcept : arr{args...}
-    {
-    }
-};
-
-template <class T>
-struct VecBase<T, 2>
-{
-    union {
-        struct
-        {
-            T x, y;
-        };
-        T arr[2];
-    };
-
-    template <class... Args>
-    constexpr VecBase(Args... args) noexcept : arr{args...}
-    {
-    }
-};
-
-template <class T>
-struct VecBase<T, 3>
-{
-    union {
-        struct
-        {
-            T x, y, z;
-        };
-        T arr[3];
-    };
-
-    template <class... Args>
-    constexpr VecBase(Args... args) noexcept : arr{args...}
-    {
-    }
-};
-
-template <class T>
-struct VecBase<T, 4>
-{
-    union {
-        struct
-        {
-            T x, y, z, w;
-        };
-        T arr[4];
-    };
-
-    template <class... Args>
-    constexpr VecBase(Args... args) noexcept : arr{args...}
-    {
-    }
-};
-
-template <class T, size_t L>
-struct Vector : VecBase<T, L>
+struct Vector : detail::VecBase<T, L>
 {
     using value_type = T;
     using size_type = size_t;
@@ -93,39 +194,147 @@ struct Vector : VecBase<T, L>
     using const_reference = const T&;
     using pointer = T*;
     using const_pointer = const T*;
-    using iterator = T*;
-    using const_iterator = const T*;
+    struct iterator;
+    struct const_iterator;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+    static const Vector zero;
+    static const Vector one;
+
+    constexpr static Vector Zero() noexcept
+    {
+        return {};
+    }
+
+    constexpr static Vector One() noexcept
+    {
+        return {All{}, 1};
+    }
 
     [[nodiscard]] static Vector Rand(const Vector& min, const Vector& max) noexcept
     {
         Vector v;
-        std::transform(min.begin(), min.end(), max.begin(), v.begin(), [](T a, T b) { return otm::Rand(a, b); });
+        for (size_t i = 0; i < L; ++i)
+            v[i] = otm::Rand(min[i], max[i]);
         return v;
     }
 
     [[nodiscard]] static Vector Rand(T min, T max) noexcept
     {
-        Vector v;
-        std::generate(v.begin(), v.end(), [&] { return otm::Rand(min, max); });
-        return v;
+        return Vector{[min, max]
+        {
+            return otm::Rand(min, max);
+        }};
     }
 
-    constexpr Vector(All_T, T val) noexcept
-    {
-        std::fill(begin(), end(), val);
-    }
-
-    template <Arithmetic... Args>
-    requires(sizeof...(Args) <= L) explicit(sizeof...(Args) == 1) constexpr Vector(Args... args) noexcept
-        : VecBase<T, L>{static_cast<T>(args)...}
+    constexpr Vector(All, T x) noexcept
+        : Vector{[x]
+        {
+            return x;
+        }}
     {
     }
 
-    constexpr bool operator==(const Vector& r) const noexcept requires std::integral<T>
+    template <class Fn, std::enable_if_t<std::is_invocable_v<Fn>, int>  = 0>
+    explicit constexpr Vector(Fn&& fn) noexcept
     {
-        std::equal(begin(), end(), r.begin());
+        Transform([&fn](T)
+        {
+            return fn();
+        });
+    }
+
+    constexpr Vector() noexcept
+        : detail::VecBase<T, L>{}
+    {
+    }
+
+    explicit constexpr Vector(T x) noexcept
+        : detail::VecBase<T, L>{x}
+    {
+    }
+
+    template <class... Args>
+    constexpr Vector(T x, T y, Args ... args) noexcept
+        : detail::VecBase<T, L>{x, y, args...}
+    {
+    }
+
+    ~Vector() = default;
+    constexpr Vector(const Vector&) noexcept = default;
+    constexpr Vector(Vector&&) noexcept = default;
+    constexpr Vector& operator=(const Vector&) noexcept = default;
+    constexpr Vector& operator=(Vector&&) noexcept = default;
+
+    template <class T2, size_t L2>
+    explicit constexpr Vector(const Vector<T2, L2>& r) noexcept
+    {
+        Assign(r);
+    }
+
+    template <class T2, size_t L2, class... Args>
+    constexpr Vector(const Vector<T2, L2>& v, T x, Args ... args) noexcept
+    {
+        static_assert(sizeof...(Args) + L2 < L, "Too many arguments");
+        ((Assign(v) << x) << ... << static_cast<T>(args));
+    }
+
+    /**
+     * \brief Assign elements of other vector to this. The value of the unassigned elements does not change.
+     * \return Iterator pointing next to the last element assigned
+     * \note Does nothing if offset is out of range
+     */
+    template <class T2, size_t L2>
+    constexpr iterator Assign(const Vector<T2, L2>& other, ptrdiff_t offset = 0) noexcept
+    {
+        // ReSharper disable once CppInitializedValueIsAlwaysRewritten
+        size_t size = 0; // Initialization is required for constexpr
+
+        if (offset >= 0)
+        {
+            size = Min(L - Min(L, static_cast<size_t>(offset)), L2);
+            for (size_t i = 0; i < size; ++i)
+                (*this)[i + offset] = static_cast<T>(other[i]);
+        }
+        else
+        {
+            size = Min(L, L2 - Min(L2, static_cast<size_t>(-offset)));
+            for (size_t i = 0; i < size; ++i)
+                (*this)[i] = static_cast<T>(other[i - offset]);
+        }
+
+        return begin() + size;
+    }
+
+    template <class T2>
+    constexpr bool operator==(const Vector<T2, L>& r) const noexcept
+    {
+        static_assert(std::is_integral_v<T> && std::is_integral_v<T2>,
+            "Can't compare equality between floating point types. Use IsNearlyEqual() instead.");
+
+        for (size_t i = 0; i < L; ++i)
+            if ((*this)[i] != r[i])
+                return false;
+        return true;
+    }
+
+    template <class T2>
+    constexpr bool operator!=(const Vector<T2, L>& r) const noexcept
+    {
+        return !(*this == r);
+    }
+
+    template <class T2, size_t L2>
+    constexpr bool operator==(const Vector<T2, L2>&) const noexcept
+    {
+        return false;
+    }
+
+    template <class T2, size_t L2>
+    constexpr bool operator!=(const Vector<T2, L2>&) const noexcept
+    {
+        return true;
     }
 
     [[nodiscard]] constexpr T LenSqr() const noexcept
@@ -133,9 +342,9 @@ struct Vector : VecBase<T, L>
         return *this | *this;
     }
 
-    [[nodiscard]] auto Len() const noexcept
+    [[nodiscard]] CommonFloat<T> Len() const noexcept
     {
-        return Sqrt(LenSqr());
+        return std::sqrt(ToFloat(LenSqr()));
     }
 
     [[nodiscard]] constexpr T DistSqr(const Vector& v) const noexcept
@@ -143,34 +352,42 @@ struct Vector : VecBase<T, L>
         return (*this - v).LenSqr();
     }
 
-    [[nodiscard]] auto Dist(const Vector& v) const noexcept
+    [[nodiscard]] CommonFloat<T> Dist(const Vector& v) const noexcept
     {
         return (*this - v).Len();
     }
 
     /**
-     * @brief Normalize this vector
-     * @throws DivByZero if IsNearlyZero(LenSqr())
+     * \brief Normalize this vector
+     * \throws DivByZero if IsNearlyZero(LenSqr())
      */
-    void Normalize() requires std::floating_point<T>
+    void Normalize()
     {
         if (!TryNormalize())
             throw DivByZero{};
     }
 
-    bool TryNormalize() noexcept requires std::floating_point<T>
+    bool TryNormalize() noexcept
     {
+        static_assert(std::is_same_v<T, CommonFloat<T>>, "Can't use Normalize() for this type. Use Unit() instead.");
         const auto lensqr = LenSqr();
         if (lensqr <= kSmallNumV<T>)
             return false;
-
-        *this /= Sqrt(lensqr);
+        *this /= std::sqrt(ToFloat(lensqr));
         return true;
     }
 
+    constexpr void Clamp(T min, T max) noexcept
+    {
+        Transform([&](T x)
+        {
+            return Clamp(x, min, max);
+        });
+    }
+
     /**
-     * @brief Get normalized vector
-     * @return Normalized vector or nullopt if length is zero
+     * \brief Get normalized vector
+     * \return Normalized vector or nullopt if length is zero
      */
     [[nodiscard]] std::optional<UnitVec<CommonFloat<T>, L>> Unit() const noexcept;
 
@@ -194,52 +411,56 @@ struct Vector : VecBase<T, L>
         return reinterpret_cast<const Matrix<T, L, 1>&>(*this);
     }
 
-    [[nodiscard]] constexpr T* data() noexcept
-    {
-        return this->arr;
-    }
-
-    [[nodiscard]] constexpr const T* data() const noexcept
-    {
-        return this->arr;
-    }
-
-    [[nodiscard]] constexpr size_t size() const noexcept
-    {
-        return L;
-    }
+    [[nodiscard]] constexpr Matrix<T, 1, L> ToRowMatrix() const noexcept;
+    [[nodiscard]] constexpr Matrix<T, L, 1> ToColMatrix() const noexcept;
 
     constexpr T& operator[](size_t i) noexcept
     {
         assert(i < L);
-        return this->arr[i];
+        return this->data[i];
     }
 
-    constexpr const T& operator[](size_t i) const noexcept
+    constexpr T operator[](size_t i) const noexcept
     {
         assert(i < L);
-        return this->arr[i];
+        return this->data[i];
     }
 
     [[nodiscard]] constexpr T& at(size_t i)
     {
         if (i >= L)
             OutOfRange();
-
-        return this->arr[i];
+        return this->data[i];
     }
 
-    [[nodiscard]] constexpr const T& at(size_t i) const
+    [[nodiscard]] constexpr T at(size_t i) const
     {
         if (i >= L)
             OutOfRange();
+        return this->data[i];
+    }
 
-        return this->arr[i];
+    template <class Fn>
+    constexpr Vector& Transform(const Vector& other, Fn&& fn) noexcept(std::is_nothrow_invocable_v<Fn, T, T>)
+    {
+        for (size_t i = 0; i < L; ++i)
+            (*this)[i] = fn((*this)[i], other[i]);
+
+        return *this;
+    }
+
+    template <class Fn>
+    constexpr Vector& Transform(Fn&& fn) noexcept(std::is_nothrow_invocable_v<Fn, T>)
+    {
+        for (size_t i = 0; i < L; ++i)
+            (*this)[i] = fn((*this)[i]);
+
+        return *this;
     }
 
     constexpr void Negate() noexcept
     {
-        std::transform(begin(), end(), begin(), std::negate<>{});
+        Transform(std::negate<>{});
     }
 
     constexpr Vector operator-() const noexcept
@@ -251,102 +472,132 @@ struct Vector : VecBase<T, L>
 
     constexpr Vector& operator+=(const Vector& v) noexcept
     {
-        std::transform(begin(), end(), v.begin(), begin(), std::plus<>{});
-        return *this;
+        return Transform(v, std::plus<>{});
     }
 
-    constexpr Vector& operator-=(const Vector<T2, L2>& v) noexcept
+    constexpr Vector& operator-=(const Vector& v) noexcept
     {
-        std::transform(begin(), end(), v.begin(), begin(), std::minus<>{});
-        return *this;
+        return Transform(v, std::minus<>{});
     }
 
-    constexpr Vector& operator*=(const Vector<T2, L2>& v) noexcept
+    constexpr Vector& operator*=(const Vector& v) noexcept
     {
-        std::transform(begin(), end(), v.begin(), begin(), std::multiplies<>{});
-        return *this;
+        return Transform(v, std::multiplies<>{});
     }
 
     constexpr Vector& operator*=(T f) noexcept
     {
-        std::transform(begin(), end(), begin(), [&](T x) { return x * f; });
-        return *this;
+        return Transform([f](T v) -> T
+        {
+            return v * f;
+        });
     }
 
     constexpr Vector& operator/=(T f) noexcept
     {
-        std::transform(begin(), end(), begin(), [&](T x) { return x / f; });
-        return *this;
+        return Transform([f](T v) -> T
+        {
+            return v / f;
+        });
     }
 
-    constexpr Vector operator+(const Vector& v) const noexcept
+    template <class U>
+    constexpr auto operator+(const Vector<U, L>& v) const noexcept
     {
-        auto ret = *this;
-        ret += v;
-        return ret;
+        Vector<std::common_type_t<T, U>, L> r;
+        for (size_t i = 0; i < L; ++i)
+            r[i] = (*this)[i] + v[i];
+        return r;
     }
 
-    constexpr Vector operator-(const Vector& v) const noexcept
+    template <class U>
+    constexpr auto operator-(const Vector<U, L>& v) const noexcept
     {
-        auto ret = *this;
-        ret -= v;
-        return ret;
+        Vector<std::common_type_t<T, U>, L> r;
+        for (size_t i = 0; i < L; ++i)
+            r[i] = (*this)[i] - v[i];
+        return r;
     }
 
-    constexpr Vector operator*(const Vector& v) const noexcept
+    template <class U>
+    constexpr auto operator*(const Vector<U, L>& v) const noexcept
     {
-        auto ret = *this;
-        ret *= v;
-        return ret;
+        Vector<std::common_type_t<T, U>, L> r;
+        for (size_t i = 0; i < L; ++i)
+            r[i] = (*this)[i] * v[i];
+        return r;
     }
 
-    constexpr Vector operator*(T f) const noexcept
+    template <class U>
+    constexpr auto operator*(U f) const noexcept
     {
-        auto ret = *this;
-        ret *= f;
-        return ret;
+        using V = std::common_type_t<T, U>;
+        Vector<V, L> v = *this;
+        v *= static_cast<V>(f);
+        return v;
     }
 
-    constexpr Vector operator/(T f) const noexcept
+    template <class U>
+    constexpr auto operator/(U f) const noexcept
     {
-        auto ret = *this;
-        ret /= f;
-        return ret;
+        using V = std::common_type_t<T, U>;
+        Vector<V, L> v = *this;
+        v /= static_cast<V>(f);
+        return v;
     }
 
-    constexpr T operator|(const Vector& v) const noexcept
+    template <class T2>
+    constexpr std::common_type_t<T, T2> operator|(const Vector<T2, L>& v) const noexcept
     {
-        return std::inner_product(begin(), end(), v.begin(), T{});
+        std::common_type_t<T, T2> t{};
+        for (size_t i = 0; i < L; ++i)
+            t += (*this)[i] * v[i];
+        return t;
+    }
+
+    constexpr iterator operator<<(T v) noexcept
+    {
+        return begin() << v;
+    }
+
+    constexpr iterator operator>>(T& v) noexcept
+    {
+        return begin() >> v;
+    }
+
+    constexpr const_iterator operator>>(T& v) const noexcept
+    {
+        return begin() >> v;
     }
 
     [[nodiscard]] constexpr iterator begin() noexcept
     {
-        return this->arr;
+        return this->data;
     }
 
     [[nodiscard]] constexpr const_iterator begin() const noexcept
     {
-        return this->arr;
+        return this->data;
     }
 
     [[nodiscard]] constexpr const_iterator cbegin() const noexcept
     {
-        return this->arr;
+        return this->data;
     }
 
     [[nodiscard]] constexpr iterator end() noexcept
     {
-        return this->arr + L;
+        return this->data + L;
     }
 
     [[nodiscard]] constexpr const_iterator end() const noexcept
     {
-        return this->arr + L;
+        return this->data + L;
     }
 
     [[nodiscard]] constexpr const_iterator cend() const noexcept
     {
-        return this->arr + L;
+        return this->data + L;
     }
 
     [[nodiscard]] constexpr reverse_iterator rbegin() noexcept
@@ -379,12 +630,252 @@ struct Vector : VecBase<T, L>
         return const_reverse_iterator{cbegin()};
     }
 
-  private:
+    struct const_iterator
+    {
+        using iterator_category = std::random_access_iterator_tag;
+        using value_type = T;
+        using difference_type = ptrdiff_t;
+        using pointer = const T*;
+        using reference = const T&;
+
+        constexpr const_iterator() noexcept = default;
+
+        constexpr explicit operator const T*() const noexcept
+        {
+            return ptr;
+        }
+
+        constexpr T operator*() const noexcept
+        {
+            return *ptr;
+        }
+
+        constexpr T operator[](difference_type n) const noexcept
+        {
+            return ptr[n];
+        }
+
+        constexpr const T* operator->() const noexcept
+        {
+            return ptr;
+        }
+
+        constexpr const_iterator& operator++() noexcept
+        {
+            ++ptr;
+            return *this;
+        }
+
+        constexpr const_iterator operator++(int) noexcept
+        {
+            const_iterator it = *this;
+            ++ptr;
+            return it;
+        }
+
+        constexpr const_iterator& operator--() noexcept
+        {
+            --ptr;
+            return *this;
+        }
+
+        constexpr const_iterator operator--(int) noexcept
+        {
+            const_iterator it = *this;
+            --ptr;
+            return it;
+        }
+
+        constexpr const_iterator& operator+=(ptrdiff_t n) noexcept
+        {
+            ptr += n;
+            return *this;
+        }
+
+        constexpr const_iterator operator+(ptrdiff_t n) const noexcept
+        {
+            return const_iterator{ptr + n};
+        }
+
+        constexpr const_iterator& operator-=(ptrdiff_t n) noexcept
+        {
+            ptr -= n;
+            return *this;
+        }
+
+        constexpr const_iterator operator-(ptrdiff_t n) const noexcept
+        {
+            return const_iterator{ptr - n};
+        }
+
+        constexpr ptrdiff_t operator-(const const_iterator& rhs) const noexcept
+        {
+            return ptr - rhs.ptr;
+        }
+
+        constexpr const_iterator& operator>>(T& v) noexcept
+        {
+            v = **this;
+            return ++*this;
+        }
+
+        constexpr bool operator==(const const_iterator& it) const noexcept
+        {
+            return ptr == it.ptr;
+        }
+
+        constexpr bool operator!=(const const_iterator& it) const noexcept
+        {
+            return ptr != it.ptr;
+        }
+
+        constexpr bool operator<(const const_iterator& it) const noexcept
+        {
+            return ptr < it.ptr;
+        }
+
+        constexpr bool operator>(const const_iterator& it) const noexcept
+        {
+            return ptr > it.ptr;
+        }
+
+        constexpr bool operator<=(const const_iterator& it) const noexcept
+        {
+            return ptr <= it.ptr;
+        }
+
+        constexpr bool operator>=(const const_iterator& it) const noexcept
+        {
+            return ptr >= it.ptr;
+        }
+
+    protected:
+        friend Vector;
+
+        constexpr const_iterator(const T* data) noexcept
+            : ptr{const_cast<T*>(data)}
+        {
+        }
+
+        T* ptr = nullptr;
+    };
+
+    struct iterator : const_iterator
+    {
+        using iterator_category = std::random_access_iterator_tag;
+        using value_type = T;
+        using difference_type = ptrdiff_t;
+        using pointer = T*;
+        using reference = T&;
+
+        constexpr iterator() noexcept = default;
+
+        constexpr explicit operator T*() const noexcept
+        {
+            return this->ptr;
+        }
+
+        constexpr T& operator*() const noexcept
+        {
+            return *this->ptr;
+        }
+
+        constexpr T& operator[](ptrdiff_t n) const noexcept
+        {
+            return this->ptr[n];
+        }
+
+        constexpr T* operator->() const noexcept
+        {
+            return this->ptr;
+        }
+
+        constexpr iterator& operator++() noexcept
+        {
+            ++this->ptr;
+            return *this;
+        }
+
+        constexpr iterator operator++(int) noexcept
+        {
+            iterator it = *this;
+            ++this->ptr;
+            return it;
+        }
+
+        constexpr iterator& operator--() noexcept
+        {
+            --this->ptr;
+            return *this;
+        }
+
+        constexpr iterator operator--(int) noexcept
+        {
+            iterator it = *this;
+            --this->ptr;
+            return it;
+        }
+
+        constexpr iterator& operator+=(ptrdiff_t n) noexcept
+        {
+            this->ptr += n;
+            return *this;
+        }
+
+        constexpr iterator operator+(ptrdiff_t n) const noexcept
+        {
+            return iterator{this->ptr + n};
+        }
+
+        constexpr iterator& operator-=(ptrdiff_t n) noexcept
+        {
+            this->ptr -= n;
+            return *this;
+        }
+
+        constexpr iterator operator-(ptrdiff_t n) const noexcept
+        {
+            return iterator{this->ptr - n};
+        }
+
+        constexpr ptrdiff_t operator-(const iterator& rhs) const noexcept
+        {
+            return this->ptr - rhs.ptr;
+        }
+
+        constexpr iterator& operator<<(T v) noexcept
+        {
+            **this = v;
+            return ++*this;
+        }
+
+        constexpr iterator& operator>>(T& v) noexcept
+        {
+            v = **this;
+            return ++*this;
+        }
+
+    protected:
+        friend Vector;
+
+        constexpr iterator(pointer data) noexcept
+            : const_iterator{data}
+        {
+        }
+    };
+
+private:
     [[noreturn]] static void OutOfRange()
     {
         throw std::out_of_range{"Vector out of range"};
     }
 };
+
+template <class... Args>
+Vector(Args ...) -> Vector<std::common_type_t<Args...>, sizeof...(Args)>;
+
+template <class T, size_t L, class... Args>
+Vector(Vector<T, L>, Args ...) -> Vector<std::common_type_t<T, Args...>, L + sizeof...(Args)>;
 
 template <class F, class T, size_t L>
 constexpr auto operator*(F f, const Vector<T, L>& v) noexcept
@@ -392,17 +883,35 @@ constexpr auto operator*(F f, const Vector<T, L>& v) noexcept
     return v * f;
 }
 
-template <std::floating_point T, size_t L>
-struct UnitVec
+template <class T, size_t L>
+std::ostream& operator<<(std::ostream& os, const Vector<T, L>& v)
 {
-    [[nodiscard]] constexpr static UVec3 Forward() noexcept;
-    [[nodiscard]] constexpr static UVec3 Right() noexcept;
-    [[nodiscard]] constexpr static UVec3 Up() noexcept;
+    os << v[0];
+    for (size_t i = 1; i < L; ++i)
+        os << ' ' << v[i];
+    return os;
+}
+
+template <class T, size_t L>
+std::istream& operator>>(std::istream& is, Vector<T, L>& v)
+{
+    for (size_t i = 0; i < L; ++i)
+        is >> v[i];
+    return is;
+}
+
+template <class T, size_t L>
+struct UnitVec : detail::UnitVecBase<T, L>
+{
+    static_assert(std::is_floating_point_v<T>);
 
     [[nodiscard]] static UnitVec Rand() noexcept
     {
         Vector<T, L> v;
-        v.Transform([](auto&&...) { return Gauss<T, T>(0, 1); });
+        v.Transform([](auto&&...)
+        {
+            return Gauss<T, T>(0, 1);
+        });
         if (auto u = v.Unit())
             return *u;
         return Rand();
@@ -417,7 +926,9 @@ struct UnitVec
     [[nodiscard]] UnitVec RotatedBy(const Quaternion<T>& q) const noexcept
     {
         static_assert(L == 3);
-        return static_cast<UnitVec>(reinterpret_cast<const Vector<T, 3>&>(*this).RotatedBy(q));
+        return static_cast<UnitVec>(
+            reinterpret_cast<const Vector<T, 3>&>(*this).RotatedBy(q)
+        );
     }
 
     constexpr T operator[](size_t i) const noexcept
@@ -430,7 +941,7 @@ struct UnitVec
         return v;
     }
 
-    constexpr operator const Vector<T, L> &() const noexcept
+    constexpr operator const Vector<T, L>&() const noexcept
     {
         return v;
     }
@@ -445,78 +956,25 @@ struct UnitVec
         return v;
     }
 
-  private:
+private:
     template <class, class>
     friend struct Angle;
     friend Vector<T, L>;
     friend detail::UnitVecBase<T, L>;
 
     template <class... Args>
-    constexpr UnitVec(Args... args) noexcept : v{static_cast<T>(args)...}
+    constexpr UnitVec(Args ... args) noexcept
+        : v{static_cast<T>(args)...}
     {
     }
 
-    constexpr UnitVec(const Vector<T, L>& v) noexcept : v{v}
+    constexpr UnitVec(const Vector<T, L>& v) noexcept
+        : v{v}
     {
     }
 
     Vector<T, L> v{};
 };
-
-template <class T, size_t L>
-[[nodiscard]] constexpr T Min(const Vector<T, L>& v) noexcept
-{
-    auto m = v[0];
-    for (size_t i = 1; i < L; ++i)
-        m = Min(m, v[i]);
-    return m;
-}
-
-template <class T, size_t L>
-[[nodiscard]] constexpr T Max(const Vector<T, L>& v) noexcept
-{
-    auto m = v[0];
-    for (size_t i = 1; i < L; ++i)
-        m = Max(m, v[i]);
-    return m;
-}
-
-template <class T, size_t L, class V = T>
-[[nodiscard]] constexpr bool IsNearlyEqual(const Vector<T, L>& a, const Vector<T, L>& b,
-                                           V tolerance = kSmallNumV<V>) noexcept
-{
-    for (size_t i = 0; i < L; ++i)
-        if (!IsNearlyEqual(a[i], b[i], tolerance))
-            return false;
-    return true;
-}
-
-template <class T, size_t L, class V = T>
-[[nodiscard]] constexpr bool IsNearlyZero(const Vector<T, L>& a, V tolerance = kSmallNumV<V>) noexcept
-{
-    for (auto x : a)
-        if (!IsNearlyZero(x, tolerance))
-            return false;
-    return true;
-}
-
-template <size_t L, class T, class U, class V>
-[[nodiscard]] constexpr auto Lerp(const Vector<T, L>& a, const Vector<U, L>& b, V alpha) noexcept
-{
-    return a + alpha * (b - a);
-}
-
-template <class T, class U>
-constexpr auto operator^(const Vector<T, 3>& a, const Vector<U, 3>& b) noexcept
-{
-    return Vector{a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
-}
-
-template <class T>
-constexpr Vector<T, 3>& operator^=(Vector<T, 3>& a, const Vector<T, 3>& b) noexcept
-{
-    return a = a ^ b;
-}
 
 template <class T, size_t L>
 std::optional<UnitVec<CommonFloat<T>, L>> Vector<T, L>::Unit() const noexcept
@@ -574,4 +1032,4 @@ inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::up = Up();
 
 template <class T>
 inline const UnitVec<T, 3> detail::UnitVecBase<T, 3>::down = Down();
-} // namespace otm
+}

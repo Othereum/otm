@@ -1,20 +1,39 @@
 #pragma once
-#include <concepts>
-
-#ifndef OTM_DEFAULT_FLOAT
-#define OTM_DEFAULT_FLOAT float
-#endif
+#include <cstddef>
+#include <ratio>
+#include <type_traits>
 
 namespace otm
 {
 using Float = OTM_DEFAULT_FLOAT;
 static_assert(std::is_floating_point_v<Float>);
 
+constexpr Float operator""_f(unsigned long long f) noexcept
+{
+    return static_cast<Float>(f);
+}
+
+constexpr Float operator""_f(long double f) noexcept
+{
+    return static_cast<Float>(f);
+}
+
+template <class... T>
+using CommonFloat = std::common_type_t<Float, T...>;
+
+
+struct Transform;
+
+template <class T>
+struct Quaternion;
+
+using Quat = Quaternion<Float>;
+
 
 template <class T, size_t L>
 struct Vector;
 
-template <std::floating_point T, size_t L>
+template <class T, size_t L>
 struct UnitVec;
 
 using Vec2 = Vector<Float, 2>;
@@ -40,7 +59,19 @@ using UVec3 = UnitVec<Float, 3>;
 using UVec4 = UnitVec<Float, 4>;
 
 
-template <class T, size_t Row, size_t Col = Row>
+template <class Ratio, class T = Float>
+struct Angle;
+
+using PiRatio = std::ratio<66627445592888887, 21208174623389167>;
+
+using RadR = std::ratio<PiRatio::num, PiRatio::den * 180>;
+using DegR = std::ratio<1>;
+
+using Rad = Angle<RadR>;
+using Deg = Angle<DegR>;
+
+
+template <class T, size_t R, size_t C = R>
 struct Matrix;
 
 using Mat2 = Matrix<Float, 2>;
