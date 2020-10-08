@@ -8,8 +8,7 @@ template <class T>
 concept Arithmetic = std::is_arithmetic_v<T>;
 
 template <Arithmetic... T>
-using CommonFloat =
-    std::conditional_t<std::is_floating_point_v<std::common_type_t<T...>>, std::common_type_t<T...>, Float>;
+using CommonFloat = std::conditional_t<std::integral<std::common_type_t<T...>>, Float, std::common_type_t<T...>>;
 
 template <class T, class... Ts>
 [[nodiscard]] constexpr auto ToFloat(T x) noexcept
