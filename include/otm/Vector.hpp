@@ -385,12 +385,6 @@ struct Vector : VecBase<T, L>
     }
 };
 
-template <class... Args>
-Vector(Args...) -> Vector<std::common_type_t<Args...>, sizeof...(Args)>;
-
-template <class T, size_t L, class... Args>
-Vector(Vector<T, L>, Args...) -> Vector<std::common_type_t<T, Args...>, L + sizeof...(Args)>;
-
 template <class F, class T, size_t L>
 constexpr auto operator*(F f, const Vector<T, L>& v) noexcept
 {
